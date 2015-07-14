@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/foundation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundationEdit.css' %}">
+    <link rel="stylesheet" href="{% static 'js/foundation.min.js' %}">
+    <link rel="stylesheet" href="{% static 'js/vendor/modernizr.js' %}">
+</head>
+
+<body>
+
+    <!-- Top bar -->
+    <nav class="top-bar" data-topbar role="navigation" style="background-color:#4285F4;">
+        <section class="top-bar-section">
+            <ul class="title-area">
+                <li class="name" style="background-color:#4285F4;">
+                <h1><a href="#" style="background-color:#4285F4;">{% block usuario %}{% endblock %}</a></h1>
+                </li>
+            </ul>
+            <ul class="right">
+                <li><a href="#" style="background-color:#4285F4;">Modificar Perfil</a></li>
+                <li><a href="#" style="background-color:#4285F4;border-left:solid #4285E4 0.15rem;">Salir</a></li>
+            </ul>
+        </section>
+    </nav>
+
+    <div class="row full-width">
+
+        <!-- Contenido del panel de la izquierda, por orden jerárquico de menor a mayor -->
+        <div class="large-2 columns" style="background-color:#FFFFFF; padding:0rem;">
+            <img src="{% static 'img/banner2.png' %}">
+            <ul class="no-bullet" style="margin:1rem;">
+
+                {% block navegacion %}
+                {% endblock %}
+
+            </ul>
+        </div>
+
+        <!-- Contenido del area principal, un recuadro por departamento con sus botones correspondientes -->
+        <div class="large-10 columns">
+            <!-- Banner, por el momento una imagen cualquiera -->
+            <div class="large-12 columns no-padding no-margin">
+                <img src="{% static 'img/banner.png' %}">
+            </div>
+
+            {% block content %}
+            {% endblock %}
+
+        </div>        	
+    </div>
+</body>
+</html>
