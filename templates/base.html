@@ -15,7 +15,7 @@
 <body>
 
     <!-- Top bar -->
-    <nav class="top-bar" data-topbar role="navigation" style="background-color:#4285F4;">
+    <nav class="top-bar hide-on-print" data-topbar role="navigation" style="background-color:#4285F4;">
         <section class="top-bar-section">
             <ul class="title-area">
                 <li class="name" style="background-color:#4285F4;">
@@ -28,31 +28,34 @@
             </ul>
         </section>
     </nav>
+    <div id="container">
+        <div class="row full-width">
 
-    <div class="row full-width">
+            <!-- Contenido del panel de la izquierda, por orden jerárquico de menor a mayor -->
+            <div class="large-2 columns hide-on-print" style="background-color:#FFFFFF; padding:0rem;">
+                <img src="{% static 'img/banner2.png' %}">
+                <ul class="no-bullet" style="margin:1rem;">
 
-        <!-- Contenido del panel de la izquierda, por orden jerárquico de menor a mayor -->
-        <div class="large-2 columns" style="background-color:#FFFFFF; padding:0rem;">
-            <img src="{% static 'img/banner2.png' %}">
-            <ul class="no-bullet" style="margin:1rem;">
+                    {% block navegacion %}
+                    {% endblock %}
 
-                {% block navegacion %}
-                {% endblock %}
-
-            </ul>
-        </div>
-
-        <!-- Contenido del area principal, un recuadro por departamento con sus botones correspondientes -->
-        <div class="large-10 columns">
-            <!-- Banner, por el momento una imagen cualquiera -->
-            <div class="large-12 columns no-padding no-margin">
-                <img src="{% static 'img/banner.png' %}">
+                </ul>
             </div>
 
-            {% block content %}
-            {% endblock %}
+            <!-- Contenido del area principal, un recuadro por departamento con sus botones correspondientes -->
+            <div class="large-10 columns">
+                {% if banner %}
+                <!-- Banner, por el momento una imagen cualquiera -->
+                <div class="large-12 columns no-padding no-margin">
+                    <img src="{% static 'img/banner.png' %}" class="hide-on-print">
+                </div>
+                {% endif %}
 
-        </div>        	
+                {% block content %}
+                {% endblock %}
+
+            </div>          
+        </div>
     </div>
 </body>
 </html>

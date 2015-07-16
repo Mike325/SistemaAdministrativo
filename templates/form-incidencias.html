@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Formulario de Incidencias
+{% endblock %}
+
+{% block usuario %}
+    {usuario}
+{% endblock %}
+
+{% block navegacion %}
+    <li><a href="/inicio-secretaria">Secretaria</a></li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="medium-6 medium-centered columns panel">
+            <form action="/computacion/reporte-incidencias" method="post">{% csrf_token %}
+                <h3 class="text-center">Reporte de Incidencias</h2>
+                {% if error %}
+                <div data-alert="" class="alert-box warning round">
+                  Revisa bien la información.
+                  <a href="#" class="close">×</a>
+                </div>
+                {% endif %}
+                Fecha Inicio<input type="date" name="fechaIni"><br>
+                Fecha Fin<input type="date" name="fechaFin"><br>
+                <input type="submit" value="Hacer reporte" class="button tiny">
+            </form>
+        </div>
+    </div>
+{% endblock %}

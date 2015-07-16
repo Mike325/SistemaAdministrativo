@@ -16,3 +16,17 @@
     margin: 1rem 0 0 0 !important;
     padding: 0 !important;
 }
+
+.top-bar {
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.especialHead{
+  background: #fff !important;
+}
+
+#container {
+  padding-top: 0.7rem;
+  padding-left: 0.6rem;
+  background: #e9eaed;
+}

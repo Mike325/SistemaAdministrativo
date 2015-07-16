@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Listas
+{% endblock %}
+
+{% block usuario %}
+    {usuario}
+{% endblock %}
+
+{% block navegacion %}
+    <li><a href="/inicio-secretaria">Secretaria</a></li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="medium-12 columns">
+            <!-- Lista de docentes tiempo completo -->
+            {% if tiempoC %}
+            <div class="row">
+                <div class="medium-12 columns">
+                <h4 style="text-align: center">Centro Universitario de Ciencias Exactas e Ingenierías</h2>
+                <hr>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>{{ today }}</th>
+                                <th colspan="2">ENTRADA</th>
+                                <th colspan="2">SALIDA</th>
+                            </tr>
+                            <tr>
+                                <th>NOMBRE</th>
+                                <th>HORA</th>
+                                <th>FIRMA</th>
+                                <th>HORA</th>
+                                <th>FIRMA</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                    <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Lista de docentes de medio tiempo -->
+            {% if tiempoM %}
+            <div class="row">
+                <div class="medium-12 columns">
+                    <table>
+                        <thead class="especialHead">
+                            <th colspan="1">
+                                {% load staticfiles %}
+                                <img src="{% static 'img/udglogo.jpg' %}">
+                            </th>
+                            <th style="text-align: center" colspan="4">
+                                UNIVERSIDAD DE GUADALAJARA<br>
+                                DEPARTAMENTO DE CIENCIAS COMPUTACIONALES<br>
+                                LISTADO DE FIRMAS {{ dayWeek }}
+                            </th>
+                            <th colspan="3">
+                                FECHA <u>&nbsp;&nbsp;{{ day }}  {{ month }}  {{ year }}&nbsp;&nbsp;</u>
+                            </th>
+                        </thead>
+                        <thead class="especialHead">
+                            <th>NRC</th>
+                            <th>NOMBRE</th>
+                            <th>MATERIA</th>
+                            <th>SEC</th>
+                            <th>EDIF.</th>
+                            <th>AULA</th>
+                            <th>HOR.</th>
+                            <th>FIRMA</th>
+                        </thead>
+
+                    </table>
+                    <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

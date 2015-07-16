@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Reporte de Incidencias
+{% endblock %}
+
+{% block usuario %}
+    {usuario}
+{% endblock %}
+
+{% block navegacion %}
+    <li><a href="/inicio-secretaria">Secretaria</a></li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="medium-12 columns">
+            <table>
+                <thead class="especialHead">
+                    <th colspan="2">
+                        {% load staticfiles %}
+                        <img src="{% static 'img/udglogo.jpg' %}">
+                    </th>
+                    <th style="text-align: center" colspan="7">
+                        REPORTE DE INCIDENCIAS DEL PERSONAL ACADEMINCO<br>
+                        CENTRO UNIVERSITARIO DE CIENCIAS EXACTAS E INGENIERIAS<br>
+
+                        {% if extender_info %}
+                            DEL {{ dia_ini }} DE {{ mes_ini }} DE {{ anio_ini }}<br>
+                            AL {{ dia_fin }} DE {{ mes_fin }} DE {{ anio_fin }}
+                        {% else %}
+                            DEL {{ dia_ini }} AL {{ dia_fin }} DE {{ mes_fin }} DE {{ anio_fin }}
+                        {% endif %}
+                    </th>
+                </thead>
+
+                <thead>
+                    <th>FECHA</th>
+                    <th>NOMBRE</th>
+                    <th>CODIGO</th>
+                    <th>CATEGORIA</th>
+                    <th>DEPTO.</th>
+                    <th>MATERIA</th>
+                    <th>SECC</th>
+                    <th>HORARIO</th>
+                    <th>HORAS FALTA</th>
+                </thead>
+
+                {% for x in listaProf %}
+                <tr>
+                    <td>{{ x.fecha }}</td>
+                    <td>{{ x.nombre }}</td>
+                    <td>{{ x.codigo }}</td>
+                    <td>{{ x.categoria }}</td>
+                    <td>{{ x.dpto }}</td>
+                    <td>{{ x.materia }}</td>
+                    <td>{{ x.secc }}</td>
+                    <td>{{ x.horario }}</td>                            
+                    <td>{{ x.hrsFalta }}</td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+            </table><br>
+
+            <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
+
+        </div>
+    </div>
+{% endblock %}

@@ -18,6 +18,11 @@ from django.contrib import admin
 from views import *
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^ejemplo/', ejemplo),
+    url(r'^admin/$', include(admin.site.urls)),
+    url(r'^ejemplo/$', ejemplo),
+    url(r'^inicio-secretaria/$', inicio_secretaria),
+    url(r'^computacion/listas/tCompleto$', computacion_listas_tCompleto),
+    url(r'^computacion/listas/tMedio$', computacion_listas_tMedio),
+    url(r'^computacion/form-incidencias$', form_incidencias),
+    url(r'^computacion/reporte-incidencias$', incidencias),
 ]
