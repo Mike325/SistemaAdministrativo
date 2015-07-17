@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Inicio - Administrador
+{% endblock %}
+
+{% block usuario %}
+    {{Administrador}}
+{% endblock %}
+
+{% block navegacion %}
+    <li><a href="/inicio-secretaria">Secretaria</a></li>
+    <li><a href="/inicio-jefe-departamento">Jefe de Departamento</a></li>
+    <li><a href="/inicio-administrador">Administrador</a></li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="large-4 medium-6 small-12 columns">
+            <div class="division-banner">
+                <img src="/static/img/logos_carreras/robotica.png">
+            </div>
+            <div class="large-12 colums panel">
+                <h3 class="text-center">Añadir Departamento<h3>
+                <div class="row">
+                    <div class="large-12 columns">
+                        <button class="button expand" onclick="location.href='{{x.nombre}}/nuevo_departamento'">Nuevo Departamento</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- for x in departamentos -->
+        <div class="large-4 medium-6 small-12 columns">
+            <div class="division-banner">
+                <img src="/static/img/logos_carreras/computacion.png">
+            </div>
+            <div class="large-12 colums panel">
+                <h3 class="text-center">Computación<h3>
+                <div class="row">
+                    <div class="large-12 columns">
+                        <form action="/modificar-jefe-departamento/" method="POST">{% csrf_token %}
+                        <button class="button expand" name="departamento" value="Computacion">Cambiar Jefe de Departamento</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

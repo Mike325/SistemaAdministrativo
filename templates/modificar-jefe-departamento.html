@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Cambiar Jefe de Departamento - Administrador
+{% endblock %}
+
+{% block usuario %}
+    {{Administrador}}
+{% endblock %}
+
+{% block navegacion %}
+    <li><a href="/inicio-secretaria">Secretaria</a></li>
+    <li><a href="/inicio-jefe-departamento">Jefe de Departamento</a></li>
+    <li><a href="/inicio-administrador">Administrador</a></li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="large-4 medium-6 small-12 columns">
+            <div class="division-banner">
+                <img src="/static/img/logos_carreras/robotica.png">
+            </div>
+            <div class="large-12 colums panel">
+                <h3 class="text-center">Cambiar Jefe de Departamento<h3>
+                <div class="row">
+                    <form action="/modificar-jefe-departamento/" method="POST">{% csrf_token %}
+                        <div class="large-12 columns">
+                            <label>Jefe actual</label><input type="text"  value="Actual" disabled></input>
+                            <label>Departamento</label><input type="text" value="{{departamento}}" disabled></input>
+                            <label>Nuevo Jefe</label>
+                            <select name="nuevoJefe">
+                                <option value="profesor 1">Nombre</option>
+                                <option value="profesor 2">Nombre</option>
+                                <option value="profesor 3">Nombre</option>
+                                <option value="profesor 4">Nombre</option>
+                            </select>
+                            <button class="button expand">Continuar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
