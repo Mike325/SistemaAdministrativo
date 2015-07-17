@@ -1,0 +1,3 @@
+# Elimina todos los archivos compilados de Python de Git
+# (no son necesarios, se compilan cada vez que se ejecuta el servidor)
+*.pyc
