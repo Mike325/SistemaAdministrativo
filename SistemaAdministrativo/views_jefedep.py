@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 
 def inicio_jefedep(request):
@@ -7,7 +8,7 @@ def computacion_sistema_subircsv(request):
 	return render(request, 'form-subircsv.html');
 
 def computacion_sistema_consulta_modifica(request):
-	return HttpResponse('');
+	return HttpResponse('<strong>En construccion o no aplicable por el momento</strong>');
 
 def computacion_form_asistencias(request):
 	if request.method == 'POST':
@@ -29,4 +30,4 @@ def computacion_form_asistencias(request):
 		return render(request, 'form-reporte-asistencias.html');
 
 def usuarios_gestionar(request):
-	return HttpResponse('');
+	return HttpResponse('<strong>En construccion o no aplicable por el momento</strong>');

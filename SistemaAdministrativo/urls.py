@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+
 from views import *
 from views_jefedep import *
+from views_admin import *
 
 """
 TODO:
@@ -43,4 +45,7 @@ urlpatterns = [
     url(r'^computacion/sistema/consulta$', computacion_sistema_consulta_modifica),
     url(r'^computacion/formatos/form-asistencias$', computacion_form_asistencias),
     url(r'^usuarios/gestionar$', usuarios_gestionar),
+
+    url(r'^inicio-administrador/$', inicio_admin),
+    url(r'^sistema/modificar/jefe-departamento', sistema_modificar_jefedep),
 ]

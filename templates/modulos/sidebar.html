@@ -1,0 +1,23 @@
+{% comment %}
+	FIX:
+		- Sin redundancia de codigo:
+			tener diferentes bloques de navegacion por cada pagina puede sujetarse 
+			a errores de dedo y/o desactualizacion de los datos. Tenerlos en un 
+			solo lugar es rapido y facil de actualizar en todos las paginas.
+
+		- Vistas uniformes:
+			El administrador debe de ser capaz de acceder al menu de administrador
+			aun cuando se encuentre en una vista perteneciente a la secretaria.
+
+	TODO:
+		+ Evaluar el rol del usuario para mostrar solo los links a los que puede acceder.
+{% endcomment %}
+			<div class="large-2 columns hide-on-print" style="background-color:#FFFFFF; padding:0rem;">
+				{% load staticfiles %}
+                <img src="{% static 'img/banner2.png' %}">
+                <ul class="no-bullet" style="margin:1rem;">
+					<li><a href="/inicio-secretaria">Secretaria</a></li>
+					<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
+					<li><a href="/inicio-administrador">Administrador</a></li>
+                </ul>
+            </div>
