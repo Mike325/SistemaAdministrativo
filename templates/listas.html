@@ -4,71 +4,101 @@
     Listas
 {% endblock %}
 
-{% block usuario %}
-    {usuario}
-{% endblock %}
-
 {% block navegacion %}
     <li><a href="/inicio-secretaria">Secretaria</a></li>
 {% endblock %}
 
+{% block poshead %}
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
+{% endblock %}
+
 {% block content %}
     <div class="row">
-        <div class="large-12 columns">
-            <!-- Lista de docentes tiempo completo -->
+        <div class="medium-12 columns">
+            
+            {# Lista de docentes tiempo completo #}
             {% if tiempoC %}
             <div class="row">
-                <div class="large-12 columns">
-                    <h4 class="text-center">Centro Universitario de Ciencias Exactas e Ingenierías</h2>
+                <div class="medium-12 columns">
+                    <h4 style="text-align: center">Centro Universitario de Ciencias Exactas e Ingenierías</h4>
                     <hr>
-                    <center>
-                        <table role="grid" summary="asd">
-                            <thead>
-                                <tr>
-                                    <th>{{ today }}</th>
-                                    <th colspan="2">ENTRADA</th>
-                                    <th colspan="2">SALIDA</th>
-                                </tr>
-                                <tr>
-                                    <th>NOMBRE</th>
-                                    <th>HORA</th>
-                                    <th>FIRMA</th>
-                                    <th>HORA</th>
-                                    <th>FIRMA</th>
-                                </tr>
-                            </thead>
 
-                            <tbody>
+                    <button class="button tiny hide-for-print right" onclick="print()">Imprimir formato</button>
+                    <table class="full-width-table">
+                        <thead>
+                            <tr>
+                                <th>{{ today }}</th>
+                                <th colspan="2">ENTRADA</th>
+                                <th colspan="2">SALIDA</th>
+                            </tr>
+                            <tr>
+                                <th>NOMBRE</th>
+                                <th>HORA</th>
+                                <th class="sign-field">FIRMA</th>
+                                <th>HORA</th>
+                                <th class="sign-field">FIRMA</th>
+                            </tr>
+                        </thead>
 
-                            </tbody>
-                        </table>
-                        <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
-                    </center>
+                        <tbody>
+                            {% for x in listaProf %}
+                                <tr>
+                                    <td class="row-nombre">{{ x.nombre }}</td>
+                                    <td class="row-hora-in">{{ x.hora_in }}</td>
+                                    <td class="row-sign">{# firma #}</td>
+                                    <td class="row-hora-out">{{ x.hora_out }}</td>
+                                    <td class="row-sign">{# firma #}</td>
+                                </tr>
+                            {% endfor %}
+
+                            {# para fines demostrativos y visuales #}
+                            <tr>
+                                <td class="row-nombre">JUAN PEREZ RODRIGUEZ</td>
+                                <td class="row-hora-in">11:00</td>
+                                <td class="row-sign">{# firma #}</td>
+                                <td class="row-hora-out">21:00</td>
+                                <td class="row-sign">{# firma #}</td>
+                            </tr>
+                            <tr>
+                                <td class="row-nombre">LUIS PEREZ RODRIGUEZ</td>
+                                <td class="row-hora-in">07:00</td>
+                                <td class="row-sign">{# firma #}</td>
+                                <td class="row-hora-out">14:00</td>
+                                <td class="row-sign">{# firma #}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             {% endif %}
 
-            <!-- Lista de docentes de medio tiempo -->
-            {% if tiempoM %}
+            {# Lista de docentes de medio tiempo #}
+            {% if tiempoM %} 
             <div class="row">
-                <div class="large-12 columns">
-                    <center>
-                        <table>
-                            <thead class="especialHead">
-                                <th colspan="1">
+                <div class="medium-12 columns">
+                    <button class="button tiny right hide-for-print" onclick="print()">Imprimir formato</button>
+                    <table class="full-width-table">
+                        <thead class="">
+                            <tr class="especialHead">
+                                <th colspan="2">
                                     {% load staticfiles %}
                                     <img src="{% static 'img/udglogo.jpg' %}">
                                 </th>
+
                                 <th style="text-align: center" colspan="4">
                                     UNIVERSIDAD DE GUADALAJARA<br>
                                     DEPARTAMENTO DE CIENCIAS COMPUTACIONALES<br>
                                     LISTADO DE FIRMAS {{ dayWeek }}
                                 </th>
-                                <th colspan="3">
-                                    FECHA <u>&nbsp;&nbsp;{{ day }}  {{ month }}  {{ year }}&nbsp;&nbsp;</u>
+
+                                <th colspan="2">
+                                    FECHA <u>&nbsp;&nbsp;{{ day }} {{ month }} {{ year }}&nbsp;&nbsp;</u>
                                 </th>
-                            </thead>
-                            <thead class="especialHead">
+                            </tr>
+                        </thead>
+                        <thead>
+                            <tr>
                                 <th>NRC</th>
                                 <th>NOMBRE</th>
                                 <th>MATERIA</th>
@@ -76,12 +106,47 @@
                                 <th>EDIF.</th>
                                 <th>AULA</th>
                                 <th>HOR.</th>
-                                <th>FIRMA</th>
-                            </thead>
+                                <th class="sign-field">FIRMA</th>
+                            </tr>
+                        </thead>
 
-                        </table>
-                        <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
-                    </center>
+                        <tbody>
+                            {% for x in listaProf %}
+                                <tr>
+                                    <td class="row-nrc">{{ x.nrc }}</td>
+                                    <td class="row-nombreprof">{{ x.nombreprof }}</td>
+                                    <td class="row-materia">{{ x.materia }}</td>
+                                    <td class="row-secc">{{ x.secc }}</td>
+                                    <td class="row-edif">{{ x.edif }}</td>
+                                    <td class="row-aula">{{ x.aula }}</td>
+                                    <td class="row-horario">{{ x.horario }}</td>
+                                    <td class="row-firma">{# firma #}</td>
+                                </tr>
+                            {% endfor %}
+
+                            {# para fines demostrativos y visuales #}
+                            <tr>
+                                <td class="row-nrc">92646</td>
+                                <td class="row-nombreprof">JUAN PEREZ RODRIGUEZ</td>
+                                <td class="row-materia">LOREM IPSUM DOLOR SIT AMET, CONSECTETUR ADIPISICING ELIT</td>
+                                <td class="row-secc">D02</td>
+                                <td class="row-edif">DEDX</td>
+                                <td class="row-aula">A002</td>
+                                <td class="row-horario">17:00 - 19:00</td>
+                                <td class="row-firma"></td>
+                            </tr>
+                            <tr>
+                                <td class="row-nrc">74639</td>
+                                <td class="row-nombreprof">LUIZ GUTIERRES RODRIGUEZ</td>
+                                <td class="row-materia">SEMINARIO DE SOLUCION DE PROBLEMAS DE REDES DE COMPUTADORAS Y PROTOCOLOS DE COMUNICACION II</td>
+                                <td class="row-secc">D12</td>
+                                <td class="row-edif">DEDU</td>
+                                <td class="row-aula">A010</td>
+                                <td class="row-horario">12:00 - 15:00</td>
+                                <td class="row-firma"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             {% endif %}

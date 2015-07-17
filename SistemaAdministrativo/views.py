@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 import datetime
 
@@ -8,7 +9,7 @@ def ejemplo(request):
     return render(request, 'ejemplo.html', {'banner': True})
 
 def inicio_secretaria(request):
-	return render(request, 'inicio-secretaria.html', {'banner': True,})
+	return render(request, 'inicio-secretaria.html', {'banner': True})
 
 def computacion_listas_tCompleto(request):
 	hoy = datetime.date.today()

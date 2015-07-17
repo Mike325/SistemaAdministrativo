@@ -16,13 +16,31 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from views import *
+from views_jefedep import *
+
+"""
+TODO:
+    + Convertir los enlaces a dinamicos
+        (que con poner 'computacion' como una variable, el sistema haga 
+         la gestion necesaria automaticamente para llegar a la vista indicada
+         y asi para los demas departamentos)
+    + Mandar las urls a archivos separados (?)
+        (estilo lo que se hacia con las apps para importar sus propias urls)
+"""
 
 urlpatterns = [
     url(r'^admin/$', include(admin.site.urls)),
     url(r'^ejemplo/$', ejemplo),
+
     url(r'^inicio-secretaria/$', inicio_secretaria),
     url(r'^computacion/listas/tCompleto$', computacion_listas_tCompleto),
     url(r'^computacion/listas/tMedio$', computacion_listas_tMedio),
     url(r'^computacion/form-incidencias$', form_incidencias),
     url(r'^computacion/reporte-incidencias$', incidencias),
+
+    url(r'^inicio-jefedep/$', inicio_jefedep),
+    url(r'^computacion/sistema/csv$', computacion_sistema_subircsv),
+    url(r'^computacion/sistema/consulta$', computacion_sistema_consulta_modifica),
+    url(r'^computacion/formatos/form-asistencias$', computacion_form_asistencias),
+    url(r'^usuarios/gestionar$', usuarios_gestionar),
 ]

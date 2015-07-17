@@ -1,0 +1,585 @@
+Agregado Jefe de Departamento. Solucion general de errores y optimizacion de los formatos impresos.
+
+# --------------
+# Please enter the commit message for your changes. Everything below
+# this paragraph is ignored, and an empty message aborts the commit.
+# Just close the window to accept your message.
+diff --git a/SistemaAdministrativo/__init__.pyc b/SistemaAdministrativo/__init__.pyc
+index 7f2dfe9..c51fef9 100644
+Binary files a/SistemaAdministrativo/__init__.pyc and b/SistemaAdministrativo/__init__.pyc differ
+diff --git a/SistemaAdministrativo/settings.pyc b/SistemaAdministrativo/settings.pyc
+index 5fe3f38..d617f4a 100644
+Binary files a/SistemaAdministrativo/settings.pyc and b/SistemaAdministrativo/settings.pyc differ
+diff --git a/SistemaAdministrativo/urls.py b/SistemaAdministrativo/urls.py
+index d064556..499c675 100644
+--- a/SistemaAdministrativo/urls.py
++++ b/SistemaAdministrativo/urls.py
+@@ -16,13 +16,31 @@ Including another URLconf
+ from django.conf.urls import include, url
+ from django.contrib import admin
+ from views import *
++from views_jefedep import *
++
++"""
++TODO:
++    + Convertir los enlaces a dinamicos
++        (que con poner 'computacion' como una variable, el sistema haga 
++         la gestion necesaria automaticamente para llegar a la vista indicada
++         y asi para los demas departamentos)
++    + Mandar las urls a archivos separados (?)
++        (estilo lo que se hacia con las apps para importar sus propias urls)
++"""
+ 
+ urlpatterns = [
+     url(r'^admin/$', include(admin.site.urls)),
+     url(r'^ejemplo/$', ejemplo),
++
+     url(r'^inicio-secretaria/$', inicio_secretaria),
+     url(r'^computacion/listas/tCompleto$', computacion_listas_tCompleto),
+     url(r'^computacion/listas/tMedio$', computacion_listas_tMedio),
+     url(r'^computacion/form-incidencias$', form_incidencias),
+     url(r'^computacion/reporte-incidencias$', incidencias),
++
++    url(r'^inicio-jefedep/$', inicio_jefedep),
++    url(r'^computacion/sistema/csv$', computacion_sistema_subircsv),
++    url(r'^computacion/sistema/consulta$', computacion_sistema_consulta_modifica),
++    url(r'^computacion/formatos/form-asistencias$', computacion_form_asistencias),
++    url(r'^usuarios/gestionar$', usuarios_gestionar),
+ ]
+diff --git a/SistemaAdministrativo/urls.pyc b/SistemaAdministrativo/urls.pyc
+index 6d84ff6..284cfe5 100644
+Binary files a/SistemaAdministrativo/urls.pyc and b/SistemaAdministrativo/urls.pyc differ
+diff --git a/SistemaAdministrativo/views.py b/SistemaAdministrativo/views.py
+index d5974a7..f4a5ae1 100644
+--- a/SistemaAdministrativo/views.py
++++ b/SistemaAdministrativo/views.py
+@@ -1,3 +1,4 @@
++from django.http import HttpResponse
+ from django.shortcuts import render
+ import datetime
+ 
+@@ -8,7 +9,7 @@ def ejemplo(request):
+     return render(request, 'ejemplo.html', {'banner': True})
+ 
+ def inicio_secretaria(request):
+-	return render(request, 'inicio-secretaria.html', {'banner': True,})
++	return render(request, 'inicio-secretaria.html', {'banner': True})
+ 
+ def computacion_listas_tCompleto(request):
+ 	hoy = datetime.date.today()
+diff --git a/SistemaAdministrativo/views.pyc b/SistemaAdministrativo/views.pyc
+index e33efaf..44f0d6a 100644
+Binary files a/SistemaAdministrativo/views.pyc and b/SistemaAdministrativo/views.pyc differ
+diff --git a/SistemaAdministrativo/wsgi.pyc b/SistemaAdministrativo/wsgi.pyc
+index 9ff7d60..9ee8d73 100644
+Binary files a/SistemaAdministrativo/wsgi.pyc and b/SistemaAdministrativo/wsgi.pyc differ
+diff --git a/static/css/foundationEdit.css b/static/css/foundationEdit.css
+index c69d5d2..9e6bc41 100644
+--- a/static/css/foundationEdit.css
++++ b/static/css/foundationEdit.css
+@@ -1,32 +1,63 @@
+-.row {
+-  margin: 0 auto;
+-  max-width: 62.5rem;
+-  width: 100%; }
+-    .full-width{
+-        background: #e9eaed;
+-        max-width: 100% !important;
+-      }
+-.no-padding {
+-    padding: 0 !important;
+-    }
+-.no-margin {
+-    margin: 0 !important;
+-    }
+-.division-banner {
+-    margin: 1rem 0 0 0 !important;
+-    padding: 0 !important;
++/* Modificaciones al codigo por defecto de foundation */
++body
++{
++	background-color: #e9eaed;
+ }
++.row
++{
++	margin: 0 auto;
++	max-width: 62.5rem;
++	width: 100%;
++}
++.full-width
++{
++	background: #e9eaed;
++	max-width: 100% !important;
++}
++.top-bar 
++{
++	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
++	-webkit-box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
++	-moz-box-shadow:    0px 1px 4px rgba(0, 0, 0, 0.3);
++}
++
++/* Estilos globales adicionales */
+ 
+-.top-bar {
+-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
++.full-width-table { width: 100% !important; }
++.no-padding { padding: 0 !important; }
++.no-margin { margin: 0 !important; }
++
++.especialHead { background: #fff !important; }
++.sign-field 
++{
++	/* 
++	 * FIX: 
++		 * Al momento de impresion el 
++		 * campo era muy pequeño.
++	 */
++	width: 145px !important;
++}
++
++.division-banner 
++{
++	margin: 1rem 0 0 0 !important;
++	padding: 0 !important;
+ }
+ 
+-.especialHead{
+-  background: #fff !important;
++#container 
++{
++	padding-top: 0.7rem;
++	padding-left: 0.6rem;
++	background: #e9eaed;
+ }
+ 
+-#container {
+-  padding-top: 0.7rem;
+-  padding-left: 0.6rem;
+-  background: #e9eaed;
++div.full-width-container
++{
++	padding: 30px; 
++	padding-bottom: 0;
++	margin: 0 16px;
++	width: auto !important; 
++
++	border: 1px solid #CBCBCB;
++	background-color: #FFF; 
+ }
+\ No newline at end of file
+diff --git a/templates/base.html b/templates/base.html
+index 5fa91cb..8e6cd5b 100644
+--- a/templates/base.html
++++ b/templates/base.html
+@@ -1,25 +1,48 @@
+ <!doctype html>
+-<html lang="en">
++<html lang="es">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+-    <title>{% block title %}{% endblock %}</title>
++    <title>{% spaceless %}{% block title %}{% endblock %}{% endspaceless %}</title>
++
++    {% block prehead %}{% endblock %}
++    {% comment %}
++        'prehead' permite agregar cualquier elemento (script, css, etc) 
++        al head ANTES que cualquier otro.
++    {% endcomment %}
+ 
+     {% load staticfiles %}
++    <!-- ESTILOS -->
+     <link rel="stylesheet" href="{% static 'css/foundation.min.css' %}">
+     <link rel="stylesheet" href="{% static 'css/foundationEdit.css' %}">
+-    <link rel="stylesheet" href="{% static 'js/foundation.min.js' %}">
+-    <link rel="stylesheet" href="{% static 'js/vendor/modernizr.js' %}">
++
++    <!-- SCRIPTS -->
++    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
++    <script type="text/javascript" src="{% static 'js/modernizr.js' %}"></script>
++    <script type="text/javascript" src="{% static 'js/foundation.min.js' %}"></script>
++
++    {% block poshead %}{% endblock %}
++    {% comment %}
++        'poshead' permite agregar cualquier elemento (script, css, etc) 
++        al head DESPUES de que se han cargado todos los demas. Util para cargar
++        plugins de jQuery o CSS que deben de aplicarse encima de cualquier otro
++    {% endcomment %}
+ </head>
+ 
+ <body>
+-
+     <!-- Top bar -->
++    {% comment %}
++        TODO:
++            + Hacer que la barra sea dinamica.
++            + Separar en otro archivo (?)
++    {% endcomment %}
+     <nav class="top-bar hide-on-print" data-topbar role="navigation" style="background-color:#4285F4;">
+         <section class="top-bar-section">
+             <ul class="title-area">
+                 <li class="name" style="background-color:#4285F4;">
+-                <h1><a href="#" style="background-color:#4285F4;">{% block usuario %}{% endblock %}</a></h1>
++                    <h1>
++                        <a href="#" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{usuario}{% endblock %}{% endspaceless %}</a>
++                    </h1>
+                 </li>
+             </ul>
+             <ul class="right">
+@@ -28,6 +51,7 @@
+             </ul>
+         </section>
+     </nav>
++
+     <div id="container">
+         <div class="row full-width">
+ 
+@@ -35,10 +59,8 @@
+             <div class="large-2 columns hide-on-print" style="background-color:#FFFFFF; padding:0rem;">
+                 <img src="{% static 'img/banner2.png' %}">
+                 <ul class="no-bullet" style="margin:1rem;">
+-
+                     {% block navegacion %}
+                     {% endblock %}
+-
+                 </ul>
+             </div>
+ 
+@@ -51,11 +73,14 @@
+                 </div>
+                 {% endif %}
+ 
+-                {% block content %}
+-                {% endblock %}
+-
++                {% block content %}{% endblock %}
+             </div>          
+         </div>
+     </div>
++
++    {# es importante agregar esto #}
++    <script type="text/javascript">
++        $(document).foundation();
++    </script>
+ </body>
+ </html>
+diff --git a/templates/form-incidencias.html b/templates/form-incidencias.html
+index ddaf9a7..2c30695 100644
+--- a/templates/form-incidencias.html
++++ b/templates/form-incidencias.html
+@@ -4,10 +4,6 @@
+     Formulario de Incidencias
+ {% endblock %}
+ 
+-{% block usuario %}
+-    {usuario}
+-{% endblock %}
+-
+ {% block navegacion %}
+     <li><a href="/inicio-secretaria">Secretaria</a></li>
+ {% endblock %}
+@@ -25,7 +21,7 @@
+                 {% endif %}
+                 Fecha Inicio<input type="date" name="fechaIni"><br>
+                 Fecha Fin<input type="date" name="fechaFin"><br>
+-                <input type="submit" value="Hacer reporte" class="button tiny">
++                <input type="submit" value="Generar reporte" class="button tiny">
+             </form>
+         </div>
+     </div>
+diff --git a/templates/incidencias.html b/templates/incidencias.html
+index 6565f19..36cbcdc 100644
+--- a/templates/incidencias.html
++++ b/templates/incidencias.html
+@@ -4,18 +4,20 @@
+     Reporte de Incidencias
+ {% endblock %}
+ 
+-{% block usuario %}
+-    {usuario}
+-{% endblock %}
+-
+ {% block navegacion %}
+     <li><a href="/inicio-secretaria">Secretaria</a></li>
+ {% endblock %}
+ 
++{% block poshead %}
++    {% load staticfiles %}
++    <link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
++{% endblock %}
++
+ {% block content %}
+     <div class="row">
+         <div class="medium-12 columns">
+-            <table>
++            <button class="button tiny hide-for-print right" onclick="print()">Imprimir formato</button>
++            <table class="full-width-table">
+                 <thead class="especialHead">
+                     <th colspan="2">
+                         {% load staticfiles %}
+@@ -46,24 +48,35 @@
+                     <th>HORAS FALTA</th>
+                 </thead>
+ 
+-                {% for x in listaProf %}
+-                <tr>
+-                    <td>{{ x.fecha }}</td>
+-                    <td>{{ x.nombre }}</td>
+-                    <td>{{ x.codigo }}</td>
+-                    <td>{{ x.categoria }}</td>
+-                    <td>{{ x.dpto }}</td>
+-                    <td>{{ x.materia }}</td>
+-                    <td>{{ x.secc }}</td>
+-                    <td>{{ x.horario }}</td>                            
+-                    <td>{{ x.hrsFalta }}</td>
+-                    <td></td>
+-                </tr>
+-                {% endfor %}
+-            </table><br>
+-
+-            <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
++                <tbody>
++                    {% for x in listaIncidencias %}
++                    <tr>
++                        <td class="row-fecha">{{ x.fecha }}</td>
++                        <td class="row-nombre">{{ x.nombre }}</td>
++                        <td class="row-codigo">{{ x.codigo }}</td>
++                        <td class="row-categoria">{{ x.categoria }}</td>
++                        <td class="row-dpto">{{ x.dpto }}</td>
++                        <td class="row-materia">{{ x.materia }}</td>
++                        <td class="row-secc">{{ x.secc }}</td>
++                        <td class="row-horario">{{ x.horario }}</td>                            
++                        <td class="row-hrsFalta">{{ x.hrsFalta }}</td>
++                    </tr>
++                    {% endfor %}
+ 
++                    {# para fines de demostrativos y visuales #}
++                    <tr>
++                        <td class="row-fecha">12/JUL/2015</td>
++                        <td class="row-nombre">JOSE LUIS RODRIGUEZ JIMENEZ</td>
++                        <td class="row-codigo">75343622</td>
++                        <td class="row-categoria">CAT98</td>
++                        <td class="row-dpto">COMP</td>
++                        <td class="row-materia">LOREM IPSUM DOLOR SIT AMET, CONSECTETUR</td>
++                        <td class="row-secc">D08</td>
++                        <td class="row-horario">17:00 - 19:00</td>                            
++                        <td class="row-hrsFalta">24</td>
++                    </tr>
++                </tbody>
++            </table><br>
+         </div>
+     </div>
+ {% endblock %}
+\ No newline at end of file
+diff --git a/templates/inicio-secretaria.html b/templates/inicio-secretaria.html
+index 094cca0..ed97975 100644
+--- a/templates/inicio-secretaria.html
++++ b/templates/inicio-secretaria.html
+@@ -4,10 +4,6 @@
+     Inicio - Secretarias
+ {% endblock %}
+ 
+-{% block usuario %}
+-    {usuario}
+-{% endblock %}
+-
+ {% block navegacion %}
+     <li><a href="/inicio-secretaria">Secretaria</a></li>
+ {% endblock %}
+@@ -36,6 +32,7 @@
+                 </div>
+             </div>
+         </div>
++        
+         <div class="large-4 medium-6 small-12 columns">
+             <div class="division-banner">
+                 <img src="/static/img/logos_carreras/electronica.png">
+diff --git a/templates/listas.html b/templates/listas.html
+index 3a7b5a7..0820c91 100644
+--- a/templates/listas.html
++++ b/templates/listas.html
+@@ -4,24 +4,28 @@
+     Listas
+ {% endblock %}
+ 
+-{% block usuario %}
+-    {usuario}
+-{% endblock %}
+-
+ {% block navegacion %}
+     <li><a href="/inicio-secretaria">Secretaria</a></li>
+ {% endblock %}
+ 
++{% block poshead %}
++    {% load staticfiles %}
++    <link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
++{% endblock %}
++
+ {% block content %}
+     <div class="row">
+         <div class="medium-12 columns">
+-            <!-- Lista de docentes tiempo completo -->
++            
++            {# Lista de docentes tiempo completo #}
+             {% if tiempoC %}
+             <div class="row">
+                 <div class="medium-12 columns">
+-                <h4 style="text-align: center">Centro Universitario de Ciencias Exactas e Ingenierías</h2>
+-                <hr>
+-                    <table>
++                    <h4 style="text-align: center">Centro Universitario de Ciencias Exactas e Ingenierías</h4>
++                    <hr>
++
++                    <button class="button tiny hide-for-print right" onclick="print()">Imprimir formato</button>
++                    <table class="full-width-table">
+                         <thead>
+                             <tr>
+                                 <th>{{ today }}</th>
+@@ -31,53 +35,118 @@
+                             <tr>
+                                 <th>NOMBRE</th>
+                                 <th>HORA</th>
+-                                <th>FIRMA</th>
++                                <th class="sign-field">FIRMA</th>
+                                 <th>HORA</th>
+-                                <th>FIRMA</th>
++                                <th class="sign-field">FIRMA</th>
+                             </tr>
+                         </thead>
+ 
+                         <tbody>
++                            {% for x in listaProf %}
++                                <tr>
++                                    <td class="row-nombre">{{ x.nombre }}</td>
++                                    <td class="row-hora-in">{{ x.hora_in }}</td>
++                                    <td class="row-sign">{# firma #}</td>
++                                    <td class="row-hora-out">{{ x.hora_out }}</td>
++                                    <td class="row-sign">{# firma #}</td>
++                                </tr>
++                            {% endfor %}
+ 
++                            {# para fines demostrativos y visuales #}
++                            <tr>
++                                <td class="row-nombre">JUAN PEREZ RODRIGUEZ</td>
++                                <td class="row-hora-in">11:00</td>
++                                <td class="row-sign">{# firma #}</td>
++                                <td class="row-hora-out">21:00</td>
++                                <td class="row-sign">{# firma #}</td>
++                            </tr>
++                            <tr>
++                                <td class="row-nombre">LUIS PEREZ RODRIGUEZ</td>
++                                <td class="row-hora-in">07:00</td>
++                                <td class="row-sign">{# firma #}</td>
++                                <td class="row-hora-out">14:00</td>
++                                <td class="row-sign">{# firma #}</td>
++                            </tr>
+                         </tbody>
+                     </table>
+-                    <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
+                 </div>
+             </div>
+             {% endif %}
+ 
+-            <!-- Lista de docentes de medio tiempo -->
+-            {% if tiempoM %}
++            {# Lista de docentes de medio tiempo #}
++            {% if tiempoM %} 
+             <div class="row">
+                 <div class="medium-12 columns">
+-                    <table>
+-                        <thead class="especialHead">
+-                            <th colspan="1">
+-                                {% load staticfiles %}
+-                                <img src="{% static 'img/udglogo.jpg' %}">
+-                            </th>
+-                            <th style="text-align: center" colspan="4">
+-                                UNIVERSIDAD DE GUADALAJARA<br>
+-                                DEPARTAMENTO DE CIENCIAS COMPUTACIONALES<br>
+-                                LISTADO DE FIRMAS {{ dayWeek }}
+-                            </th>
+-                            <th colspan="3">
+-                                FECHA <u>&nbsp;&nbsp;{{ day }}  {{ month }}  {{ year }}&nbsp;&nbsp;</u>
+-                            </th>
++                    <button class="button tiny right hide-for-print" onclick="print()">Imprimir formato</button>
++                    <table class="full-width-table">
++                        <thead class="">
++                            <tr class="especialHead">
++                                <th colspan="2">
++                                    {% load staticfiles %}
++                                    <img src="{% static 'img/udglogo.jpg' %}">
++                                </th>
++
++                                <th style="text-align: center" colspan="4">
++                                    UNIVERSIDAD DE GUADALAJARA<br>
++                                    DEPARTAMENTO DE CIENCIAS COMPUTACIONALES<br>
++                                    LISTADO DE FIRMAS {{ dayWeek }}
++                                </th>
++
++                                <th colspan="2">
++                                    FECHA <u>&nbsp;&nbsp;{{ day }} {{ month }} {{ year }}&nbsp;&nbsp;</u>
++                                </th>
++                            </tr>
+                         </thead>
+-                        <thead class="especialHead">
+-                            <th>NRC</th>
+-                            <th>NOMBRE</th>
+-                            <th>MATERIA</th>
+-                            <th>SEC</th>
+-                            <th>EDIF.</th>
+-                            <th>AULA</th>
+-                            <th>HOR.</th>
+-                            <th>FIRMA</th>
++                        <thead>
++                            <tr>
++                                <th>NRC</th>
++                                <th>NOMBRE</th>
++                                <th>MATERIA</th>
++                                <th>SEC</th>
++                                <th>EDIF.</th>
++                                <th>AULA</th>
++                                <th>HOR.</th>
++                                <th class="sign-field">FIRMA</th>
++                            </tr>
+                         </thead>
+ 
++                        <tbody>
++                            {% for x in listaProf %}
++                                <tr>
++                                    <td class="row-nrc">{{ x.nrc }}</td>
++                                    <td class="row-nombreprof">{{ x.nombreprof }}</td>
++                                    <td class="row-materia">{{ x.materia }}</td>
++                                    <td class="row-secc">{{ x.secc }}</td>
++                                    <td class="row-edif">{{ x.edif }}</td>
++                                    <td class="row-aula">{{ x.aula }}</td>
++                                    <td class="row-horario">{{ x.horario }}</td>
++                                    <td class="row-firma">{# firma #}</td>
++                                </tr>
++                            {% endfor %}
++
++                            {# para fines demostrativos y visuales #}
++                            <tr>
++                                <td class="row-nrc">92646</td>
++                                <td class="row-nombreprof">JUAN PEREZ RODRIGUEZ</td>
++                                <td class="row-materia">LOREM IPSUM DOLOR SIT AMET, CONSECTETUR ADIPISICING ELIT</td>
++                                <td class="row-secc">D02</td>
++                                <td class="row-edif">DEDX</td>
++                                <td class="row-aula">A002</td>
++                                <td class="row-horario">17:00 - 19:00</td>
++                                <td class="row-firma"></td>
++                            </tr>
++                            <tr>
++                                <td class="row-nrc">74639</td>
++                                <td class="row-nombreprof">LUIZ GUTIERRES RODRIGUEZ</td>
++                                <td class="row-materia">SEMINARIO DE SOLUCION DE PROBLEMAS DE REDES DE COMPUTADORAS Y PROTOCOLOS DE COMUNICACION II</td>
++                                <td class="row-secc">D12</td>
++                                <td class="row-edif">DEDU</td>
++                                <td class="row-aula">A010</td>
++                                <td class="row-horario">12:00 - 15:00</td>
++                                <td class="row-firma"></td>
++                            </tr>
++                        </tbody>
+                     </table>
+-                    <button class="button tiny hide-for-print" onclick="print()">Imprimir</button>
+                 </div>
+             </div>
+             {% endif %}
