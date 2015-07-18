@@ -5,3 +5,6 @@ def inicio_admin(request):
 
 def sistema_modificar_jefedep(request):
 	return render(request, 'modificar-jefe-departamento.html')
+
+def nuevo_departamento(request):
+	return render(request, 'nuevo_departamento.html')

@@ -48,4 +48,6 @@ urlpatterns = [
 
     url(r'^inicio-administrador/$', inicio_admin),
     url(r'^sistema/modificar/jefe-departamento', sistema_modificar_jefedep),
+    url(r'^nuevo_departamento',nuevo_departamento),
+    
 ]
