@@ -16,9 +16,9 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from views import *
-from views_jefedep import *
-from views_admin import *
+from Secretaria.url_secretaria import *
+from Jefe_Dpto.url_jefedep import *
+from Admin.url_admin import *
 
 """
 TODO:
@@ -33,21 +33,6 @@ TODO:
 urlpatterns = [
     url(r'^admin/$', include(admin.site.urls)),
     url(r'^ejemplo/$', ejemplo),
-
-    url(r'^inicio-secretaria/$', inicio_secretaria),
-    url(r'^computacion/listas/tCompleto$', computacion_listas_tCompleto),
-    url(r'^computacion/listas/tMedio$', computacion_listas_tMedio),
-    url(r'^computacion/form-incidencias$', form_incidencias),
-    url(r'^computacion/reporte-incidencias$', incidencias),
-
-    url(r'^inicio-jefedep/$', inicio_jefedep),
-    url(r'^computacion/sistema/csv$', computacion_sistema_subircsv),
-    url(r'^computacion/sistema/consulta$', computacion_sistema_consulta_modifica),
-    url(r'^computacion/formatos/form-asistencias$', computacion_form_asistencias),
-    url(r'^usuarios/gestionar$', usuarios_gestionar),
-
-    url(r'^inicio-administrador/$', inicio_admin),
-    url(r'^sistema/modificar/jefe-departamento', sistema_modificar_jefedep),
-    url(r'^nuevo_departamento',nuevo_departamento),
-    
 ]
+
+urlpatterns += url_secretaria + url_jefedep + url_admin
