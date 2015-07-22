@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, permission_required
 
-@permission_required('usuarios.admin', login_url='/login/')
+#Verificar si el usuario tiene permisos para estas vistas, por el momento sólo pide que esté logeado
+
+@login_required(login_url='/login/')
 def inicio_admin(request):
 	return render(request, 'inicio-administrador.html', { 'banner' : True })
 
