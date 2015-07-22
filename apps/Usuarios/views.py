@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
-from apps.Usuarios.models import Usuario
 from django.contrib import auth
 # Create your views here.
 
