@@ -31,7 +31,7 @@ TODO:
 """
 
 urlpatterns = [
-    url(r'^admin/$', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^ejemplo/$', ejemplo),
 ]
 

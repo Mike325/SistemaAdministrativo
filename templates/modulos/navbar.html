@@ -7,13 +7,13 @@
             <ul class="title-area">
                 <li class="name" style="background-color:#4285F4;">
                     <h1>
-                        <a href="#" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{usuario}{% endblock %}{% endspaceless %}</a>
+                        <a href="#" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario }}{% endblock %}{% endspaceless %}</a>
                     </h1>
                 </li>
             </ul>
             <ul class="right">
                 <li><a href="#" style="background-color:#4285F4;">Modificar Perfil</a></li>
-                <li><a href="#" style="background-color:#4285F4;border-left:solid #4285E4 0.15rem;">Salir</a></li>
+                <li><a href="/logout/" style="background-color:#4285F4;border-left:solid #4285E4 0.15rem;">Salir</a></li>
             </ul>
         </section>
     </nav>
