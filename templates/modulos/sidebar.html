@@ -11,13 +11,26 @@
 
 	TODO:
 		+ Evaluar el rol del usuario para mostrar solo los links a los que puede acceder.
+		+ Para el menu expandido, agregar el acordeon.
 {% endcomment %}
-			<div class="large-2 columns hide-on-print" style="background-color:#FFFFFF; padding:0rem;">
-				{% load staticfiles %}
-                <img src="{% static 'img/banner2.png' %}">
-                <ul class="no-bullet" style="margin:1rem;">
-					<li><a href="/inicio-secretaria">Secretaria</a></li>
-					<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
-					<li><a href="/inicio-administrador">Administrador</a></li>
-                </ul>
-            </div>
+			<div class="large-2 columns hide-on-print no-padding white-bg">
+				<div class="no-margin no-padding">
+					{% load staticfiles %}
+					<div class="sidebar-image" style="background-image: url('{% static 'img/banner2.png' %}');"></div>
+
+					{# barra mas pequeña (sin acordeon). pantalllas inferiores a 1024px #}
+					<div class="no-margin no-padding hidden-for-large-up">
+						<ul class="no-bullet no-margin sidebar-nav lt-large">
+							<li><a href="/inicio-secretaria">Secretaria</a></li>
+							<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
+							<li><a href="/inicio-administrador">Administrador</a></li>
+						</ul>
+					</div>
+					
+					<ul class="no-bullet show-for-large-up no-margin sidebar-nav">
+						<li><a href="/inicio-secretaria">Secretaria</a></li>
+						<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
+						<li><a href="/inicio-administrador">Administrador</a></li>
+					</ul>
+				</div>
+			</div>

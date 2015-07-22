@@ -26,6 +26,7 @@ body
 .full-width-table { width: 100% !important; }
 .no-padding { padding: 0 !important; }
 .no-margin { margin: 0 !important; }
+.white-bg { background-color: #FFF; }
 
 .especialHead { background: #fff !important; }
 .sign-field 
@@ -60,4 +61,55 @@ div.full-width-container
 
 	border: 1px solid #CBCBCB;
 	background-color: #FFF; 
+}
+
+ul.sidebar-nav
+{
+	margin: 24px 0 !important;
+	border-bottom: 1px solid #F0F0F0;
+	border-top: 1px solid #F0F0F0;
+	background-color: #FCFCFC;
+}
+
+ul.sidebar-nav li
+{
+	padding: 4px 24px;
+	transition: 0.2s;
+	-webkit-transition: 0.2s;
+}
+
+ul.sidebar-nav li:hover
+{
+	background-color: rgb(231, 231, 231);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIUlEQVQIW2NkQAL////fzAjjgzmMjL5gARgHxGZE5oAEAA0GD7VMeqp7AAAAAElFTkSuQmCC);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.08);
+}
+
+ul.sidebar-nav li a
+{
+	display: block;
+	color: #6C6C6C;
+	font-size: 14px;
+}
+
+.sidebar-image
+{
+	display: block; 
+	width: 100%; 
+	height: 125px; 
+
+	background-size: 100%; 
+	background-position: center center; 
+}
+
+ul.lt-large
+{
+	/*height: 27px;*/
+	margin-top: 0 !important;
+	overflow: hidden;
+}
+
+ul.lt-large li 
+{
+	float: left !important;
 }
