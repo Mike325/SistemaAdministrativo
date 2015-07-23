@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.sessions.models import Session
 from django.contrib import auth
@@ -17,17 +18,22 @@ def login(request):
             auth.login(request, user)
             #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
             request.session['usuario'] = usuario
-            return redirect('/inicio-secretaria/')
+            request.session['rol'] = user.usuario.rol.id
+            if request.session['rol'] == 1:
+                return redirect('/inicio-secretaria/')
+            elif request.session['rol'] == 2:
+                return redirect('/inicio-jefedep/')
+            else:
+                return redirect('/inicio-administrador/')
         else:
-            errors = "Usuario o contraseña incorrectos"
-            return render(request,'login.html', locals())
+            return render(request,'login.html', {'errors': "Usuario o contraseña incorrectos"})
     else:
-        return render(request,'login.html', locals())
+        return render(request,'login.html')
 
 def logout(request):
     try:
         auth.logout(request)
     except KeyError:
         pass
-    return redirect('/login/')
+    return redirect('/')
     
