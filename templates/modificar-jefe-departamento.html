@@ -4,10 +4,6 @@
     Cambiar Jefe de Departamento - Administrador
 {% endblock %}
 
-{% block usuario %}
-    {{Administrador}}
-{% endblock %}
-
 {% block content %}
     <div class="row">
         <div class="large-4 medium-6 small-12 columns">
@@ -17,8 +13,8 @@
             <div class="large-12 colums panel">
                 <h3 class="text-center">Cambiar Jefe de Departamento<h3>
                 <div class="row">
-                    <form action="/modificar-jefe-departamento/" method="POST">{% csrf_token %}
-                        <div class="large-12 columns">
+                    <div class="large-12 columns">
+                        <form action="/enviar/modificar/jefe-departamento/" method="POST">{% csrf_token %}
                             <label>Jefe actual</label><input type="text"  value="Actual" disabled></input>
                             <label>Departamento</label><input type="text" value="{{departamento}}" disabled></input>
                             <label>Nuevo Jefe</label>
@@ -29,8 +25,8 @@
                                 <option value="profesor 4">Nombre</option>
                             </select>
                             <button class="button expand">Continuar</button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

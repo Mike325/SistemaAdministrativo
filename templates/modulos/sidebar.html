@@ -21,16 +21,28 @@
 					{# barra mas pequeña (sin acordeon). pantalllas inferiores a 1024px #}
 					<div class="no-margin no-padding hidden-for-large-up">
 						<ul class="no-bullet no-margin sidebar-nav lt-large">
-							<li><a href="/inicio-secretaria">Secretaria</a></li>
-							<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
-							<li><a href="/inicio-administrador">Administrador</a></li>
+							{% if request.session.rol > 0 %}
+								<li><a href="/inicio-secretaria">Secretaria</a></li>
+							{% endif %}
+							{% if request.session.rol > 1 %}
+								<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
+							{% endif %}
+							{% if request.session.rol > 2 %}
+								<li><a href="/inicio-administrador">Administrador</a></li>
+							{% endif %}
 						</ul>
 					</div>
 					
 					<ul class="no-bullet show-for-large-up no-margin sidebar-nav">
-						<li><a href="/inicio-secretaria">Secretaria</a></li>
-						<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
-						<li><a href="/inicio-administrador">Administrador</a></li>
+						{% if request.session.rol > 0 %}
+							<li><a href="/inicio-secretaria">Secretaria</a></li>
+						{% endif %}
+						{% if request.session.rol > 1 %}
+							<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
+						{% endif %}
+						{% if request.session.rol > 2 %}
+							<li><a href="/inicio-administrador">Administrador</a></li>
+						{% endif %}
 					</ul>
 				</div>
 			</div>
