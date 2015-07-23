@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .models import *
 
 # Es necesario registrar en admin para el proyecto?
 admin.site.register(Departamento)
