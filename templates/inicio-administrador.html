@@ -23,22 +23,24 @@
                 </div>
             </div>
         </div>
-        <!-- for x in departamentos -->
+
+        {% for departamento in departamentos %}
         <div class="large-4 medium-6 small-12 columns">
             <div class="division-banner">
-                <img src="/static/img/logos_carreras/computacion.png">
+                <img src="/static/img/logos_carreras/{{ departamento }}.png">
             </div>
             <div class="large-12 colums panel">
-                <h3 class="text-center">Computación<h3>
+                <h3 class="text-center">{{ departamento }}<h3>
                 <div class="row">
                     <div class="large-12 columns">
                         <form action="/sistema/modificar/jefe-departamento" method="POST">{% csrf_token %}
-                        <button class="button expand" name="departamento" value="Computacion">Cambiar Jefe de Departamento</button>
+                        <button class="button expand" name="departamento" value="{{ departamento.nombre }}">Cambiar Jefe de Departamento</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
+        {% endfor %}
 
           <div class="large-4 medium-6 small-12 columns">
             <div class="division-banner">

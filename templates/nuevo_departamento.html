@@ -1,53 +1,27 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Ejemplo
-{% endblock %}
-
-{% block usuario %}
-    Administrador
-{% endblock %}
-
-{% block navegacion %}
-    <li><a href="#">Secretaria</a></li>
-    <li><a href="#">Jefe de departamento</a></li>
-    <li><a href="#">Departamento</a></li>
+    Nuevo Departamento - Administrador
 {% endblock %}
 
 {% block content %}
-   <div class="large-5 medium-8 columns">
-					<div class="panel">
-						
-						<div class="row">
-							<div class="large-12 medium-12 columns">
-
-								<!-- División -->
-								<div class="large-12 medium-12 columns">
-									<div class="callout panel">
-										<h4>Nueva división</h4>
-										<form>
-											<label>Nombre de la división</label>
-				      						<input type="text" id="nuevaDivision" placeholder="Nombre de la nueva división"/>
-				      						<label>Selecciona el jefe del departamento</label>
-				      						<select>
-				      							<!--Aquí se carga todo el personal disponible para el puesto de jefé de división-->
-				        						<option value="Profesor 1" id="nombre">Profesor 1</option>
-				        						<option value="Profesor 2" id="nombre">Profesor 2</option>
-										        <option value="Profesor 3" id="nombre">Profesor 3</option>
-										        <option value="Profesor 4" id="nombre">Profesor 4</option>
-								       		</select>
-								       		<label>Codigo del Departamento</label>
-								       		<input type="text" id="nuevaDivision" placeholder="Codigo de la nueva divicion"/>
-								       		<input type="submit" value="Continuar" class="small radius button"/>
-								       	</form>
-									</div>
-								</div>
-								
-
-							</div>	
-						</div>
-
-					</div>
+<div class="row">
+	<div class="large-4 medium-6 small-12 columns">
+		<div class="panel">
+			<div class="row">
+				<div class="large-12 medium-12 columns">
+					<h4>Nuevo Departamento</h4>
+					<form method='POST' action="/nuevo_departamento">{% csrf_token %}
+						<label>Nombre del Departamento</label>
+							<input type="text" name='nombre' placeholder="Nombre de la nueva división"/>
+			       		<label>Codigo del Departamento</label>
+			       		<input type="text" name="id" placeholder="Codigo de la nueva divicion"/>
+			       		<input type="submit" value="Continuar" class="button expand"/>
+			       	</form>
 				</div>
+			</div>	
+		</div>
+	</div>
+</div>
 {% endblock %}
 
