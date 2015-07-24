@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 
 #Verificar si el usuario está logeado, en caso contrario, redirecciona a página de log in
 @login_required(login_url='/')
