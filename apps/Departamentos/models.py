@@ -1,6 +1,13 @@
 from django.db import models
 
+from apps.Usuarios.models import Usuario
+
 '''
+FIX:
+    - Jefe de departamento:
+        Faltaba ese campo. Ahora todo funciona bien.
+        Checar las notas en apps.Usuarios.models para mas detalles.
+
 TODO:
     + Revisar relaciones.
     + Revisar claves primarias de todos los modelos.
@@ -10,6 +17,7 @@ TODO:
 class Departamento(models.Model):
     id = models.IntegerField(primary_key=True)
     nombre = models.CharField(max_length=120)
+    jefeDep = models.OneToOneField(Usuario, blank=True, null=True)
 
     def __unicode__(self):
         return self.nombre

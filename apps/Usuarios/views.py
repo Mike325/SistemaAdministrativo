@@ -11,14 +11,18 @@ def login(request):
         #Tomar los valores mandados al hacer log in
         usuario = request.POST.get('username','')
         password = request.POST.get('pass','')
+        
         #Autentificar que el usuario exista
         user = auth.authenticate(username=usuario, password=password)
+
         #Si el usuario existe  y está activo, se inicia la sesión
         if user is not None and user.is_active:
             auth.login(request, user)
+
             #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
             request.session['usuario'] = usuario
             request.session['rol'] = user.usuario.rol.id
+            
             if request.session['rol'] == 1:
                 return redirect('/inicio-secretaria/')
             elif request.session['rol'] == 2:
