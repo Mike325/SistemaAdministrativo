@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Cambiar Jefe de Departamento - Administrador
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="medium-12 columns ">	
+		<table class="full-width-table">
+			<caption><h3>USUARIOS <h3></caption>
+				 <thead>
+                    <th>USUARIO</th>
+                    <th>PUESTO</th>
+                    <th>STATUS</th>
+                </thead>
+
+				  <tbody>
+                    {% for x in usuarios_activos %}
+                    <tr>
+                        <td class="row-usuario">{{ x.user }}</td>
+                        <td class="row-rol">{{ x.rol }}</td>
+                        <td class="row-status">
+							{% if x.status == 'activo' %}
+							<input type="radio" name="activos" value="Activo" id="usuactivo"><label for="usuactivo">activo</label>
+							 {% endif %}
+							{% if x.status == 'inactivo' %}
+	      					<input type="radio" name="activos" value="Inactivo" id="usuinactivo"><label for="usuinactivo">inactivo</label>
+	      					{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {# MUESTRA #}
+                    <tr>
+                        <td class="row-fecha">JOSE LUIS RODRIGUEZ JIMENEZ</td>
+                        <td class="row-rol">secretatia</td>
+                        <td class="row-status">
+                        <input type="radio" name="activos" value="Activo" id="usuactivo"><label for="usuactivo">activo</label>
+      					<input type="radio" name="activos" value="Inactivo" id="usuinactivo"><label for="usuinactivo">inactivo</label>
+                    </tr>
+                </tbody>
+		</table>
+		<input type="submit" value="Aplicar cambios" class="small radius button"/>
+	</div>
+
+</div>
+{% endblock %}

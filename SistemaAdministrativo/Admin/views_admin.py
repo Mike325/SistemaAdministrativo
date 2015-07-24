@@ -38,3 +38,10 @@ def nuevo_departamento(request):
         return render(request, 'nuevo_departamento.html')
     else:
         return render(request, 'PermisoDenegado.html')
+
+@login_required(login_url='/')
+def activar_usuarios(request):
+    if request.session['rol'] == 3:
+        return render(request, 'activar_usuarios.html')
+    else:
+        return render(request, 'PermisoDenegado.html')
