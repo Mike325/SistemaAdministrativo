@@ -19,13 +19,14 @@ def inicio_admin(request):
 
 @login_required(login_url='/')
 def form_sistema_modificar_jefedep(request):
+    errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la modificación de jefe de departamento'
     if request.session['rol'] == 3:
         if request.method == 'POST':
             post_nombreDepartamento = request.POST.get('departamento', '')
             departamento = Departamento.objects.get(nombre=post_nombreDepartamento)
             try:
                 jefeActual = departamento.jefeDep
-                opcionesJefeDepartamento = Usuario.objects.all()
+                opcionesJefeDepartamento = Usuario.objects.filter(rol = 2).filter(departamento = None)
             except ObjectDoesNotExist:
                 errors = "No existen jefes de este departamento, favor de crear uno"
                 return render(request, 'modificar-jefe-departamento.html', locals())
@@ -70,13 +71,17 @@ def nuevo_departamento(request):
             codigo = request.POST.get('id','')
             nombre = request.POST.get('nombre', '')
             #Crear el nuevo departamento
-            nuevoDepartamento = Departamento(id = codigo, nombre = nombre)
+            nuevoJefe_user = User.objects.get(username = nuevoJefe)
+            nuevoJefe = Usuario.objects.get(user = nuevoJefe_user)
+            nuevoDepartamento = Departamento(id = codigo, nombre = nombre, jefeDep = nuevoJefe)
             #Guardar en la base de datos el nuevo departamento
             nuevoDepartamento.save()
             return redirect('/inicio-administrador/')
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
-            return render(request, 'nuevo_departamento.html')
+            errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la creación de departamento'
+            opcionesJefeDepartamento = Usuario.objects.filter(rol = 2).filter(departamento = None)
+            return render(request, 'nuevo_departamento.html', locals())
     else:
         return render(request, 'PermisoDenegado.html')
 
