@@ -8,6 +8,9 @@
 <div class="row">
 	<div class="large-4 medium-6 small-12 columns">
 		<div class="panel">
+			{% if opcionJefeDepartamento|length < 1 %}
+        	    <div class="callout panel"><label class="error">{{errors}}</label></div>
+            {% endif %}
 			<div class="row">
 				<div class="large-12 medium-12 columns">
 					<h4>Nuevo Departamento</h4>
@@ -16,7 +19,13 @@
 							<input type="text" name='nombre' placeholder="Nombre de la nueva división"/>
 			       		<label>Codigo del Departamento</label>
 			       		<input type="text" name="id" placeholder="Codigo de la nueva divicion"/>
-			       		<input type="submit" value="Continuar" class="button expand"/>
+			       		<label>Jefe del departamento</label>
+			       		<select name="nuevoJefe">
+                            {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
+                            <option>{{ opcionJefeDepartamento }}</option>
+                            {% endfor %}
+                        </select>
+			       		<button class="button expand" {% if opcionJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
 			       	</form>
 				</div>
 			</div>	

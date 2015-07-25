@@ -8,8 +8,8 @@
     <div class="row">
         <div class="large-4 medium-6 small-12 columns">
             <div class="panel">
-                {% if errors %}
-                <div class="callout panel"><label class="error">{{errors}}</label></div>
+                {% if opcionJefeDepartamento|length < 1 %}
+                    <div class="callout panel"><label class="error">{{errors}}</label></div>
                 {% endif %}
                 <h3 class="text-center">Cambiar Jefe de Departamento<h3>
                 <div class="row">
@@ -23,7 +23,7 @@
                                 <option>{{ opcionJefeDepartamento }}</option>
                                 {% endfor %}
                             </select>
-                            <button class="button expand" {% if errors %}disabled{% endif %}>Continuar</button>
+                            <button class="button expand" {% if opcionJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
                         </form>
                     </div>
                 </div>
