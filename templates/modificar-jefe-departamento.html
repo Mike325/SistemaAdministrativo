@@ -6,24 +6,24 @@
 
 {% block content %}
     <div class="row">
-        <div class="large-4 medium-6 small-12 columns">
+        <div class="large-6 medium-6 small-12 columns">
             <div class="panel">
-                {% if opcionJefeDepartamento|length < 1 %}
+                {% if opcionesJefeDepartamento|length < 1 %}
                     <div class="callout panel"><label class="error">{{errors}}</label></div>
                 {% endif %}
                 <h3 class="text-center">Cambiar Jefe de Departamento<h3>
                 <div class="row">
                     <div class="large-12 columns">
                         <form action="/enviar/modificar/jefe-departamento/" method="POST">{% csrf_token %}
-                            <label>Jefe actual</label><input type="text" name="jefeActual" value="{{jefeActual}}" readonly="readonly"></input>
+                            <label>Jefe actual</label><input type="text" name="jefeActual" readonly="readonly" value="{{jefeActual.user.last_name}}, {{jefeActual.rol}}({{jefeActual.codigo}})"/>
                             <label>Departamento</label><input type="text" name="departamento" value="{{departamento}}" readonly="readonly"></input>
                             <label>Nuevo Jefe</label>
                             <select name="nuevoJefe">
                                 {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
-                                <option>{{ opcionJefeDepartamento }}</option>
+                                <option>{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}}({{opcionJefeDepartamento.codigo}})</option>
                                 {% endfor %}
                             </select>
-                            <button class="button expand" {% if opcionJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
+                            <button class="button expand" {% if opcionesJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
                         </form>
                     </div>
                 </div>

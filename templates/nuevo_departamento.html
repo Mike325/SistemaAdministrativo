@@ -6,9 +6,9 @@
 
 {% block content %}
 <div class="row">
-	<div class="large-4 medium-6 small-12 columns">
+	<div class="large-6 medium-6 small-12 columns">
 		<div class="panel">
-			{% if opcionJefeDepartamento|length < 1 %}
+			{% if opcionesJefeDepartamento|length < 1 %}
         	    <div class="callout panel"><label class="error">{{errors}}</label></div>
             {% endif %}
 			<div class="row">
@@ -22,10 +22,10 @@
 			       		<label>Jefe del departamento</label>
 			       		<select name="nuevoJefe">
                             {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
-                            <option>{{ opcionJefeDepartamento }}</option>
+                            <option>{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}}({{opcionJefeDepartamento.codigo}})</option>
                             {% endfor %}
                         </select>
-			       		<button class="button expand" {% if opcionJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
+			       		<button class="button expand" {% if opcionesJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
 			       	</form>
 				</div>
 			</div>	
