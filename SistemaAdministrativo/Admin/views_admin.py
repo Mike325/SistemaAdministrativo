@@ -44,11 +44,13 @@ def sistema_modificar_jefedep(request):
             post_jefeActual = request.POST.get('jefeActual', '')
             post_departamento = request.POST.get('departamento', '')
             post_nuevoJefe = request.POST.get('nuevoJefe', '')
+            post_jefeActual = post_jefeActual.split(',', 1)
+            post_nuevoJefe = post_nuevoJefe.split(',', 1)
             #Hacer query del objeto del jefe actual y desactivarlo (?)
                 #jefeActual_user = User.objects.get(username = post_jefeActual)
                 #jefeActual = Usuario.objects.get(user = jefeActual_user)
             #Hacer query del nuevo jefe (user y usuario) y ponerlo como activo
-            nuevoJefe_user = User.objects.get(username = post_nuevoJefe)
+            nuevoJefe_user = User.objects.get(last_name = post_nuevoJefe[0])
             nuevoJefe = Usuario.objects.get(user = nuevoJefe_user)
             #Query del departamento del jefe actual
             departamento = Departamento.objects.get(nombre = post_departamento)
@@ -68,12 +70,14 @@ def nuevo_departamento(request):
         #Revisar si se entra a la página por POST
         if request.method == 'POST':
             #Obtener los campos del nuevo departamento
-            codigo = request.POST.get('id','')
-            nombre = request.POST.get('nombre', '')
+            post_codigo = request.POST.get('id','')
+            post_nombre = request.POST.get('nombre', '')
+            post_nuevoJefe = request.POST.get('nuevoJefe', '')
+            post_nuevoJefe = post_nuevoJefe.split(',', 1)
             #Crear el nuevo departamento
-            nuevoJefe_user = User.objects.get(username = nuevoJefe)
+            nuevoJefe_user = User.objects.get(last_name = post_nuevoJefe[0])
             nuevoJefe = Usuario.objects.get(user = nuevoJefe_user)
-            nuevoDepartamento = Departamento(id = codigo, nombre = nombre, jefeDep = nuevoJefe)
+            nuevoDepartamento = Departamento(id = post_codigo, nombre = post_nombre, jefeDep = nuevoJefe)
             #Guardar en la base de datos el nuevo departamento
             nuevoDepartamento.save()
             return redirect('/inicio-administrador/')
