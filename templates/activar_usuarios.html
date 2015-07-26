@@ -12,34 +12,23 @@
 			<caption><h3>USUARIOS <h3></caption>
 				 <thead>
                     <th>USUARIO</th>
+                    <th>NOMBRE</th>
                     <th>PUESTO</th>
                     <th>STATUS</th>
                 </thead>
 
 				  <tbody>
-                    {% for x in usuarios_activos %}
+                    {% for x in usuarios %}
                     <tr>
-                        <td class="row-usuario">{{ x.user }}</td>
-                        <td class="row-rol">{{ x.rol }}</td>
-                        <td class="row-status">
-							{% if x.status == 'activo' %}
-							<input type="radio" name="activos" value="Activo" id="usuactivo"><label for="usuactivo">activo</label>
-							 {% endif %}
-							{% if x.status == 'inactivo' %}
-	      					<input type="radio" name="activos" value="Inactivo" id="usuinactivo"><label for="usuinactivo">inactivo</label>
-	      					{% endif %}
-                        </td>
+                        <td class="row-username">{{ x.username }}</td>
+                        <td class="row-usuario">{{ x.first_name }} {{x.last_name}}</td>
+                        <td class="row-rol">{{x.rol.tipo}}</td>
+                        {% if x.is_active %}
+                        <td> <input type="radio" name="activos" value="Activo"<label for="usuactivo" checked >Activo</label>
+                        <input type="radio" name="inactivo" value="Inactivo"<label for="usuinactivo">Inactivo</label></td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
-
-                    {# MUESTRA #}
-                    <tr>
-                        <td class="row-fecha">JOSE LUIS RODRIGUEZ JIMENEZ</td>
-                        <td class="row-rol">secretatia</td>
-                        <td class="row-status">
-                        <input type="radio" name="activos" value="Activo" id="usuactivo"><label for="usuactivo">activo</label>
-      					<input type="radio" name="activos" value="Inactivo" id="usuinactivo"><label for="usuinactivo">inactivo</label>
-                    </tr>
                 </tbody>
 		</table>
 		<input type="submit" value="Aplicar cambios" class="small radius button"/>

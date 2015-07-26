@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Ejemplo
+{% endblock %}
+
+{% block usuario %}
+    Administrador
+{% endblock %}
+
+{% block navegacion %}
+    <li><a href="#">Secretaria</a></li>
+    <li><a href="#">Jefe de departamento</a></li>
+    <li><a href="#">Departamento</a></li>
+{% endblock %}
+
+{% block content %}	
+
+   		<div class="large-5 medium-8 columns ">
+			<div class="panel">
+					{{errors}}
+				<div class="row">
+					<div class="large-12 medium-12 columns">
+									<!-- División -->
+						<div class="large-12 medium-12 columns">
+							<div class="callout panel">
+								<!--aqui -->
+								<form id='formulario' method='post' action=''>{% csrf_token %}
+									<h4 align="center">NUEVO JEFE </h4>
+									<label>Usuario </label>
+		      						<input type="text" name="username" placeholder="Usuario"/>
+		      						<label>Contrase~a </label>
+		      						<input type="password" name="password" placeholder="Contrase~a"/>
+		      						<label>Nombre </label>
+		      						<input type="text" name="nombre" placeholder="Nombre"/>
+		      						<label>Apellido </label>
+		      						<input type="text" name="apellido" placeholder="apellido"/>
+		      						<label>Codigo </label>
+		      						<input type="text" name="codigo" placeholder="codigo"/>
+						
+									<p><input type="submit" value="Continuar" class="small radius button"/></p>
+								</form>
+							</div>
+						</div>
+					</div>	
+				</div>
+			</div>
+		</div>
+
+{% endblock %}

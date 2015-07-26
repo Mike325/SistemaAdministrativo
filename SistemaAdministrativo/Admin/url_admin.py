@@ -12,5 +12,6 @@ url_admin = [
     url(r'^enviar/modificar/jefe-departamento', sistema_modificar_jefedep),
     url(r'^nuevo_departamento',nuevo_departamento),
     url(r'^activar_usuarios',activar_usuarios),
+    url(r'^nuevo_jefe',nuevo_jefe),
 
 ]
