@@ -26,9 +26,8 @@ def form_sistema_modificar_jefedep(request):
             departamento = Departamento.objects.get(nombre=post_nombreDepartamento)
             try:
                 jefeActual = departamento.jefeDep
-                opcionesJefeDepartamento = Usuario.objects.filter(rol = 2).filter(departamento = None)
+                opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             except ObjectDoesNotExist:
-                errors = "No existen jefes de este departamento, favor de crear uno"
                 return render(request, 'modificar-jefe-departamento.html', locals())
             return render(request, 'modificar-jefe-departamento.html', locals())
         else:
@@ -44,22 +43,21 @@ def sistema_modificar_jefedep(request):
             post_jefeActual = request.POST.get('jefeActual', '')
             post_departamento = request.POST.get('departamento', '')
             post_nuevoJefe = request.POST.get('nuevoJefe', '')
-            post_jefeActual = post_jefeActual.split(',', 1)
-            post_nuevoJefe = post_nuevoJefe.split(',', 1)
-            #Hacer query del objeto del jefe actual y desactivarlo (?)
-                #jefeActual_user = User.objects.get(username = post_jefeActual)
-                #jefeActual = Usuario.objects.get(user = jefeActual_user)
-            #Hacer query del nuevo jefe (user y usuario) y ponerlo como activo
-            nuevoJefe_user = User.objects.get(last_name = post_nuevoJefe[0])
-            nuevoJefe = Usuario.objects.get(user = nuevoJefe_user)
+
+            #¿Qué hacer con el antiguo jefe de departamento?
+
+            #Query del objeto del nuevo jefe
+            nuevoJefe = Usuario.objects.get(user__username = post_nuevoJefe)
+
             #Query del departamento del jefe actual
             departamento = Departamento.objects.get(nombre = post_departamento)
+
             #Sustitución del jefe actual por el nuevo
             departamento.jefeDep = nuevoJefe
-            #Desactivar al antiguo jefe de departamento
+
             #Guardar los cambios en la base de datos
-                #jefeActual.save()
             departamento.save()
+
         return redirect('/inicio-administrador/')
     else:
         return render(request, 'PermisoDenegado.html')
@@ -73,13 +71,16 @@ def nuevo_departamento(request):
             post_codigo = request.POST.get('id','')
             post_nombre = request.POST.get('nombre', '')
             post_nuevoJefe = request.POST.get('nuevoJefe', '')
-            post_nuevoJefe = post_nuevoJefe.split(',', 1)
+            
+            #Hacer query del nuvo jefe
+            nuevoJefe = Usuario.objects.get(user__username=post_nuevoJefe)
+
             #Crear el nuevo departamento
-            nuevoJefe_user = User.objects.get(last_name = post_nuevoJefe[0])
-            nuevoJefe = Usuario.objects.get(user = nuevoJefe_user)
-            nuevoDepartamento = Departamento(id = post_codigo, nombre = post_nombre, jefeDep = nuevoJefe)
+            nuevoDepartamento = Departamento(id=post_codigo, nombre=post_nombre, jefeDep=nuevoJefe)
+            
             #Guardar en la base de datos el nuevo departamento
             nuevoDepartamento.save()
+
             return redirect('/inicio-administrador/')
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
