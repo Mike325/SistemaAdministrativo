@@ -9,28 +9,33 @@
 <div class="row">
 	<div class="medium-12 columns ">	
 		<table class="full-width-table">
-			<caption><h3>USUARIOS <h3></caption>
-				 <thead>
-                    <th>USUARIO</th>
-                    <th>NOMBRE</th>
-                    <th>PUESTO</th>
-                    <th>STATUS</th>
-                </thead>
+			<caption><h3>Usuarios<h3></caption>
 
-				  <tbody>
-                    {% for x in usuarios %}
-                    <tr>
-                        <td class="row-username">{{ x.username }}</td>
-                        <td class="row-usuario">{{ x.first_name }} {{x.last_name}}</td>
-                        <td class="row-rol">{{x.rol.tipo}}</td>
-                        {% if x.is_active %}
-                        <td> <input type="radio" name="activos" value="Activo"<label for="usuactivo" checked >Activo</label>
-                        <input type="radio" name="inactivo" value="Inactivo"<label for="usuinactivo">Inactivo</label></td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-		</table>
+			<thead>
+                <th>USUARIO</th>
+                <th>NOMBRE</th>
+                <th>APELLIDO</th>
+                <th>PUESTO</th>
+                <th>STATUS</th>
+            </thead>
+
+			<tbody>
+                {% for x in usuarios %}
+                <tr>
+                    <td class="row-username">{{ x.username }}</td>
+                    <td class="row-nombre">{{ x.first_name }}</td>
+                    <td class="row-apellido">{{ x.last_name }}</td>
+                    <td class="row-rol">{{x.usuario.rol}}</td>
+                    <form>
+                    <td> <input type="radio" name="{{x}}estado" value="Activo" id="{{x}}Activo"{% if x.is_active %} checked {% endif %}>
+                    <label for="{{x}}Activo">Activo</label>
+                    <input type="radio" name="{{x}}estado" value="Inactivo" id="{{x}}Inactivo"{% if not x.is_active %} checked {% endif %}>
+                    <label for="{{x}}Inactivo">Inactivo</label></td>
+                </tr>
+                {% endfor %}
+                </form>
+            </tbody>
+        </table>
 		<input type="submit" value="Aplicar cambios" class="small radius button"/>
 	</div>
 

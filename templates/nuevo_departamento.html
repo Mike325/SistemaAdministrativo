@@ -22,7 +22,7 @@
 			       		<label>Jefe del departamento</label>
 			       		<select name="nuevoJefe">
                             {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
-                            <option>{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}}({{opcionJefeDepartamento.codigo}})</option>
+                            <option value="{{opcionJefeDepartamento}}">{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}}({{opcionJefeDepartamento.codigo}})</option>
                             {% endfor %}
                         </select>
 			       		<button class="button expand" {% if opcionesJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
