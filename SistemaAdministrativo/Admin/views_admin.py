@@ -116,6 +116,34 @@ def nuevo_jefe(request):
         return render(request, 'PermisoDenegado.html')
 
 @login_required(login_url='/')
+def nueva_secretaria(request):
+    if request.session['rol'] == 3 or request.session['rol'] == 2:
+        if request.method == 'POST':
+            usuario = request.POST.get('username','')
+            password = request.POST.get('password', '')
+            codigo = request.POST.get('codigo','')
+            nombre = request.POST.get('nombre','')
+            apellido = request.POST.get('apellido','')
+            if User.objects.filter(username = usuario ).exists():
+                errors = 'Ya existe registro con ese nombre'
+                return render(request,'nueva-secretaria.html',locals())
+            else:
+                Jefe_rol = Rol.objects.get(id = 1 )
+                usuario_user = User.objects.create_user(username=usuario, first_name=nombre, 
+                                                        last_name=apellido, password = password)
+                Jefe_usuario = Usuario(user=usuario_user, codigo=codigo, rol=Jefe_rol)
+                usuario_user.save()
+                Jefe_usuario.save()
+                if request.session['rol'] == 3:
+                    return redirect('/inicio-administrador/')
+                elif request.session['rol'] == 2:
+                    return redirect('/inicio-jefedep/')
+        else:
+            return render(request, 'nueva-secretaria.html')
+    else:
+        return render(request, 'PermisoDenegado.html')
+
+@login_required(login_url='/')
 def activar_usuarios(request):
     if request.session['rol'] == 3:
         usuarios = User.objects.all();
