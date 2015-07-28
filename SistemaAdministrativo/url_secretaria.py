@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from apps.Reportes.views import *
 
+#URL's de Secretarias
+
 url_secretaria = [
 	url(r'^inicio-secretaria/$', inicio_secretaria),
 	url(r'^(computacion|electronica)/listas/tCompleto$', listas_tCompleto),

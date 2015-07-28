@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from apps.Usuarios.views import *
 
+#URL's de Administrador
+
 url_admin = [
     url(r'^$', login),
     url(r'^logout/$', logout),

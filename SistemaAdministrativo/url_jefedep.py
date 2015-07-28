@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from apps.Departamentos.views import *
 
+#URL's de Jedes de Deptos.
+
 url_jefedep = [
 	url(r'^inicio-jefedep/$', inicio_jefedep),
 	url(r'^computacion/sistema/csv$', computacion_sistema_subircsv),
