@@ -14,11 +14,11 @@ FIX:
     - Codigos unicos:
         Ahora 'codigo' no puede repetirse (lo normal, no?).
 
-    - ¿Como te llamas?
+    - ¿Como te llamas? --(Ya existen estos campos en el modelo User)--
         Agregado 'nombre' y 'apellidos' al modelo de Usuario.
 
 TODO:
-    + Agregar un metodo en 'Usuario' para realizar el procedimiento 
+    + --(Hecho)--Agregar un metodo en 'Usuario' para realizar el procedimiento 
       de dar de alta un usuario en el sistema (de django) y enlazarlo 
       aqui.
 
@@ -47,12 +47,34 @@ class Rol(models.Model):
 class Usuario(models.Model):
     user = models.OneToOneField(User, primary_key=True)
     codigo = models.CharField(max_length=9, unique=True)
-
-    nombre = models.CharField(max_length=50, blank=True)
-    apellidos = models.CharField(max_length=50, blank=True)
-
     rol = models.ForeignKey(Rol)
 
     def __unicode__(self):
         return self.user.username
         pass
+
+    @classmethod
+    def alta_jefe(cls, username, password, first_name, last_name, email, codigo):
+        nuevo_user = User.objects.create_user(username=username, password=password,
+                                     first_name=first_name, last_name=last_name, email=email)
+        nuevo_user.save()
+        usuario = cls(user=nuevo_user, codigo=codigo, rol=Rol.objects.get(id=2))
+        return usuario
+
+    @classmethod
+    def alta_secretaria(cls, username, password, first_name, last_name, email, codigo):
+        nuevo_user = User.objects.create_user(username=username, password=password,
+                                     first_name=first_name, last_name=last_name, email=email)
+        nuevo_user.save()
+        usuario = cls(user=nuevo_user, codigo=codigo, rol=Rol.objects.get(id=1))
+        return usuario
+
+    @classmethod
+    def hacer_jefe(self, rol):
+        self.rol = Rol.objects.get(id=2)
+        return self
+
+    @classmethod
+    def hacer_secretaria(self, rol):
+        self.rol = Rol.objects.get(id=1)
+        return self

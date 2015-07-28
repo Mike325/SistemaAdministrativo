@@ -47,3 +47,26 @@ def computacion_form_asistencias(request):
 			return render(request, 'form-reporte-asistencias.html');
 	else:
 	    return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def nueva_secretaria(request):
+    if request.session['rol'] >= 2:
+        if request.method == 'POST':
+            usuario = request.POST.get('username','')
+            password = request.POST.get('password', '')
+            codigo = request.POST.get('codigo','')
+            nombre = request.POST.get('nombre','')
+            apellido = request.POST.get('apellido','')
+            correo = request.POST.get('correo', '')
+            if User.objects.filter(username = usuario ).exists():
+                errors = 'Ya existe registro con ese nombre'
+                return render(request,'nueva_secretaria.html',locals())
+            else:
+                nuevo_usuario = Usuario.alta_secretaria(usuario, password, nombre, 
+                                                    apellido, correo, codigo)
+                nuevo_usuario.save()
+                return redirect('/inicio-administrador/')
+        else:
+            return render(request, 'nueva_secretaria.html')
+    else:
+        return render(request, 'PermisoDenegado.html')

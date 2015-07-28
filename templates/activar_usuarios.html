@@ -24,8 +24,8 @@
                 {% for x in usuarios %}
                 <tr>
                     <td class="row-username">{{ x.user.username }}</td>
-                    <td class="row-nombre">{{ x.nombre }}</td>
-                    <td class="row-apellido">{{ x.apellidos }}</td>
+                    <td class="row-nombre">{{ x.user.first_name }}</td>
+                    <td class="row-apellido">{{ x.user.last_name }}</td>
                     <td class="row-rol">{{ x.rol.tipo }}</td>
                     <td>
                         <input type="radio" name="{{ x }}estado" value="active" id="{{ x }}-active" {% if x.user.is_active %}checked{% endif %}>

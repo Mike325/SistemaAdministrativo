@@ -6,13 +6,13 @@
 
 {% block content %}
     <div class="row">
-        <div class="medium-6 small-12 columns medium-centered">
+        <div class="medium-6 small-12 columns">
             <div class="panel">
-                {% if errors %}
-                    <div class="callout panel"><label class="error">{{errors}}</label></div>
-                {% endif %}
-                {% if not opcionJefeDepartamento %}
-                    <div class="callout panel"><label class="error">No hay Jefes de Departamento disponibles para asignar. Si desea continuar, primero cree un nuevo Jefe de Departamento</label></div>
+                
+                {% if opcionesJefeDepartamento|length < 1 %}
+                    <a href="/nuevo_jefe/">
+                    <div class="alert-box alert radius">{{errors}}</div>
+                    </a>
                 {% endif %}
 
                 <h3 class="text-center">Cambiar Jefe de Departamento<h3>
@@ -20,7 +20,7 @@
                     <div class="large-12 columns">
                         <form action="/enviar/modificar/jefe-departamento/" method="POST">{% csrf_token %}
                             <label>Jefe actual</label>
-                                <input type="text" name="jefeActual" readonly="readonly" value="{{jefeActual.apellidos}}, {{jefeActual.nombre}} ({{jefeActual.codigo}})"/>
+                                <input type="text" name="jefeActual" readonly="readonly" value="{{jefeActual}}, {{jefeActual.user.last_name}}, {{jefeActual.user.first_name}} ({{jefeActual.codigo}})"/>
 
                             <label>Departamento</label>
                                 <input type="text" name="departamento" value="{{departamento}}" readonly="readonly"></input>
@@ -28,10 +28,10 @@
                             <label>Nuevo Jefe</label>
                                 <select name="nuevoJefe">
                                 {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
-                                    <option value="{{opcionJefeDepartamento}}">{{ opcionJefeDepartamento.apellidos }}, {{opcionJefeDepartamento.nombre}} ({{opcionJefeDepartamento.codigo}})</option>
+                                    <option value="{{opcionJefeDepartamento}}">{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}}({{opcionJefeDepartamento.codigo}})</option>
                                 {% endfor %}
                                 </select>
-                            <button class="button expand" {% if not opcionJefeDepartamento %}disabled{% endif %}>Continuar</button>
+                            <button class="button expand" {% if opcionesJefeDepartamento|length < 1 %}disabled{% endif %}>Continuar</button>
                         </form>
                     </div>
                 </div>

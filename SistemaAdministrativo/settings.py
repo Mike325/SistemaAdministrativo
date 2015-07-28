@@ -50,6 +50,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'apps.Usuarios',
     'apps.Departamentos',
+    'apps.Historicos'
 )
 
 

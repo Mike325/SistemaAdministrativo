@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from apps.Usuarios.views import *
+from apps.Historicos.views import *
 from views_admin import *
 
 url_admin = [
@@ -14,5 +15,7 @@ url_admin = [
     url(r'^nuevo_departamento',nuevo_departamento),
     url(r'^activar_usuarios',activar_usuarios),
     url(r'^nuevo_jefe',nuevo_jefe),
+    url(r'^historicos/$', historicos),
+    url(r'^historicos/filtro/$', historicosFiltrados),
 
 ]

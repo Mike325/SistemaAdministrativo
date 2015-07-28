@@ -24,8 +24,8 @@ def login(request):
             usuario = {
                     'nick': usuario.user.username,
                     'correo': usuario.user.email,
-                    'nombre': usuario.nombre,
-                    'apellidos': usuario.apellidos,
+                    'nombre': usuario.user.first_name,
+                    'apellidos': usuario.user.last_name,
                     'codigo': usuario.codigo,
                     'rol': usuario.rol.id
                 }

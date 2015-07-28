@@ -22,40 +22,20 @@
 
 {% block content %}
 <div class="row">
-
+    
     <div class="large-4 medium-6 small-12 columns end">
         <div class="division-banner">
             <img src="/static/img/logos_carreras/robotica.png">
         </div>
         <div class="large-12 colums panel">
-            <h3 class="text-center">Cambiar Jefe de Departamento<h3>
+            <h3 class="text-center">Históricos<h3>
             <div class="row">
                 <div class="large-12 columns">
-                    <form action="/sistema/modificar/jefe-departamento" method="POST">{% csrf_token %}
-                        {% for departamento in departamentos %}
-                            <button class="button expand" name="departamento" value="{{ departamento.nombre }}">{{ departamento.nombre }}</button>
-                        {% endfor %}
-                    </form>
+                    <button class="button expand" onclick="location.href='/historicos'">Ver</button>
                 </div>
             </div>
         </div>
     </div>
-    
-{% comment %}
-        <div class="large-4 medium-6 small-12 columns end">
-        <div class="division-banner">
-            <img src="/static/img/logos_carreras/robotica.png">
-        </div>
-        <div class="large-12 colums panel">
-            <h3 class="text-center">Añadir Jefe de Departamento<h3>
-            <div class="row">
-                <div class="large-12 columns">
-                    <button class="button expand" onclick="location.href='/nuevo_jefe'">Añadir</button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endcomment %}
 
     <div class="large-4 medium-6 small-12 columns end">
         <div class="division-banner">
@@ -76,13 +56,34 @@
             <img src="/static/img/logos_carreras/robotica.png">
         </div>
         <div class="large-12 colums panel">
+            <h3 class="text-center">Cambiar Jefe de Departamento<h3>
+            <div class="row">
+                <div class="large-12 columns">
+                    <form action="/sistema/modificar/jefe-departamento" method="POST">{% csrf_token %}
+                        {% for departamento in departamentos %}
+                            <button class="button expand" name="departamento" value="{{ departamento.nombre }}">{{ departamento.nombre }}</button>
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="large-4 medium-6 small-12 columns end">
+        <div class="division-banner">
+            <img src="/static/img/logos_carreras/robotica.png">
+        </div>
+        <div class="large-12 colums panel">
             <h3 class="text-center">Usuarios del sistema<h3>
             <div class="row">
                 <div class="large-12 columns">
                     <button class="button expand" onclick="location.href='/activar_usuarios'">Administrar</button>
                 </div>
                 <div class="large-12 columns">
-                    <button class="button expand" onclick="location.href='/nuevo_usuario'">(+) Crear nuevo</button>
+                    <button class="button expand" onclick="location.href='/nuevo_jefe'">(+) Crear jefe de departamento</button>
+                </div>
+                <div class="large-12 columns">
+                    <button class="button expand" onclick="location.href='/nueva_secretaria'">(+) Crear secretaria</button>
                 </div>
             </div>
         </div>
