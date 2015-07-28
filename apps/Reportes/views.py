@@ -1,10 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-import datetime
 from django.contrib.auth.decorators import login_required
-
-# Create your views here.
-
+import datetime
 
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
@@ -83,29 +80,27 @@ def form_incidencias(request, dpto):
 		return render(request, 'PermisoDenegado.html')
 
 @login_required(login_url='/')
-def incidencias(request, dpto):
+def ver_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
 		fechaI = str(request.POST.get('fechaIni'))
 		fechaF = str(request.POST.get('fechaFin'))
 
-		fI = fechaI.split('-')
-		fF = fechaF.split('-')
-
 		try:
+			fI = fechaI.split('-')
+			fF = fechaF.split('-')
 			num_mes = int(fI[1])
 			mes_ini = meses[(num_mes-1)].upper()
 
 			num_mes = int(fF[1])
 			mes_fin = meses[(num_mes-1)].upper()
-
+			
 			extender_info = False
 
 			if mes_ini != mes_fin:
 				extender_info = True
 			pass
-		except Exception, e:
-			raise e
-			return Http404
+		except:
+			return render(request, 'form-incidencias.html', {'error': True,})
 
 		return render(request, 'incidencias.html',
 			{
@@ -117,6 +112,42 @@ def incidencias(request, dpto):
 				'anio_fin': fF[0],
 				'extender_info': extender_info
 			})
+		pass
+	else:
+		return render(request, 'PermisoDenegado.html')
+
+@login_required(login_url='/')
+def form_reporte_incidencias(request, dpto):
+	if request.session['rol'] >= 1:
+		try:
+			if dpto == 'computacion':
+				dpto = 'CIENCIAS COMPUTACIONALES'
+				pass
+			return render(request, 'form-reporte-incidencias.html', {'departamento': dpto.upper()})
+			pass
+		except:
+			return render(request, 'form-reporte-incidencias.html', {'error': True, 'departamento': dpto.upper()})
+		pass
+	else:
+		return render(request, 'PermisoDenegado.html')
+
+@login_required(login_url='/')
+def reporte_incidencias(request, dpto):
+	if request.session['rol'] >= 1:
+		return render(request, 'hecho.html', {'accion': 'realizado el reporte'})
+		try:
+			fecha = str(request.POST.get('fecha'))
+			fecha = fecha.split('-')
+			maestro = str(request.POST.get('maestro'))
+			codigo = str(request.POST.get('codigo'))
+			categoria = str(request.POST.get('categoria'))
+			depto = str(request.POST.get('depto'))
+			materia = str(request.POST.get('materia'))
+			seccion = str(request.POST.get('seccion'))
+			horario = str(request.POST.get('horario'))
+			horasFalta = str(request.POST.get('horasFalta'))			
+		except:
+			return render(request, 'form-reporte-incidencias.html', {'error': True, 'departamento': dpto.upper()})
 		pass
 	else:
 		return render(request, 'PermisoDenegado.html')
