@@ -16,9 +16,9 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from Secretaria.url_secretaria import *
-from Jefe_Dpto.url_jefedep import *
-from Admin.url_admin import *
+from url_secretaria import *
+from url_jefedep import *
+from url_admin import *
 
 """
 TODO:
