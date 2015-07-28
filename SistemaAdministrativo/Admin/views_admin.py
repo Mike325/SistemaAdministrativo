@@ -13,13 +13,19 @@ def inicio_admin(request):
     departamentos = Departamento.objects.all()
     if request.session['rol'] == 3:
         banner = True
+        bienvenida = False
+
+        if request.session['just_logged']:
+            bienvenida = True
+            request.session['just_logged'] = False
+            
+        departamentos = Departamento.objects.all()
         return render(request, 'inicio-administrador.html', locals())
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def form_sistema_modificar_jefedep(request):
-    errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la modificación de jefe de departamento'
     if request.session['rol'] == 3:
         if request.method == 'POST':
             post_nombreDepartamento = request.POST.get('departamento', '')
@@ -28,12 +34,13 @@ def form_sistema_modificar_jefedep(request):
                 jefeActual = departamento.jefeDep
                 opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             except ObjectDoesNotExist:
-                return render(request, 'modificar-jefe-departamento.html', locals())
+                errors = "No existen jefes de este departamento, favor de crear uno."
+
             return render(request, 'modificar-jefe-departamento.html', locals())
         else:
             return redirect('/inicio-administrador/')
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def sistema_modificar_jefedep(request):
@@ -60,7 +67,7 @@ def sistema_modificar_jefedep(request):
 
         return redirect('/inicio-administrador/')
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def nuevo_departamento(request):
@@ -111,12 +118,14 @@ def nuevo_jefe(request):
                 Jefe_usuario.save()
                 return redirect('/inicio-administrador/')
         else:
-            return render(request, 'nuevo_jefeDep.html')
+            return render(request, 'nuevo_usuario.html')
     else:
         return render(request, 'PermisoDenegado.html')
 
 @login_required(login_url='/')
 def activar_usuarios(request):
     if request.session['rol'] == 3:
-        usuarios = User.objects.all();
+        usuarios = Usuario.objects.all()
         return render(request, 'activar_usuarios.html', locals())
+    else:
+        return redirect('error403', origen=request.path)

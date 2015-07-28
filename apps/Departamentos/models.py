@@ -1,6 +1,9 @@
 from django.db import models
+from django.core.validators import RegexValidator
 
 from apps.Usuarios.models import Usuario
+
+alfanumerico = RegexValidator(r'^[0-9a-zA-Z]*$', 'Use solo caracteres alfanumericos (a-Z, 0-9).')
 
 '''
 FIX:
@@ -15,7 +18,8 @@ TODO:
 '''
 
 class Departamento(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+    nick = models.CharField(max_length=20, validators=[alfanumerico], unique=True)
     nombre = models.CharField(max_length=120)
     jefeDep = models.OneToOneField(Usuario, blank=True, null=True)
 
@@ -24,7 +28,7 @@ class Departamento(models.Model):
         pass
 
 class Area(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=120)
     fk_departamento = models.ForeignKey(Departamento)
 
@@ -39,14 +43,14 @@ class Materia(models.Model):
     fk_departamento = models.ForeignKey(Departamento)
 
     def __unicode__(self):
-        return clave
+        return self.clave
         pass
 
 class Seccion(models.Model):
     id = models.CharField(max_length=5, primary_key=True)
 
     def __unicode__(self):
-        return id
+        return self.id
         pass    
 
 class Profesor(models.Model):
@@ -59,6 +63,12 @@ class Profesor(models.Model):
         pass
 
 class Edificio(models.Model):
+    '''
+    REV:
+        + 'Edificio' para contener una variable de aulas.
+        (y asi ahorrar tantos duplicados en aula?)
+        + 'id' para ser una variable de tipo auto.
+    '''
     id = models.CharField(max_length=5, primary_key=True)
     nombre = models.CharField(max_length=50, null=True)
 
@@ -69,9 +79,14 @@ class Edificio(models.Model):
 class Aula(models.Model):
     nombre = models.CharField(max_length=5)
     fk_edif = models.ForeignKey(Edificio)
+    '''
+    REV:
+        + 'fk_edif' para ser una variable de tipo
+            models.ManyToManyField().
+    '''
 
     def __unicode__(self):
-        return self.id
+        return self.nombre
         pass
 
 class Ciclo(models.Model):
@@ -80,7 +95,7 @@ class Ciclo(models.Model):
     fecha_fin = models.DateField()
 
     def __unicode__(self):
-        return id
+        return self.id
         pass
     
 class Curso(models.Model):

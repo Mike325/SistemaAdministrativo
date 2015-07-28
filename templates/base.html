@@ -41,8 +41,10 @@
             <div class="large-10 columns">
                 {% if banner %}
                 <!-- Banner, por el momento una imagen cualquiera -->
-                <div class="large-12 columns no-padding no-margin">
-                    <img src="{% static 'img/banner.png' %}" class="hide-on-print">
+                <div class="large-12 columns no-padding no-margin main-banner" style="background-image: url('{% static 'img/banner_loop.png' %}');">
+                    <div class="no-margin no-padding transparent-black-bg" style="width: 100%; height: 100%; border-bottom: 4px solid #2B9A99;">
+                        <h2 style="color: #FFF; position: absolute; left: 12px; bottom: 0;">Bienvenido(a), {{ request.session.usuario.nombre }}</h2>
+                    </div>
                 </div>
                 {% endif %}
 
@@ -50,7 +52,7 @@
             </div>          
         </div>
     </div>
-
+    {% block footer %}{% endblock %}
     {# es importante agregar esto #}
     <script type="text/javascript">
         $(document).foundation();

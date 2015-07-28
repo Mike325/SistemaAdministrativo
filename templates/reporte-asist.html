@@ -5,27 +5,27 @@
 {% endblock %}
 
 {% block poshead %}
-<style type="text/css">
-	img.header-logo
-	{
-		height: 96px;
-	}
+	<style type="text/css">
+		img.header-logo
+		{
+			height: 96px;
+		}
 
-	div.logo
-	{
-		margin-right: 6px;
-		padding-right: 6px; 
-		border-right: 2px solid #000; 
-	}
+		div.logo
+		{
+			margin-right: 6px;
+			padding-right: 6px; 
+			border-right: 2px solid #000; 
+		}
 
-	div.full-width-container p
-	{
-		font-size: 14px;
-	}
-	
-</style>
-{% load staticfiles %}
-<link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
+		div.full-width-container p
+		{
+			font-size: 14px;
+		}
+		
+	</style>
+	{% load staticfiles %}
+	<link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
 {% endblock %}
 
 {% block content %}

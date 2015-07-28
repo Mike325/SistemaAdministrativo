@@ -1,28 +1,46 @@
 from django.http import HttpResponse
-from django.shortcuts import render
-import datetime
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+
+import datetime
+
+from apps.Departamentos.models import *
 
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
 @login_required(login_url='/')
 def ejemplo(request):
-    if request.session['rol'] >= 1:
-        return render(request, 'ejemplo.html', {'banner': True})
-    else:
-        return render(request, 'PermisoDenegado.html')
+	if request.session['rol'] >= 1:
+		return render(request, 'ejemplo.html', {'banner': True})
+	else:
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def inicio_secretaria(request):
 	if request.session['rol'] >= 1:
-		return render(request, 'inicio-secretaria.html', {'banner': True})
+		_departamentos = Departamento.objects.all()
+
+		bienvenida = False
+
+		if request.session['just_logged']:
+			bienvenida = True
+			request.session['just_logged'] = False
+
+		return render(request, 'inicio-secretaria.html', 
+			{
+				'banner': True, 
+				'bienvenida': bienvenida, 
+				'lista_departamentos': _departamentos
+			})
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def listas_tCompleto(request, dpto):
 	if request.session['rol'] >= 1:
+		_departamento = get_object_or_404(Departamento, nick=dpto)
+
 		hoy = datetime.date.today()
 		dia = hoy.isoweekday()
 
@@ -40,15 +58,12 @@ def listas_tCompleto(request, dpto):
 			})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def listas_tMedio(request, dpto):
 	if request.session['rol'] >= 1:
-		dpto = dpto.upper()
-
-		if dpto == 'COMPUTACION':
-			dpto = 'CIENCIAS COMPUTACIONALES'
+		_departamento = get_object_or_404(Departamento, nick=dpto)
 
 		fecha = datetime.date.today()
 		mesFc = int(fecha.month)
@@ -69,7 +84,7 @@ def listas_tMedio(request, dpto):
 			})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def form_incidencias(request, dpto):
@@ -77,7 +92,7 @@ def form_incidencias(request, dpto):
 		return render(request, 'form-incidencias.html')
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def incidencias(request, dpto):
@@ -116,4 +131,4 @@ def incidencias(request, dpto):
 			})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)

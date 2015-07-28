@@ -1,27 +1,28 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
+from apps.Departamentos.models import Departamento
 
 @login_required(login_url='/')
 def inicio_jefedep(request):
 	if request.session['rol'] >= 2:
-		return render(request, 'inicio-jefedep.html', { 'banner': True });
-	else:
-	   	return render(request, 'PermisoDenegado.html')
+		bienvenida = False
 
-@login_required(login_url='/')
-def computacion_sistema_subircsv(request):
-	if request.session['rol'] >= 2:
-		return render(request, 'form-subircsv.html');
-	else:
-	   	return render(request, 'PermisoDenegado.html')
+		if request.session['just_logged']:
+			bienvenida = True
+			request.session['just_logged'] = False
 
-@login_required(login_url='/')
-def computacion_sistema_consulta_modifica(request):
-	if request.session['rol'] >= 2:
-		return HttpResponse('<strong>En construccion o no aplicable por el momento</strong>');
+		lista_departamentos = Departamento.objects.all()
+
+		return render(request, 'inicio-jefedep.html', 
+			{
+				'banner': True, 
+				'bienvenida': bienvenida,
+				'lista_departamentos': lista_departamentos
+			});
 	else:
-	    return render(request, 'PermisoDenegado.html')
+	   	return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def computacion_form_asistencias(request):
@@ -30,7 +31,8 @@ def computacion_form_asistencias(request):
 
 			criterios = ['si', 'si', 'si', 'si', 'si', 'si']
 
-			return render(request, 'reporte-asist.html', {
+			return render(request, 'reporte-asist.html', 
+				{
 					'departamento' : 'Departamento de Ciencias Computacionales',
 					'nombre' : 'Juan Perez Rodriguez', 
 					'codigo' : request.POST.get('field-codprof'), 
@@ -44,11 +46,4 @@ def computacion_form_asistencias(request):
 		else:
 			return render(request, 'form-reporte-asistencias.html');
 	else:
-	    return render(request, 'PermisoDenegado.html')
-
-@login_required(login_url='/')
-def usuarios_gestionar(request):
-	if request.session['rol'] >= 2:
-		return HttpResponse('<strong>En construccion o no aplicable por el momento</strong>');
-	else:
-	    return render(request, 'PermisoDenegado.html')
+	    return redirect('error403', origen=request.path)
