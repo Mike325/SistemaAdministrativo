@@ -1,57 +1,37 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Inicio - Administrador
+	Inicio - Administrador
 {% endblock %}
 
-{% block usuario %}
-    {{Administrador}}
+{% block poshead %}
+	{% if bienvenida %}
+	<style type="text/css">
+		.sidebar-image { opacity: 0; }
+		.main-banner { display: none; }
+	</style>
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			$('.main-banner').delay(300).slideDown(function() {
+				$('.sidebar-image').animate({ opacity: 1 }, 1100);
+			});
+		});
+	</script>
+	{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="row">
-
-    {% for departamento in departamentos %}
-    <div class="large-4 medium-6 small-12 columns end">
-        <div class="division-banner">
-            <img src="/static/img/logos_carreras/{{ departamento }}.png">
-        </div>
-        <div class="large-12 colums panel">
-            <h3 class="text-center">{{ departamento }}<h3>
-            <div class="row">
-                <div class="large-12 columns">
-                    <form action="/sistema/modificar/jefe-departamento" method="POST">{% csrf_token %}
-                    <button class="button expand" name="departamento" value="{{ departamento.nombre }}">Cambiar Jefe de Departamento</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-
+    
     <div class="large-4 medium-6 small-12 columns end">
         <div class="division-banner">
             <img src="/static/img/logos_carreras/robotica.png">
         </div>
         <div class="large-12 colums panel">
-            <h3 class="text-center">Administrar Usuarios<h3>
+            <h3 class="text-center">Históricos<h3>
             <div class="row">
                 <div class="large-12 columns">
-                    <button class="button expand" onclick="location.href='/activar_usuarios'">Administrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="large-4 medium-6 small-12 columns end">
-        <div class="division-banner">
-            <img src="/static/img/logos_carreras/robotica.png">
-        </div>
-        <div class="large-12 colums panel">
-            <h3 class="text-center">Añadir Jefe de Deaprtamento<h3>
-            <div class="row">
-                <div class="large-12 columns">
-                    <button class="button expand" onclick="location.href='/nuevo_jefe'">Añadir</button>
+                    <button class="button expand" onclick="location.href='/historicos'">Ver</button>
                 </div>
             </div>
         </div>
@@ -66,6 +46,44 @@
             <div class="row">
                 <div class="large-12 columns">
                     <button class="button expand" onclick="location.href='/nuevo_departamento'">Nuevo Departamento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="large-4 medium-6 small-12 columns end">
+        <div class="division-banner">
+            <img src="/static/img/logos_carreras/robotica.png">
+        </div>
+        <div class="large-12 colums panel">
+            <h3 class="text-center">Cambiar Jefe de Departamento<h3>
+            <div class="row">
+                <div class="large-12 columns">
+                    <form action="/sistema/modificar/jefe-departamento" method="POST">{% csrf_token %}
+                        {% for departamento in departamentos %}
+                            <button class="button expand" name="departamento" value="{{ departamento.nombre }}">{{ departamento.nombre }}</button>
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="large-4 medium-6 small-12 columns end">
+        <div class="division-banner">
+            <img src="/static/img/logos_carreras/robotica.png">
+        </div>
+        <div class="large-12 colums panel">
+            <h3 class="text-center">Usuarios del sistema<h3>
+            <div class="row">
+                <div class="large-12 columns">
+                    <button class="button expand" onclick="location.href='/activar_usuarios'">Administrar</button>
+                </div>
+                <div class="large-12 columns">
+                    <button class="button expand" onclick="location.href='/nuevo_jefe'">(+) Crear jefe de departamento</button>
+                </div>
+                <div class="large-12 columns">
+                    <button class="button expand" onclick="location.href='/nueva_secretaria'">(+) Crear secretaria</button>
                 </div>
             </div>
         </div>

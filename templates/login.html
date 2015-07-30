@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>{% spaceless %}{% block title %}{% endblock %}{% endspaceless %}</title>
-
-    {% block prehead %}{% endblock %}{% comment %}
-        'prehead' permite agregar cualquier elemento (script, css, etc) 
-        al head ANTES que cualquier otro.
-    {% endcomment %}
+    <title>SIIAD - Iniciar Sesion en el Sistema</title>
 
     {% load staticfiles %}
     <!-- ESTILOS -->
@@ -20,26 +15,57 @@
     <script type="text/javascript" src="{% static 'js/modernizr.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/foundation.min.js' %}"></script>
 
-    {% block poshead %}{% endblock %}{% comment %}
-        'poshead' permite agregar cualquier elemento (script, css, etc) 
-        al head DESPUES de que se han cargado todos los demas. Util para cargar
-        plugins de jQuery o CSS que deben de aplicarse encima de cualquier otro
-    {% endcomment %}
-</head>
+    <style type="text/css">
+        /* Estilos para las cajas de login */
+        .panel-container
+        {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.07);
+            -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.07);
+            -moz-box-shadow:    0 0 10px rgba(0, 0, 0, 0.07);
+        }
 
+        .panel-container .login-logo
+        {
+            display: block; 
+                width: 100%; 
+                height: 122px; 
+
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: contain;
+        }
+    </style>
+</head>
 
 <body>
     <div class="row">
         <div class="large-4 columns large-centered">
-            <div class="panel">
+            <div class="panel panel-container">
+                <div class="login-logo" style="background-image: url('{% static 'img/SIIAD-logo.png' %}'); "></div> 
+                {% comment %}{# Se cambio por el logo directo #}
+                    <p class="text-center" style="font-size: 20px;font-variant: small-caps;font-family: serif;line-height: 1.05;">Sistema Integral de Apoyo Administrativo y Docente</p>
+                {% endcomment %}
+
                 {% if errors %}
-                    <label class="error">{{errors}}</label>
+                    <div class="alert-box alert radius" style="font-size: 14px;">{{errors}}</div>
                 {% endif %}
+                {% if info %}
+                    <div class="alert-box info radius" style="font-size: 14px;">{{errors}}</div>
+                {% endif %}
+                <!--[if lt IE 8]>
+                    <div class="alert-box warning radius" style="font-size: 12px;">Esta utilizando un navegador parcialmente incompatible con este sistema. Algunas funciones podrian no llevarse acabo segun lo esperado.<br/><br/>Por favor, considere esto antes de continuar. <a href="http://browsehappy.com/" style="color: light-gray;">Mas informacion.</a></div>
+                <![endif]-->
                 <form method="POST" action="/">{% csrf_token %}
-                    <label>Usuario: </label><input type="text" name="username"></input>
-                    <label>Contraseña: </label><input type="password" name="pass"></input>
-                    <button type="submit">Login</button>
+                    <label for="username">Codigo o Usuario: </label><input type="text" name="username" id="nick"></input>
+                    <label for="pass">Contraseña: </label><input type="password" name="pass" id="pass"></input>
+                    <button style="width: 100% !important;" class="button radius" type="submit">Ingresar</button>
                 </form>
+                <script type="text/javascript">
+                    $( document ).ready(function()
+                    {
+                        $('input#nick').focus();
+                    });
+                </script>
             </div>
         </div>
     </div>

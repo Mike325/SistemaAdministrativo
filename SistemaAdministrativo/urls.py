@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from commons.views import Error403 as NoAutorizado
+
 from url_secretaria import *
 from url_jefedep import *
 from url_admin import *
@@ -32,6 +34,9 @@ TODO:
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^ejemplo/$', ejemplo),
+
+    url(r'^sistema/403/origen=(?P<origen>.*)$', NoAutorizado, name='error403'),
 ]
 
 urlpatterns += url_secretaria + url_jefedep + url_admin

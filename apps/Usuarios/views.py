@@ -1,14 +1,11 @@
 # -*- encoding: utf-8 -*-
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib import auth
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sessions.models import Session
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib import auth
 
-from apps.Departamentos.models import Departamento
-from apps.Usuarios.models import Usuario, Rol
+from SistemaAdministrativo.commons.shortcuts import panelInicio
+from apps.Usuarios.models import Usuario
 
 def login(request):
     if request.method == 'POST':
@@ -23,20 +20,29 @@ def login(request):
         if user is not None and user.is_active:
             auth.login(request, user)
 
+            usuario = Usuario.objects.get(user=user)
+            usuario = {
+                    'nick': usuario.user.username,
+                    'correo': usuario.user.email,
+                    'nombre': usuario.user.first_name,
+                    'apellidos': usuario.user.last_name,
+                    'codigo': usuario.codigo,
+                    'rol': usuario.rol.id
+                }
+
             #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
             request.session['usuario'] = usuario
             request.session['rol'] = user.usuario.rol.id
-            
-            if request.session['rol'] == 1:
-                return redirect('/inicio-secretaria/')
-            elif request.session['rol'] == 2:
-                return redirect('/inicio-jefedep/')
-            else:
-                return redirect('/inicio-administrador/')
+            request.session['just_logged'] = True
+
+            return panelInicio(request)
         else:
             return render(request,'login.html', {'errors': "Usuario o contraseña incorrectos"})
     else:
-        return render(request,'login.html')
+        if request.user.is_authenticated():
+            return panelInicio(request)
+        else:
+            return render(request,'login.html')
 
 def logout(request):
     try:
@@ -44,7 +50,20 @@ def logout(request):
     except KeyError:
         pass
     return redirect('/')
+
+
     
+
+''' *************** IMPORTACIONES DE admin/views_admin.py *************** '''
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+
+from apps.Departamentos.models import Departamento
+from apps.Usuarios.models import Usuario, Rol
+from apps.Historicos.models import Registro
 #Verificar si el usuario está logeado, en caso contrario, redirecciona a página de log in
 @login_required(login_url='/')
 def inicio_admin(request):
@@ -52,27 +71,34 @@ def inicio_admin(request):
     departamentos = Departamento.objects.all()
     if request.session['rol'] == 3:
         banner = True
+        bienvenida = False
+
+        if request.session['just_logged']:
+            bienvenida = True
+            request.session['just_logged'] = False
+            
+        departamentos = Departamento.objects.all()
         return render(request, 'inicio-administrador.html', locals())
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def form_sistema_modificar_jefedep(request):
-    errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la modificación de jefe de departamento'
     if request.session['rol'] == 3:
         if request.method == 'POST':
+            errors = "No existen jefes de este departamento, favor de crear uno."
             post_nombreDepartamento = request.POST.get('departamento', '')
             departamento = Departamento.objects.get(nombre=post_nombreDepartamento)
             try:
                 jefeActual = departamento.jefeDep
                 opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             except ObjectDoesNotExist:
-                return render(request, 'modificar-jefe-departamento.html', locals())
+                errors = "No existen jefes de este departamento, favor de crear uno."
             return render(request, 'modificar-jefe-departamento.html', locals())
         else:
             return redirect('/inicio-administrador/')
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def sistema_modificar_jefedep(request):
@@ -84,6 +110,8 @@ def sistema_modificar_jefedep(request):
             post_nuevoJefe = request.POST.get('nuevoJefe', '')
 
             #¿Qué hacer con el antiguo jefe de departamento?
+            username_jefeActual = post_jefeActual.split(",",1)[0]
+            jefeActual = Usuario.objects.get(user__username=username_jefeActual)
 
             #Query del objeto del nuevo jefe
             nuevoJefe = Usuario.objects.get(user__username = post_nuevoJefe)
@@ -97,9 +125,16 @@ def sistema_modificar_jefedep(request):
             #Guardar los cambios en la base de datos
             departamento.save()
 
+            registro = Registro.modificacion(request.session['usuario']['nick'],
+                        'Se cambio el jefe del departamento "'+
+                        post_departamento+'" de "'+jefeActual.user.get_full_name()+
+                        '" a "'+nuevoJefe.user.get_full_name()+'"', jefeActual,
+                        nuevoJefe, 'Departamentos')
+            registro.save()
+
         return redirect('/inicio-administrador/')
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def nuevo_departamento(request):
@@ -107,7 +142,7 @@ def nuevo_departamento(request):
         #Revisar si se entra a la página por POST
         if request.method == 'POST':
             #Obtener los campos del nuevo departamento
-            post_codigo = request.POST.get('id','')
+            post_abreviacion = request.POST.get('abreviacion','')
             post_nombre = request.POST.get('nombre', '')
             post_nuevoJefe = request.POST.get('nuevoJefe', '')
             
@@ -115,16 +150,22 @@ def nuevo_departamento(request):
             nuevoJefe = Usuario.objects.get(user__username=post_nuevoJefe)
 
             #Crear el nuevo departamento
-            nuevoDepartamento = Departamento(id=post_codigo, nombre=post_nombre, jefeDep=nuevoJefe)
+            nuevoDepartamento = Departamento(nick=post_abreviacion, nombre=post_nombre, jefeDep=nuevoJefe)
             
             #Guardar en la base de datos el nuevo departamento
             nuevoDepartamento.save()
 
+            registro = Registro.creacion(request.session['usuario']['nick'],
+                        'Se creó el departamento "'+post_nombre+'"'
+                        , post_nombre, 'Departamentos')
+            registro.save()
+
             return redirect('/inicio-administrador/')
+
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
             errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la creación de departamento'
-            opcionesJefeDepartamento = Usuario.objects.filter(rol = 2).filter(departamento = None)
+            opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             return render(request, 'nuevo_departamento.html', locals())
     else:
         return render(request, 'PermisoDenegado.html')
@@ -138,16 +179,20 @@ def nuevo_jefe(request):
             codigo = request.POST.get('codigo','')
             nombre = request.POST.get('nombre','')
             apellido = request.POST.get('apellido','')
+            correo = request.POST.get('correo', '')
             if User.objects.filter(username = usuario ).exists():
                 errors = 'Ya existe registro con ese nombre'
                 return render(request,'nuevo_jefeDep.html',locals())
             else:
-                Jefe_rol = Rol.objects.get(id = 2 )
-                usuario_user = User.objects.create_user(username=usuario, first_name=nombre, 
-                                                        last_name=apellido, password = password)
-                Jefe_usuario = Usuario(user=usuario_user, codigo=codigo, rol=Jefe_rol)
-                usuario_user.save()
-                Jefe_usuario.save()
+                nuevo_usuario = Usuario.alta_jefe(usuario, password, nombre, 
+                                                    apellido, correo, codigo)
+                nuevo_usuario.save()
+
+                registro = Registro.creacion(request.session['usuario']['nick'],
+                        'Se creó el jefe de departamento "'+nuevo_usuario.user.get_full_name()+'"'
+                        , usuario, 'Usuarios')
+                registro.save()
+
                 return redirect('/inicio-administrador/')
         else:
             return render(request, 'nuevo_jefeDep.html')
@@ -155,35 +200,31 @@ def nuevo_jefe(request):
         return render(request, 'PermisoDenegado.html')
 
 @login_required(login_url='/')
-def nueva_secretaria(request):
-    if request.session['rol'] == 3 or request.session['rol'] == 2:
-        if request.method == 'POST':
-            usuario = request.POST.get('username','')
-            password = request.POST.get('password', '')
-            codigo = request.POST.get('codigo','')
-            nombre = request.POST.get('nombre','')
-            apellido = request.POST.get('apellido','')
-            if User.objects.filter(username = usuario ).exists():
-                errors = 'Ya existe registro con ese nombre'
-                return render(request,'nueva-secretaria.html',locals())
-            else:
-                Jefe_rol = Rol.objects.get(id = 1 )
-                usuario_user = User.objects.create_user(username=usuario, first_name=nombre, 
-                                                        last_name=apellido, password = password)
-                Jefe_usuario = Usuario(user=usuario_user, codigo=codigo, rol=Jefe_rol)
-                usuario_user.save()
-                Jefe_usuario.save()
-                if request.session['rol'] == 3:
-                    return redirect('/inicio-administrador/')
-                elif request.session['rol'] == 2:
-                    return redirect('/inicio-jefedep/')
-        else:
-            return render(request, 'nueva-secretaria.html')
-    else:
-        return render(request, 'PermisoDenegado.html')
-
-@login_required(login_url='/')
 def activar_usuarios(request):
     if request.session['rol'] == 3:
-        usuarios = User.objects.all();
-        return render(request, 'activar_usuarios.html', locals())
+        if request.method == 'POST':
+            usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
+            for x in usuarios:
+                estado = request.POST.get(x.user.username,'')
+                if estado=='active' and not x.user.is_active:
+                    x.user.is_active = True
+                    registro = Registro.modificacion(request.session['usuario']['nick'],
+                            'Se activo el usuario "'+
+                            x.user.username +'"', 'Inactivo',
+                            'Activo', 'Usuarios')
+                    x.user.save()
+                    registro.save()
+                elif estado=='unactive' and x.user.is_active:
+                    x.user.is_active = False
+                    registro = Registro.modificacion(request.session['usuario']['nick'],
+                            'Se desactivo el usuario "'+
+                            x.user.username +'"', 'Activo',
+                            'Inactivo', 'Usuarios')
+                    x.user.save()
+                    registro.save()
+            return redirect('/inicio-administrador/')
+        else:
+            usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
+            return render(request, 'activar_usuarios.html', locals())
+    else:
+        return redirect('error403', origen=request.path)

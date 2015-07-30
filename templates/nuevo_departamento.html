@@ -9,7 +9,9 @@
 	<div class="large-6 medium-6 small-12 columns">
 		<div class="panel">
 			{% if opcionesJefeDepartamento|length < 1 %}
-        	    <div class="callout panel"><label class="error">{{errors}}</label></div>
+                <a href="/nuevo_jefe/">
+        	    <div class="alert-box alert radius">{{errors}}</div>
+                </a>
             {% endif %}
 			<div class="row">
 				<div class="large-12 medium-12 columns">
@@ -17,8 +19,8 @@
 					<form method='POST' action="/nuevo_departamento">{% csrf_token %}
 						<label>Nombre del Departamento</label>
 							<input type="text" name='nombre' placeholder="Nombre de la nueva división"/>
-			       		<label>Codigo del Departamento</label>
-			       		<input type="text" name="id" placeholder="Codigo de la nueva divicion"/>
+			       		<label>Abreviación del Departamento</label>
+			       		<input type="text" name="abreviacion" placeholder="Abreviación de la nueva divicion"/>
 			       		<label>Jefe del departamento</label>
 			       		<select name="nuevoJefe">
                             {% for opcionJefeDepartamento in opcionesJefeDepartamento %}

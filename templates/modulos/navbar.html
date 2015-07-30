@@ -7,7 +7,7 @@
             <ul class="title-area">
                 <li class="name" style="background-color:#4285F4;">
                     <h1>
-                        <a href="#" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario }}{% endblock %}{% endspaceless %}</a>
+                        <a href="#" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario.nick }}{% endblock %}{% endspaceless %}</a>
                     </h1>
                 </li>
             </ul>

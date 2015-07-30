@@ -6,18 +6,32 @@
 
 {% block content %}
     <div class="row">
-        <div class="medium-6 medium-centered columns panel">
-            <form action="/computacion/reporte-incidencias" method="post">{% csrf_token %}
-                <h3 class="text-center">Reporte de Incidencias</h2>
-                {% if error %}
-                <div data-alert="" class="alert-box warning round">
-                  Revisa bien la información.
-                  <a href="#" class="close">×</a>
+        <div class="medium-11 medium-centered columns panel">
+            <h4 class="text-center">Reportes de Incidencias</h4>
+            <form action="/computacion/ver-incidencias" method="post">{% csrf_token %}
+                <div class="row">                    
+                    <div class="medium-6 columns">
+                        <label>
+                            Fecha de inicio<input type="date" name="fechaIni" class="error">
+                        </label>
+                        {% if error %}
+                        <small class="error">Fecha invalida</small>
+                        {% endif %}
+                    </div>
+                    <div class="medium-6 columns">
+                        <label>
+                            Fecha fin<input type="date" name="fechaFin" class="error">
+                        </label>
+                        {% if error %}
+                        <small class="error">Fecha invalida</small>
+                        {% endif %}
+                    </div>
                 </div>
-                {% endif %}
-                Fecha Inicio<input type="date" name="fechaIni"><br>
-                Fecha Fin<input type="date" name="fechaFin"><br>
-                <input type="submit" value="Generar reporte" class="button tiny">
+                <div class="row">
+                    <div class="medium-12 columns">
+                        <br><input type="submit" value="Generar reporte" class="button tiny">
+                    </div>
+                </div>
             </form>
         </div>
     </div>

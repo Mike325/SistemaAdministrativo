@@ -7,66 +7,64 @@
 {% block content %}
     <div class="row">
         <div class="medium-11 medium-centered columns panel">
-            <div class="medium-12 columns">
-                <h3 class="text-center title">Reporte de Incidencias</h3>
-            </div>
             <form action="/computacion/reporte-incidencias" method="post">{% csrf_token %}
-                <div class="row">
-                    <div class="medium-4 columns">
-                        <label>
-                            Fecha <input type="date" name="fecha">
-                        </label>
+                <fieldset>
+                    <legend>Reporte de Incidencias</legend>
+                    <div class="row">
+                        <div class="medium-4 columns">
+                            <label>
+                                Fecha <input type="date" name="fecha">
+                            </label>
+                        </div>
+                        <div class="medium-8 columns">
+                            <label>
+                                Profesor
+                                <select name="codigo" id="codigo">
+                                    <option value="0" disabled="true" selected="true">-- Nombre | Código --</option>
+                                    {% for x in profesores %}
+                                    <option value="{{ x.codigo }}">{{ x.apellido }}, {{ x.nombre }} | {{ x.codigo_udg }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
                     </div>
-                    <div class="medium-8 columns">
-                        <label>
-                            Profesor
-                            <select name="codigo" id="profesor">
-                                <option value="0" disabled="true" selected="true">-- Nombre | Código --</option>
-                            </select>
-                        </label>
+                    <div class="row">
+                        <div class="medium-4 columns">
+                            <label>
+                                Depto. <input type="text" name="depto" placeholder="Departamento" disabled="true" value="{{departamento}}">
+                            </label>
+                        </div>
+                        <div class="medium-6 columns">
+                            <label>
+                                Materia | Sección | Horario
+                                <select name="materia" id="materia">
+                                    <option value="0" disabled="true" selected="true">-- Materia | Sección | Horario --</option>
+                                    {% for x in materias %}
+                                    <option value="{{ x.fk_materia }}">{{ x.fk_materia }} | {{ x.fk_secc }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                        <div class="medium-2 columns">
+                            <label>
+                                Horas falta <input type="text" name="horasFalta" placeholder="Horas falta">
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="medium-4 columns">
-                        <label>
-                            Depto. <input type="text" name="depto" placeholder="Departamento" disabled="true" value="{{ departamento }}">
-                        </label>
+                    <div class="button-bar">
+                        <ul class="button-group round">
+                            <li>
+                                <input type="submit" value="Enviar Reporte" class="button tiny">
+                            </li>
+                            {% if error %}
+                            <li data-alert class="alert-box warning round">
+                                    Revisa bien la información.
+                                    <a href="#" class="close">×</a>
+                            </li>
+                            {% endif %}
+                        </ul>
                     </div>
-                    <div class="medium-3 columns">
-                        <label>
-                            Materia
-                            <select name="materia" id="materia">
-                                <option value="0" disabled="true" selected="true">-- Selecciona una materia --</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div class="medium-3 columns">
-                        <label>
-                            Sección | Horario
-                            <select name="secc" id="secc">
-                                <option value="0" disabled="true" selected="true">-- Sección | Horario --</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div class="medium-2 columns">
-                        <label>
-                            Horas falta <input type="text" name="horasFalta" placeholder="Horas falta">
-                        </label>
-                    </div>
-                </div>
-                <div class="button-bar">
-                    <ul class="button-group round">
-                        <li>
-                            <input type="submit" value="Enviar Reporte" class="button">
-                        </li>
-                        {% if error %}
-                        <li data-alert class="alert-box warning round">
-                                Revisa bien la información.
-                                <a href="#" class="close">×</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
+                </fieldset>
             </form>
         </div>
     </div>

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Nuevo Jefe de Departamento - Administrador
+{% endblock %}
+
+{% block content %}	
+
+<div class="row">
+	<div class="large-5 medium-8 columns ">
+		<div class="panel">
+			{% if errors %}
+        	    <div class="callout panel"><label class="error">{{errors}}</label></div>
+            {% endif %}
+			<form id='formulario' method='post' action='./'>{% csrf_token %}
+				<h4 align="center">Nuevo Jefe de Departamento</h4>
+				<label>Usuario</label>
+				<input type="text" name="username" placeholder="Usuario"/>
+				<label>Contraseña </label>
+				<input type="password" name="password" placeholder="Contraseña"/>
+				<label>Nombre</label>
+				<input type="text" name="nombre" placeholder="Nombre"/>
+				<label>Apellido</label>
+				<input type="text" name="apellido" placeholder="Apellido"/>
+				<label>Codigo</label>
+				<input type="text" name="codigo" placeholder="Codigo"/>
+				<input type="submit" value="Continuar" class="button expand"/>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
