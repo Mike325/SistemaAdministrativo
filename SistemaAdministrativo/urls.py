@@ -34,7 +34,6 @@ TODO:
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^ejemplo/$', ejemplo),
 
     url(r'^sistema/403/origen=(?P<origen>.*)$', NoAutorizado, name='error403'),
 ]

@@ -2,6 +2,8 @@
  * la vista de los formatos imprimibles */
 
 @media print {
+	@page {size: landscape}
+	
 	table
 	{
 		margin: 0;

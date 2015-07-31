@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 import datetime
 
@@ -8,19 +8,25 @@ from apps.Departamentos.models import *
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
-@login_required(login_url='/')
-def ejemplo(request):
-    if request.session['rol'] >= 1:
-        return render(request, 'ejemplo.html', {'banner': True})
-    else:
-        return render(request, 'PermisoDenegado.html')
+# @login_required(login_url='/')
+# def ejemplo(request):
+#     if request.session['rol'] >= 1:
+#         return render(request, 'ejemplo.html', {'banner': True})
+#     else:
+#         return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def inicio_secretaria(request):
 	if request.session['rol'] >= 1:
-		return render(request, 'inicio-secretaria.html', {'banner': True})
+		_departamentos = Departamento.objects.all()
+
+		return render(request, 'inicio-secretaria.html', 
+			{
+				'banner': True,
+				'lista_departamentos': _departamentos
+			})
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def listas_tCompleto(request, dpto):
@@ -42,15 +48,12 @@ def listas_tCompleto(request, dpto):
 			})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def listas_tMedio(request, dpto):
 	if request.session['rol'] >= 1:
-		dpto = dpto.upper()
-
-		if dpto == 'COMPUTACION':
-			dpto = 'CIENCIAS COMPUTACIONALES'
+		dpto = get_object_or_404(Departamento, nick=dpto)
 
 		fecha = datetime.date.today()
 		mesFc = int(fecha.month)
@@ -71,7 +74,7 @@ def listas_tMedio(request, dpto):
 			})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def form_incidencias(request, dpto):
@@ -79,7 +82,7 @@ def form_incidencias(request, dpto):
 		return render(request, 'form-incidencias.html')
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def ver_incidencias(request, dpto):
@@ -116,15 +119,12 @@ def ver_incidencias(request, dpto):
 			})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def form_reporte_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
 		try:
-			if dpto == 'computacion':
-				dpto = 'CIENCIAS COMPUTACIONALES'
-
 			listaProf = Profesor.objects.order_by('apellido')
 			listaMaterias = Curso.objects.all()
 
@@ -144,7 +144,7 @@ def form_reporte_incidencias(request, dpto):
 				})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def reporte_incidencias(request, dpto):
@@ -165,4 +165,4 @@ def reporte_incidencias(request, dpto):
 			return render(request, 'form-reporte-incidencias.html', {'error': True, 'departamento': dpto.upper()})
 		pass
 	else:
-		return render(request, 'PermisoDenegado.html')
+		return redirect('error403', origen=request.path)

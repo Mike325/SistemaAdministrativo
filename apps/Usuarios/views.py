@@ -1,10 +1,11 @@
 # -*- encoding: utf-8 -*-
 from django.http import HttpResponse
-from django.contrib.sessions.models import Session
 from django.contrib import auth
-from django.shortcuts import render, redirect
+from django.contrib.sessions.models import Session
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+
+from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 
 from SistemaAdministrativo.commons.shortcuts import panelInicio
@@ -58,18 +59,8 @@ def logout(request):
     return redirect('/')
 
 
-    
-
 ''' *************** IMPORTACIONES DE admin/views_admin.py *************** '''
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-
-from apps.Departamentos.models import Departamento
-from apps.Usuarios.models import Usuario, Rol
-from apps.Historicos.models import Registro
 #Verificar si el usuario está logeado, en caso contrario, redirecciona a página de log in
 @login_required(login_url='/')
 def inicio_admin(request):
