@@ -1,11 +1,17 @@
 # -*- encoding: utf-8 -*-
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
 from django.contrib.sessions.models import Session
 from django.contrib import auth
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 from SistemaAdministrativo.commons.shortcuts import panelInicio
-from apps.Usuarios.models import Usuario
+
+from apps.Departamentos.models import Departamento
+from apps.Usuarios.models import Usuario, Rol
+from apps.Historicos.models import Registro
 
 def login(request):
     if request.method == 'POST':
@@ -156,7 +162,7 @@ def nuevo_departamento(request):
             nuevoDepartamento.save()
 
             registro = Registro.creacion(request.session['usuario']['nick'],
-                        'Se creó el departamento "'+post_nombre+'"'
+                        'Se creo el departamento "'+post_nombre+'"'
                         , post_nombre, 'Departamentos')
             registro.save()
 
@@ -164,7 +170,7 @@ def nuevo_departamento(request):
 
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
-            errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la creación de departamento'
+            errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la creacion de departamento'
             opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             return render(request, 'nuevo_departamento.html', locals())
     else:
@@ -189,13 +195,42 @@ def nuevo_jefe(request):
                 nuevo_usuario.save()
 
                 registro = Registro.creacion(request.session['usuario']['nick'],
-                        'Se creó el jefe de departamento "'+nuevo_usuario.user.get_full_name()+'"'
+                        'Se creo el jefe de departamento "'+nuevo_usuario.user.get_full_name()+'"'
                         , usuario, 'Usuarios')
                 registro.save()
 
                 return redirect('/inicio-administrador/')
         else:
             return render(request, 'nuevo_jefeDep.html')
+    else:
+        return render(request, 'PermisoDenegado.html')
+
+@login_required(login_url='/')
+def nueva_secretaria(request):
+    if request.session['rol'] >= 2:
+        if request.method == 'POST':
+            usuario = request.POST.get('username','')
+            password = request.POST.get('password', '')
+            codigo = request.POST.get('codigo','')
+            nombre = request.POST.get('nombre','')
+            apellido = request.POST.get('apellido','')
+            correo = request.POST.get('correo', '')
+            if User.objects.filter(username = usuario ).exists():
+                errors = 'Ya existe registro con ese nombre'
+                return render(request,'nueva_secretaria.html',locals())
+            else:
+                nuevo_usuario = Usuario.alta_secretaria(usuario, password, nombre, 
+                                                    apellido, correo, codigo)
+                nuevo_usuario.save()
+
+                registro = Registro.creacion(request.session['usuario']['nick'],
+                        'Se creo la secretaria "'+nuevo_usuario.user.get_full_name()+'"'
+                        , usuario, 'Usuarios')
+                registro.save()
+
+                return redirect('/inicio-administrador/')
+        else:
+            return render(request, 'nueva_secretaria.html')
     else:
         return render(request, 'PermisoDenegado.html')
 
