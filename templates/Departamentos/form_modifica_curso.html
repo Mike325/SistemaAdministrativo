@@ -1,0 +1,152 @@
+
+{% if ajax %}
+	<style type="text/css">
+	.autocomplete-suggestions { border: 1px solid #999; background: #FFF; overflow: auto; }
+	.autocomplete-suggestion { padding: 2px 5px; white-space: nowrap; overflow: hidden; }
+	.autocomplete-selected { background: #F0F0F0; }
+	.autocomplete-suggestions strong { font-weight: normal; color: #3399FF; }
+	.autocomplete-group { padding: 2px 5px; }
+	.autocomplete-group strong { display: block; border-bottom: 1px solid #000; }
+	</style>
+	{% load staticfiles %}
+	<script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+
+	<script type="text/javascript">
+{% comment %}
+			var profesores = [];
+		{% for profe in lista_profesores %}
+			profesores['{{ profe.codigo_udg }}'] = {
+				'nombre': '{{ profe.nombre }}',
+				'apellidos': '{{ profe.apellido }}'
+			}
+		{% endfor %}
+{% endcomment %}
+
+		$(document).ready(function()
+		{
+			$('.in_profesor').autocomplete({
+			    lookup: [
+			    {% for profe in lista_profesores %}
+			    	{'value': "{{ profe.apellido }}, {{ profe.nombre }}", 'data': '{{ profe.codigo_udg }}'}{% if not forloop.last %},{% endif %}{% endfor %}
+			    ],
+			    onSelect: function (suggestion) 
+			    {
+			        // alert('Seleccionado: ' + suggestion.value + "|" + suggestion.data);
+			        $('.in_codigo').val(suggestion.data);
+			    },
+			    minChars: 3,
+			    lookupLimit: 10,
+			    triggerSelectOnValidInput: true,
+			    autoSelectFirst: true
+			});
+
+			$(document).on('close.fndtn.reveal', '[data-reveal]', function() 
+			{
+  				$('.in_profesor').autocomplete().hide();
+			});
+		});
+	</script>
+
+	<div class="row">
+		<div class="small-12 columns">
+			<h2 class="text-center">Modificar Curso</h2>
+
+			<form action="{{ request.path }}" onsubmit="alert('\'enviado\'\n...o eso dira cuando este completo.'); return false;">
+				<div class="row">
+					<div class="medium-2 columns">
+						<label>Clave</label>
+							<input type="text" value="{{ curso.fk_materia.clave }}" disabled>
+					</div>
+					<div class="medium-10 columns">
+						<label>Nombre</label>
+							<input type="text" value="{{ curso.fk_materia.nombre }}" disabled>
+					</div>
+				</div>
+				<div class="row">
+					<div class="medium-2 small-6 columns">
+						<label>Edificio</label>
+							<input type="text" name="in_edif" value="{{ curso.fk_edif }}">
+					</div>
+					<div class="medium-2 small-6 columns">
+						<label>Aula</label>
+							<input type="text" name="in_aula" value="{{ curso.fk_aula }}">
+					</div>
+					<div class="medium-5 columns">
+						<label>Profesor</label>
+							<input type="text" name="in_profesor" class="in_profesor" value="{{ curso.fk_profesor }}">
+					</div>
+					<div class="medium-3 columns">
+						<label>Codigo</label>
+							<input type="text" name="in_codigo" class="in_codigo" value="{{ curso.fk_profesor.codigo_udg }}" disabled>
+					</div>
+				</div>
+				<div class="row">
+					<div class="medium-4 columns">
+						<fieldset>
+							<legend>Horario(s)</legend>
+							{% for horario in curso.fk_horarios.all %}
+								<div class="row">
+									<div class="small-6 columns">
+										<label>Hora inicio</label>
+											<input type="text" name="in_hora_ini" class="in_hora_ini" value="{{ horario.hora_ini }}">
+									</div>
+									<div class="small-6 columns">
+										<label>Hora fin</label>
+											<input type="text" name="in_hora_fin" class="in_hora_fin" value="{{ horario.hora_fin }}">
+									</div>
+								</div>
+								<div class="row">
+									<div class="small-2 columns text-center">
+										<label for="in-dias-L">L</label>
+											<input type="checkbox" name="in-dias-L" class="in-dias" id="in-dias-L" {% if horario.L %}checked{% endif %}>
+									</div>
+									<div class="small-2 columns text-center">
+										<label for="in-dias-M">M</label>
+											<input type="checkbox" name="in-dias-M" class="in-dias" id="in-dias-M" {% if horario.M %}checked{% endif %}>
+									</div>
+									<div class="small-2 columns text-center">
+										<label for="in-dias-I">I</label>
+											<input type="checkbox" name="in-dias-I" class="in-dias" id="in-dias-I" {% if horario.I %}checked{% endif %}>
+									</div>
+									<div class="small-2 columns text-center">
+										<label for="in-dias-J">J</label>
+											<input type="checkbox" name="in-dias-J" class="in-dias" id="in-dias-J" {% if horario.J %}checked{% endif %}>
+									</div>
+									<div class="small-2 columns text-center">
+										<label for="in-dias-V">V</label>
+											<input type="checkbox" name="in-dias-V" class="in-dias" id="in-dias-V" {% if horario.V %}checked{% endif %}>
+									</div>
+									<div class="small-2 columns text-center">
+										<label for="in-dias-S">S</label>
+											<input type="checkbox" name="in-dias-S" class="in-dias" id="in-dias-S" {% if horario.S %}checked{% endif %}>
+									</div>
+								</div>
+							{% endfor %}
+							<div class="row">
+								<div class="small-12 columns">
+									<button class="button tiny radius success no-margin" style="width: 100%;" onclick="return false;">Añadir otro horario</button>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+				</div>
+				<hr/>
+				<div class="row">
+					<div class="medium-5 columns right">
+						<div class="row collapse">
+							<div class="medium-6 columns">
+								<button class="button success expand">Guardar cambios</button>
+							</div>
+
+							<div class="medium-6 columns">
+								<a class="button alert expand" onclick="$('a.close-reveal-modal').trigger('click');">Cancelar</a>
+							</div>
+
+							<a class="close-reveal-modal" style="display: none !important;">X</a>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endif %}

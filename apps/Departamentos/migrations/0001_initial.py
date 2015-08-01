@@ -60,6 +60,20 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='Horario',
+            fields=[
+                ('id', models.AutoField(serialize=False, primary_key=True)),
+                ('hora_ini', models.TimeField()),
+                ('hora_fin', models.TimeField()),
+                ('L', models.BooleanField(default=False)),
+                ('M', models.BooleanField(default=False)),
+                ('I', models.BooleanField(default=False)),
+                ('J', models.BooleanField(default=False)),
+                ('V', models.BooleanField(default=False)),
+                ('S', models.BooleanField(default=False)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Materia',
             fields=[
                 ('clave', models.CharField(max_length=10, serialize=False, primary_key=True)),
@@ -86,6 +100,11 @@ class Migration(migrations.Migration):
             model_name='curso',
             name='fk_edif',
             field=models.ForeignKey(to='Departamentos.Edificio'),
+        ),
+        migrations.AddField(
+            model_name='curso',
+            name='fk_horarios',
+            field=models.ManyToManyField(to='Departamentos.Horario', blank=True),
         ),
         migrations.AddField(
             model_name='curso',

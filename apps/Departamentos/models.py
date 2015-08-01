@@ -97,16 +97,40 @@ class Ciclo(models.Model):
     def __unicode__(self):
         return self.id
         pass
+
+class Horario(models.Model):
+    id = models.AutoField(primary_key=True)
+
+    hora_ini = models.TimeField(blank=True, null=True)
+    hora_fin = models.TimeField(blank=True, null=True)
+
+    L = models.BooleanField(default=False, blank=True)
+    M = models.BooleanField(default=False, blank=True)
+    I = models.BooleanField(default=False, blank=True)
+    J = models.BooleanField(default=False, blank=True)
+    V = models.BooleanField(default=False, blank=True)
+    S = models.BooleanField(default=False, blank=True)
+
+    def __unicode__(self):
+        return "%s - %s: %s"%(self.hora_ini, self.hora_fin, [x for x in ['L','M','I','J','V','S'] if eval('self.'+x)==True])
+        pass
     
+
 class Curso(models.Model):
     NRC = models.CharField(max_length=5, primary_key=True)
-    fk_profesor = models.ForeignKey(Profesor)
-    fk_materia = models.ForeignKey(Materia)
+
     fk_area = models.ForeignKey(Area)
+    
+    fk_ciclo = models.ForeignKey(Ciclo)
+    fk_materia = models.ForeignKey(Materia)
+    fk_secc = models.ForeignKey(Seccion)
+    
     fk_edif = models.ForeignKey(Edificio)
     fk_aula = models.ForeignKey(Aula)
-    fk_secc = models.ForeignKey(Seccion)
-    fk_ciclo = models.ForeignKey(Ciclo)
+    fk_horarios = models.ManyToManyField(Horario, blank=True)
+    
+    fk_profesor = models.ForeignKey(Profesor)
+    #fk_horario = models.ForeignKey(Horario, blank=True, null=True, default='')
 
     def __unicode__(self):
         return self.NRC

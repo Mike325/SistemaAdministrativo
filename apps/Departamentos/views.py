@@ -11,6 +11,31 @@ from apps.Departamentos.models import *
 import re # libreria de expresiones regulares
 
 @login_required(login_url='/')
+def modifica_curso(request, dpto, nrc, ajax=False):
+	if request.session['rol'] >= 2: # es jefedep o mayor
+		if request.method == 'POST':
+			# Nos envia los datos a traves del formulario.
+			'''
+			TODO:
+				+ Procesar la entrada.
+					+ Analizar si JSON serializado es mejor.
+				+ Guardar datos enviados en la DB.
+			'''
+			pass
+		else:
+			_nrc = int(nrc)
+			curso = get_object_or_404(Curso, NRC=_nrc)
+
+			lista_materias = Materia.objects.all();
+			lista_profesores = Profesor.objects.all();
+
+			options = locals();
+
+			return render(request, 'Departamentos/form_modifica_curso.html', options)
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
 def ver_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		lista_cursos = Curso.objects.all()
@@ -27,7 +52,7 @@ def ver_cursos(request, dpto):
 			# If page is out of range (e.g. 9999), deliver last page of results.
 			lista_cursos = paginator.page(paginator.num_pages)
 
-		return render(request, 'Departamentos/modifica_curso.html', locals())
+		return render(request, 'Departamentos/ver_cursos.html', locals())
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -178,6 +203,37 @@ def procesar_csv(request, dpto):
 
 				# return HttpResponse(_seccion) # DEBUG
 
+				# PREPARACIONES HORA >> INICIO
+				if re.search( '\d+', x['ini'] ) is not None:
+					temp_hora = re.search('(?P<hora>\d{,2})(?P<min>\d{,2})', x['ini'])
+					hora_ini = str(temp_hora.group('hora')) + ':' + str(temp_hora.group('min'))
+					pass
+				else:
+					hora_ini = None
+
+				if re.search( '\d+', x['fin'] ) is not None:
+					temp_hora = re.search('(?P<hora>\d{,2})(?P<min>\d{,2})', x['fin'])
+					hora_fin = str(temp_hora.group('hora')) + ':' + str(temp_hora.group('min'))
+					pass
+				else:
+					hora_fin = None
+				# PREPARACIONES HORA >> FIN
+
+				# return HttpResponse(hora_ini + ', ' + hora_fin) # DEBUG
+
+				_horario, created = Horario.objects.get_or_create(
+						hora_ini = hora_ini,
+						hora_fin = hora_fin,
+						L = x['dias']['lun'],
+						M = x['dias']['mar'],
+						I = x['dias']['mie'],
+						J = x['dias']['jue'],
+						V = x['dias']['vie'],
+						S = x['dias']['sab']
+					)
+
+				# return HttpResponse(_horario) # DEBUG
+
 				# FINALMENTE!
 				_curso = Curso(
 						NRC=x['nrc'], 
@@ -190,6 +246,7 @@ def procesar_csv(request, dpto):
 						fk_ciclo=_ciclo
 					)
 
+				_curso.fk_horarios.add(_horario)
 				_curso.save();
 				# return HttpResponse(_curso) #YOLO
 				pass
@@ -233,12 +290,6 @@ def sistema_modifica_nrc(request, dpto, ciclo, nrc):
 
 
 ''' *************** IMPORTACIONES DE jefe_Depto/views_jefedep.py *************** '''
-
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-
-from apps.Departamentos.models import Departamento
 
 @login_required(login_url='/')
 def inicio_jefedep(request):

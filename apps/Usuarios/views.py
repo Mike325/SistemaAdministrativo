@@ -161,7 +161,6 @@ def nuevo_departamento(request):
 
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
-            errors = 'No hay jefes de departamento disponibles, crear uno antes de seguir con la creacion de departamento'
             opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             return render(request, 'nuevo_departamento.html', locals())
     else:
@@ -177,6 +176,7 @@ def nuevo_jefe(request):
             nombre = request.POST.get('nombre','')
             apellido = request.POST.get('apellido','')
             correo = request.POST.get('correo', '')
+            
             if User.objects.filter(username = usuario ).exists():
                 errors = 'Ya existe registro con ese nombre'
                 return render(request,'nuevo_jefeDep.html',locals())

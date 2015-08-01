@@ -124,13 +124,15 @@ def ver_incidencias(request, dpto):
 @login_required(login_url='/')
 def form_reporte_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
+		_departamento = get_object_or_404(Departamento, nick=dpto)
+		
 		try:
 			listaProf = Profesor.objects.order_by('apellido')
 			listaMaterias = Curso.objects.all()
 
 			return render(request, 'form-reporte-incidencias.html', 
 				{
-					'departamento': dpto.upper(),
+					'departamento': _departamento,
 					'profesores': listaProf,
 					'materias': listaMaterias,
 				})
@@ -138,7 +140,7 @@ def form_reporte_incidencias(request, dpto):
 			return render(request, 'form-reporte-incidencias.html', 
 				{
 					'error': True,
-					'departamento': dpto.upper(),
+					'departamento': _departamento,
 					'profesores': listaProf,
 
 				})

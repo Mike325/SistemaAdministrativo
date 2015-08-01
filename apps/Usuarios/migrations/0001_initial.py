@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import models, migrations
@@ -24,8 +24,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('user', models.OneToOneField(primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('codigo', models.CharField(unique=True, max_length=9)),
-                ('nombre', models.CharField(max_length=50, blank=True)),
-                ('apellidos', models.CharField(max_length=50, blank=True)),
                 ('rol', models.ForeignKey(to='Usuarios.Rol')),
             ],
         ),
