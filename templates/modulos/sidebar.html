@@ -13,36 +13,94 @@
 		+ Evaluar el rol del usuario para mostrar solo los links a los que puede acceder.
 		+ Para el menu expandido, agregar el acordeon.
 {% endcomment %}
-			<div class="large-2 columns hide-on-print no-padding white-bg" style="border: 1px solid #d8d8d8;">
-				<div class="no-margin no-padding">
-					{% load staticfiles %}
-					<div class="sidebar-image" style="background-image: url('{% static 'img/SIIAD-logo.png' %}');"></div>
 
-					{# barra mas pequeña (sin acordeon). pantalllas inferiores a 1024px #}
-					<div class="no-margin no-padding hidden-for-large-up">
-						<ul class="no-bullet no-margin sidebar-nav lt-large">
-							{% if request.session.rol > 0 %}
-								<li><a href="/inicio-secretaria">Secretaria</a></li>
-							{% endif %}
-							{% if request.session.rol > 1 %}
-								<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
-							{% endif %}
-							{% if request.session.rol > 2 %}
-								<li><a href="/inicio-administrador">Administrador</a></li>
-							{% endif %}
+<div class="large-2 columns hide-on-print no-padding white-bg" style="border: 1px solid #d8d8d8;">
+	<div class="no-margin no-padding">
+		{% load staticfiles %}
+		<a href="/inicio-secretaria"><div class="sidebar-image" style="background-image: url('{% static 'img/SIIAD-logo.png' %}');"></div></a>
+
+		{# barra mas pequeña (sin acordeon). pantalllas inferiores a 1024px #}
+		<div class="no-margin no-padding hidden-for-large-up">
+			<ul class="no-bullet no-margin sidebar-nav lt-large">
+				{% if request.session.rol > 0 %}
+					<li><a href="/inicio-secretaria">Secretaria</a></li>
+				{% endif %}
+				{% if request.session.rol > 1 %}
+					<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
+				{% endif %}
+				{% if request.session.rol > 2 %}
+					<li><a href="/inicio-administrador">Administrador</a></li>
+				{% endif %}
+			</ul>
+		</div>
+
+		<div class="no-margin no-padding show-for-large-up">
+			<ul class="accordion no-bullet no-margin no-padding" data-accordion>
+			{% if request.session.rol > 0 %}
+			 	<li class="accordion-navigation">
+			    <a href="#panel1">Secretaria</a>
+			    <div id="panel1" class="content no-margin no-padding">
+					{% for x in lista_departamentos %}
+						<ul class="accordion inner-accordion" data-accordion>
+							<li class="accordion-navigation">
+			   				<a href="#panel1{{x.nick}}">{{x.nombre}}</a>
+			   				<div id="panel1{{x.nick}}" class="content">
+			   					<ul class="accordion no-margin">
+	   								<li><a href="/{{x.nick}}/listas/tCompleto">Listas-Tiempo Completo</a></li>
+	   								<li><a href="/{{x.nick}}/listas/tMedio">Listas-Medio Tiempo</a></li>
+									<li><a href="/{{x.nick}}/form-incidencias">Ver Incidencias</a></li>
+									<li><a href="/{{x.nick}}/form-reporte-incidencias">Reportar Incidencia</a></li>
+									<li><a href="/{{x.nick}}/estadisticas">Estadísticas</a></li>
+			   					</ul>
+			   				</div>
+			   				</li>
 						</ul>
-					</div>
-					
-					<ul class="no-bullet show-for-large-up no-margin sidebar-nav">
-						{% if request.session.rol > 0 %}
-							<li><a href="/inicio-secretaria">Secretaria</a></li>
-						{% endif %}
-						{% if request.session.rol > 1 %}
-							<li><a href="/inicio-jefedep">Jefe de Departamento</a></li>
-						{% endif %}
-						{% if request.session.rol > 2 %}
-							<li><a href="/inicio-administrador">Administrador</a></li>
-						{% endif %}
-					</ul>
-				</div>
-			</div>
+					{% endfor %}
+			    </div>
+			  </li>
+			{% endif %}
+			{% if request.session.rol > 1 %}
+			  	<li class="accordion-navigation">
+			    <a href="#panel2">Jefe de Departamento</a>
+			    <div id="panel2" class="content no-margin no-padding">
+					{% for x in lista_departamentos %}
+						<ul class="accordion inner-accordion" data-accordion>
+							<li class="accordion-navigation">
+			   				<a href="#panel2{{x.nick}}">{{x.nombre}}</a>
+			   				<div id="panel2{{x.nick}}" class="content">
+			   					<ul class="accordion no-bullet no-margin">
+	   								<li><a href="/{{x.nick}}/sistema/csv">Subir CSV</a></li>
+	   								<li><a href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a></li>
+									<li><a href="/{{x.nick}}/form-incidencias">Reporte Asistencia</a></li>
+									<li><a href="/{{x.nick}}/listas/form-reporte-incidencias">Gestionar Encargados</a></li>
+			   					</ul>
+			   				</div>
+			   				</li>
+						</ul>
+					{% endfor %}
+			    </div>
+			  </li>
+			{% endif %}
+			{% if request.session.rol > 2 %}
+			  	<li class="accordion-navigation">
+			    <a href="#panel3">Jefe de Departamento</a>
+			    <div id="panel3" class="content no-margin no-padding">
+					{% for x in lista_departamentos %}
+						<ul class="accordion inner-accordion" data-accordion>
+							<li class="accordion-navigation">
+			   				<a href="#panel3{{x.nick}}">{{x.nombre}}</a>
+			   				<div id="panel3{{x.nick}}" class="content">
+			   					<ul class="accordion no-bullet no-margin">
+	   								<li><a href="/historicos">Históricos</a></li>
+			   					</ul>
+			   				</div>
+			   				</li>
+						</ul>
+					{% endfor %}
+			    </div>
+			  </li>
+			{% endif %}
+			</ul>
+		</div>
+	</div>
+</div>
