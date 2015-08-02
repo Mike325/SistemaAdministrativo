@@ -162,7 +162,7 @@ def nuevo_departamento(request):
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
             opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
-            return render(request, 'nuevo_departamento.html', locals())
+            return render(request, 'nuevo-departamento.html', locals())
     else:
         return render(request, 'PermisoDenegado.html')
 
@@ -192,7 +192,7 @@ def nuevo_jefe(request):
 
                 return redirect('/inicio-administrador/')
         else:
-            return render(request, 'nuevo_jefeDep.html')
+            return render(request, 'nuevo-jefeDep.html')
     else:
         return render(request, 'PermisoDenegado.html')
 
@@ -221,7 +221,7 @@ def nueva_secretaria(request):
 
                 return redirect('/inicio-administrador/')
         else:
-            return render(request, 'nueva_secretaria.html')
+            return render(request, 'nueva-secretaria.html')
     else:
         return render(request, 'PermisoDenegado.html')
 
@@ -251,6 +251,6 @@ def activar_usuarios(request):
             return redirect('/inicio-administrador/')
         else:
             usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
-            return render(request, 'activar_usuarios.html', locals())
+            return render(request, 'activar-usuarios.html', locals())
     else:
         return redirect('error403', origen=request.path)
