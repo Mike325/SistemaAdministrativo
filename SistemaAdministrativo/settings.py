@@ -52,6 +52,8 @@ LOCAL_APPS = (
     'apps.Departamentos',
     'apps.Historicos',
     'apps.Reportes',
+    'apps.Enlaces',
+    
 )
 
 
@@ -81,6 +83,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'SistemaAdministrativo.commons.shortcuts.sidebar_context',
             ],
         },
     },

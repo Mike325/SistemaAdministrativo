@@ -3,6 +3,8 @@
 # a lo largo de todo el codigo.
 
 from django.shortcuts import render, redirect
+from apps.Enlaces.models import Enlace
+from apps.Departamentos.models import Departamento
 
 def panelInicio(request):
     if request.user.is_authenticated():
@@ -14,3 +16,8 @@ def panelInicio(request):
             return redirect('inicio_admin')
     else:
         return redirect('/')
+
+def sidebar_context(request):
+    return{
+        'lista_departamentos' : Departamento.objects.all(),
+    }

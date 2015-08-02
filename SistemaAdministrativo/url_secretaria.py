@@ -11,4 +11,8 @@ url_secretaria = [
 	url(r'^(?P<dpto>.+)/form-reporte-incidencias$', form_reporte_incidencias),
 	url(r'^(?P<dpto>.+)/ver-incidencias$', ver_incidencias),
 	url(r'^(?P<dpto>.+)/reporte-incidencias$', reporte_incidencias),
+    url(r'^estadisticas-profesor/$', estadisticasProfesor, name='estadisticas_profesor'),
+    url(r'^estadisticas-materia/$', estadisticasMateria, name='estadisticas_materia'),
+    url(r'^estadisticas-ciclo/$', estadisticasCiclo, name='estadisticas_ciclo'),
+    url(r'^(?P<dpto>.+)/estadisticas-departamento/$', estadisticasDepartamento, name='estadisticas_departamento'),
 ]
