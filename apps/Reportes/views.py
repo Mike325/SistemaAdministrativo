@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -7,13 +8,6 @@ from apps.Departamentos.models import *
 
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-
-# @login_required(login_url='/')
-# def ejemplo(request):
-#     if request.session['rol'] >= 1:
-#         return render(request, 'ejemplo.html', {'banner': True})
-#     else:
-#         return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def inicio_secretaria(request):
@@ -79,7 +73,7 @@ def listas_tMedio(request, dpto):
 @login_required(login_url='/')
 def form_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
-		return render(request, 'form-incidencias.html')
+		return render(request, 'form-incidencias.html', locals())
 		pass
 	else:
 		return redirect('error403', origen=request.path)
@@ -105,7 +99,10 @@ def ver_incidencias(request, dpto):
 				extender_info = True
 			pass
 		except:
-			return render(request, 'form-incidencias.html', {'error': True,})
+			return render(request, 'form-incidencias.html',
+				{
+					'error': True,
+				})
 
 		return render(request, 'incidencias.html',
 			{
@@ -115,7 +112,7 @@ def ver_incidencias(request, dpto):
 				'mes_fin': mes_fin, 
 				'anio_ini': fI[0],
 				'anio_fin': fF[0],
-				'extender_info': extender_info
+				'extender_info': extender_info,
 			})
 		pass
 	else:
@@ -142,7 +139,6 @@ def form_reporte_incidencias(request, dpto):
 					'error': True,
 					'departamento': _departamento,
 					'profesores': listaProf,
-
 				})
 		pass
 	else:
@@ -151,7 +147,10 @@ def form_reporte_incidencias(request, dpto):
 @login_required(login_url='/')
 def reporte_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
-		return render(request, 'hecho.html', {'accion': 'Hecho. Se ha realizado el reporte.'})
+		return render(request, 'hecho.html', 
+			{
+				'accion': 'Hecho. Se ha realizado el reporte.',
+			})
 		try:
 			fecha = str(request.POST.get('fecha'))
 			fecha = fecha.split('-')
@@ -164,7 +163,78 @@ def reporte_incidencias(request, dpto):
 			horario = str(request.POST.get('horario'))
 			horasFalta = str(request.POST.get('horasFalta'))			
 		except:
-			return render(request, 'form-reporte-incidencias.html', {'error': True, 'departamento': dpto.upper()})
+			return render(request, 'form-reporte-incidencias.html', 
+				{
+					'error': True, 'departamento': dpto.upper(),
+				})
 		pass
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def estadisticasDepartamento(request, dpto):
+	if request.session['rol'] >= 1:
+		departamento = get_object_or_404(Departamento, nick=dpto)
+		try:
+			#Aquí se genera la información que se pasará a la gráfica
+			return render(request, 'estadisticas.html', locals())
+			pass
+		except:
+			return redirect('inicio-secretaria.html')
+	else:
+		return redirect('error403', origen=request.path)
+
+
+@login_required(login_url='/')
+def estadisticasProfesor(request):
+	if request.session['rol'] >= 1:
+		if request.GET.get('profesor'):
+			profesor = get_object_or_404(Profesor, codigo_udg=request.GET.get('profesor'))
+			try:
+				#Aquí se genera la información que se pasará a la gráfica
+				return render(request, 'estadisticas.html', locals())
+				pass
+			except:
+				return redirect('inicio-secretaria.html')
+		else:
+			lista_profesores = Profesor.objects.all()
+			objetos = "Profesores"
+			return render(request, 'estadisticas-listas.html', locals())
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def estadisticasMateria(request):
+	if request.session['rol'] >= 1:
+		if request.GET.get('materia'):
+			materia = get_object_or_404(Materia, clave=request.GET.get('materia'))
+			try:
+				#Aquí se genera la información que se pasará a la gráfica
+				return render(request, 'estadisticas.html', locals())
+				pass
+			except:
+				return redirect('inicio-secretaria')
+		else:
+			objetos = "Materias"
+			lista_materias = Materia.objects.all()
+			return render(request, 'estadisticas-listas.html', locals())		
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def estadisticasCiclo(request):
+	if request.session['rol'] >= 1:
+		if request.GET.get('ciclo'):
+			ciclo = get_object_or_404(Ciclo, id=request.GET.get('ciclo'))
+			try:
+				#Aquí se genera la información que se pasará a la gráfica
+				return render(request, 'estadisticas.html', locals())
+				pass
+			except:
+				return redirect('inicio-secretaria.html')
+		else:
+			objetos = "Ciclos"
+			lista_ciclos = Ciclo.objects.all()
+			return render(request, 'estadisticas-listas.html', locals())
 	else:
 		return redirect('error403', origen=request.path)
