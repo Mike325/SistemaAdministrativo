@@ -3,7 +3,6 @@
 # a lo largo de todo el codigo.
 
 from django.shortcuts import render, redirect
-from apps.Enlaces.models import Enlace
 from apps.Departamentos.models import Departamento
 
 def panelInicio(request):
