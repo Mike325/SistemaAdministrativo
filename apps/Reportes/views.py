@@ -177,6 +177,9 @@ def estadisticasDepartamento(request, dpto):
 		departamento = get_object_or_404(Departamento, nick=dpto)
 		try:
 			#Aquí se genera la información que se pasará a la gráfica
+			datos = {
+				'nombre' : departamento.nombre
+			}
 			return render(request, 'estadisticas.html', locals())
 			pass
 		except:
@@ -192,6 +195,10 @@ def estadisticasProfesor(request):
 			profesor = get_object_or_404(Profesor, codigo_udg=request.GET.get('profesor'))
 			try:
 				#Aquí se genera la información que se pasará a la gráfica
+				datos = {
+					'nombre' : (profesor.nombre + " " + profesor.apellido +
+								 "(" + profesor.codigo_udg + ")")
+				}
 				return render(request, 'estadisticas.html', locals())
 				pass
 			except:
@@ -210,6 +217,9 @@ def estadisticasMateria(request):
 			materia = get_object_or_404(Materia, clave=request.GET.get('materia'))
 			try:
 				#Aquí se genera la información que se pasará a la gráfica
+				datos = {
+					'nombre' : materia.nombre + " (" + materia.clave + ")"
+				}
 				return render(request, 'estadisticas.html', locals())
 				pass
 			except:
@@ -228,6 +238,9 @@ def estadisticasCiclo(request):
 			ciclo = get_object_or_404(Ciclo, id=request.GET.get('ciclo'))
 			try:
 				#Aquí se genera la información que se pasará a la gráfica
+				datos = {
+					'nombre' : "Ciclo " + ciclo.id
+				}
 				return render(request, 'estadisticas.html', locals())
 				pass
 			except:
