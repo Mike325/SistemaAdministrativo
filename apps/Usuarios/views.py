@@ -208,7 +208,7 @@ def nueva_secretaria(request):
             correo = request.POST.get('correo', '')
             if User.objects.filter(username = usuario ).exists():
                 errors = 'Ya existe registro con ese nombre'
-                return render(request,'nueva_secretaria.html',locals())
+                return render(request,'nueva-secretaria.html',locals())
             else:
                 nuevo_usuario = Usuario.alta_secretaria(usuario, password, nombre, 
                                                     apellido, correo, codigo)
@@ -252,5 +252,43 @@ def activar_usuarios(request):
         else:
             usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
             return render(request, 'activar-usuarios.html', locals())
+    else:
+        return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def modificar_perfil(request):
+    if request.session['rol'] >=1:
+        user_modificar = request.session['usuario']['nick']
+        perfil = Usuario.objects.filter(user__username = user_modificar)
+        if request.method == 'POST':
+            usuario1 = request.POST.get('username','')
+            codigo1 = request.POST.get('codigo','')
+            nombre = request.POST.get('nombre','')
+            apellido = request.POST.get('apellido','')
+            correo = request.POST.get('correo', '')
+            modificar = Usuario.objects.filter(user__username = user_modificar).update(codigo = codigo1 )
+            modificar_user = User.objects.filter(username = user_modificar).update(
+                                                username = usuario1, first_name = nombre,
+                                                last_name = apellido, email = correo)
+            usuario = Usuario.objects.get(user__username = usuario1)
+            usuario = {
+                    'nick': usuario.user.username,
+                    'correo': usuario.user.email,
+                    'nombre': usuario.user.first_name,
+                    'apellidos': usuario.user.last_name,
+                    'codigo': usuario.codigo,
+                    'rol': usuario.rol.id
+                }
+            #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
+            request.session['usuario'] = usuario
+            request.session['just_logged'] = True
+            if request.session['rol'] == 1:   
+                return redirect('/inicio-secretaria/')
+            elif request.session['rol'] == 2:
+                return redirect('/inicio-jefedep/')
+            elif request.session['rol'] == 3:
+                return redirect('/inicio-administrador/')
+        else:    
+            return render(request, 'modificar-perfil.html', locals())        
     else:
         return redirect('error403', origen=request.path)

@@ -7,13 +7,25 @@
             <ul class="title-area">
                 <li class="name" style="background-color:#4285F4;">
                     <h1>
-                        <a href="#" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario.nick }}{% endblock %}{% endspaceless %}</a>
+                        <a
+                        "{% if request.session.rol == 1 %}
+                           href ="/inicio-secretaria/"
+                        {% endif %}"
+                        "{% if request.session.rol == 2 %}
+                            href="/inicio-jefedep/"
+                        {% endif %}"
+                        "{% if request.session.rol == 3 %}
+                            href="/inicio-administrador/"
+                        {% endif %}" 
+
+                        style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario.nick }}{% endblock %}{% endspaceless %}</a>
                     </h1>
                 </li>
             </ul>
             <ul class="right">
-                <li><a href="#" style="background-color:#4285F4;">Modificar Perfil</a></li>
+                <li><a href="/modificar-perfil/" style="background-color:#4285F4;">Modificar Perfil</a></li>
                 <li><a href="/logout/" style="background-color:#4285F4;border-left:solid #4285E4 0.15rem;">Salir</a></li>
             </ul>
         </section>
     </nav>
+                         

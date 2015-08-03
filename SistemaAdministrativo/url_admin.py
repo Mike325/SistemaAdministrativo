@@ -17,4 +17,6 @@ url_admin = [
     url(r'^nueva_secretaria/$', nueva_secretaria),
     url(r'^historicos/$', historicos),
     url(r'^historicos/filtro/$', historicosFiltrados),
+    url(r'^modificar-perfil/$',modificar_perfil),
+    
 ]
