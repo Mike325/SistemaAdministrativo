@@ -140,16 +140,10 @@ ul.lt-large li
 	margin:0 !important;
 	padding:0 !important;
 }
-
-.accordion-navigation{
-	background-color: #FFF;
-	color: #2f2f2f;	
-}
-
-.accordion{
-	background-color: #FFF;
-}
-
-.content{
-	background-color: #FFF;
-}
+.accordion-link{
+	text-align: center !important;
+	color: #222 !important;
+	background-color: #E3E3E3;
+	display: block;
+	border: solid 1px #9f9f9f;
+	}
