@@ -59,11 +59,9 @@
             <h3 class="text-center">Cambiar Jefe de Departamento<h3>
             <div class="row">
                 <div class="large-12 columns">
-                    <form action="/sistema/modificar/jefe-departamento" method="POST">{% csrf_token %}
-                        {% for departamento in departamentos %}
-                            <button class="button expand" name="departamento" value="{{ departamento.nombre }}">{{ departamento.nombre }}</button>
-                        {% endfor %}
-                    </form>
+                    {% for x in departamentos %}
+                        <button class="button expand" onclick="location.href='/{{x.nick}}/modificar/jefe-departamento'">{{ x }}</button>
+                    {% endfor %}
                 </div>
             </div>
         </div>

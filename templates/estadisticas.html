@@ -36,16 +36,14 @@
 				window.myPie = new Chart(ctx).Pie(pieData);
 				window.myPie.generateLegend();
 			};
-
-
-
 	</script>
 {% endblock %}
+
 {% block content %}
 	<div class="row">
 		<div class="large-5 medium-8 columns">
 			<div class="panel">
-				<h3 class="text-center">Porcentaje de asistencias de {{datos.nombre}}</h3>
+				<h3 class="text-center">Porcentaje de asistencias de: {{datos.nombre}}</h3>
 				<div class="canvas-holder">
 					<canvas id="chart-area" widht="100%" height="350" align="center"/>
 				</div>

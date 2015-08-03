@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="row">
-	<div class="medium-6 small-12 columns medium-centered">
+	<div class="medium-6 small-12 columns">
 		<div class="panel">
 			{% if not opcionesJefeDepartamento %}
 				<div class="alert-box warning radius">No hay jefes de departamento disponibles para asignar.<br/>
@@ -23,10 +23,10 @@
 					<h4>Nuevo Departamento</h4>
 					<form method='POST' action="/nuevo_departamento">{% csrf_token %}
 						<label>Nombre del Departamento</label>
-							<input type="text" name='nombre' placeholder="Nombre de la nueva división"/>
+							<input type="text" name='nombre' placeholder="Nombre de la nueva división" required/>
 
 			       		<label>Abreviación del Departamento</label>
-			       			<input type="text" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios."/>
+			       			<input type="text" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios." required/>
 
 			       		<label>Jefe del departamento</label>
 				       		<select name="nuevoJefe">

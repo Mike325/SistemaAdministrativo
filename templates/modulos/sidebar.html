@@ -40,22 +40,35 @@
 			 	<li class="accordion-navigation">
 			    <a href="#panel1">Secretaria</a>
 			    <div id="panel1" class="content no-margin no-padding">
+			    	<div class="accordion-link">
+			    		<a class="accordion-link" href="/inicio-secretaria">Inicio Secretaria</a>
+			    	</div>
 					{% for x in lista_departamentos %}
 						<ul class="accordion inner-accordion" data-accordion>
 							<li class="accordion-navigation">
 			   				<a href="#panel1{{x.nick}}">{{x.nombre}}</a>
-			   				<div id="panel1{{x.nick}}" class="content">
-			   					<ul class="accordion no-margin">
-	   								<li><a href="/{{x.nick}}/listas/tCompleto">Listas-Tiempo Completo</a></li>
-	   								<li><a href="/{{x.nick}}/listas/tMedio">Listas-Medio Tiempo</a></li>
-									<li><a href="/{{x.nick}}/form-incidencias">Ver Incidencias</a></li>
-									<li><a href="/{{x.nick}}/form-reporte-incidencias">Reportar Incidencia</a></li>
-									<li><a href="/{{x.nick}}/estadisticas">Estadísticas</a></li>
-			   					</ul>
+			   				<div id="panel1{{x.nick}}" class="content no-margin no-padding accordion-link">
+								<a class="accordion-link" href="/{{x.nick}}/listas/tCompleto">Listas-Tiempo Completo</a>
+								<a class="accordion-link" href="/{{x.nick}}/listas/tMedio">Listas-Medio Tiempo</a>
+								<a class="accordion-link" href="/{{x.nick}}/form-incidencias">Ver Incidencias</a>
+								<a class="accordion-link" href="/{{x.nick}}/form-reporte-incidencias">Reportar Incidencia</a>
 			   				</div>
 			   				</li>
 						</ul>
 					{% endfor %}
+					<ul class="accordion inner-accordion" data-accordion>
+						<li class="accordion-navigation">
+						<a href="#panel1estadisticas">Estadisticas</a>
+		   				<div id="panel1estadisticas" class="content no-margin no-padding accordion-link">
+		   					<a class="accordion-link" href="/estadisticas-profesor">Estadísticas Profesor</a>
+				    		<a class="accordion-link" href="/estadisticas-materia">Estadísticas Materia</a>
+				    		<a class="accordion-link" href="/estadisticas-ciclo">Estadísticas Ciclo</a>
+				    		{% for x in lista_departamentos %}
+				    			<a class="accordion-link" href="/{{x.nick}}/estadisticas-departamento">Estadísticas {{x}}</a>
+				    		{% endfor %}
+			    		</div>
+			    		</li>
+			    	</ul>
 			    </div>
 			  </li>
 			{% endif %}
@@ -63,17 +76,20 @@
 			  	<li class="accordion-navigation">
 			    <a href="#panel2">Jefe de Departamento</a>
 			    <div id="panel2" class="content no-margin no-padding">
+			    	<div class="accordion-link">
+			    		<a class="accordion-link" href="/inicio-jefedep">Inicio Jefe Departamento</a>
+			    		<a class="accordion-link" href="/nueva_secretaria">Crear Nueva Secretaria</a>
+			    		<a class="accordion-link" href="/historicos">Históricos</a>
+			    	</div>
 					{% for x in lista_departamentos %}
 						<ul class="accordion inner-accordion" data-accordion>
 							<li class="accordion-navigation">
 			   				<a href="#panel2{{x.nick}}">{{x.nombre}}</a>
-			   				<div id="panel2{{x.nick}}" class="content">
-			   					<ul class="accordion no-bullet no-margin">
-	   								<li><a href="/{{x.nick}}/sistema/csv">Subir CSV</a></li>
-	   								<li><a href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a></li>
-									<li><a href="/{{x.nick}}/form-incidencias">Reporte Asistencia</a></li>
-									<li><a href="/{{x.nick}}/listas/form-reporte-incidencias">Gestionar Encargados</a></li>
-			   					</ul>
+			   				<div id="panel2{{x.nick}}" class="content no-margin no-padding accordion-link">
+	   							<a class="accordion-link" href="/{{x.nick}}/sistema/csv">Subir CSV</a>
+	   							<a class="accordion-link" href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a>
+								<a class="accordion-link" href="/{{x.nick}}/form-incidencias">Reporte Asistencia</a>
+								<a class="accordion-link" href="/{{x.nick}}/listas/form-reporte-incidencias">Gestionar Encargados</a>
 			   				</div>
 			   				</li>
 						</ul>
@@ -83,20 +99,23 @@
 			{% endif %}
 			{% if request.session.rol > 2 %}
 			  	<li class="accordion-navigation">
-			    <a href="#panel3">Jefe de Departamento</a>
+			    <a href="#panel3">Administrador</a>
 			    <div id="panel3" class="content no-margin no-padding">
-					{% for x in lista_departamentos %}
-						<ul class="accordion inner-accordion" data-accordion>
-							<li class="accordion-navigation">
-			   				<a href="#panel3{{x.nick}}">{{x.nombre}}</a>
-			   				<div id="panel3{{x.nick}}" class="content">
-			   					<ul class="accordion no-bullet no-margin">
-	   								<li><a href="/historicos">Históricos</a></li>
-			   					</ul>
-			   				</div>
-			   				</li>
-						</ul>
-					{% endfor %}
+			    	<div class="accordion-link">
+			    		<a class="accordion-link" href="/inicio-administrador">Inicio Administrador</a>
+			    		<a class="accordion-link" href="/nuevo_jefeDep">Crear Jefe de Departamento</a>
+			    		<a class="accordion-link" href="/nuevo_departamento">Crear Nuevo Departamento</a>
+			    	</div>
+					<ul class="accordion inner-accordion" data-accordion>
+						<li class="accordion-navigation">
+						<a href="#panel1estadisticas">Cambiar Jefe de Departamento</a>
+		   				<div id="panel1estadisticas" class="content no-margin no-padding accordion-link">
+		   					{% for x in lista_departamentos %}
+				    			<a class="accordion-link" href="/{{x.nick}}/modificar/jefe-departamento">{{x}}</a>
+				    		{% endfor %}
+		   				</div>
+		   				</li>
+		   			</ul>
 			    </div>
 			  </li>
 			{% endif %}
