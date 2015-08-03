@@ -13,27 +13,6 @@ FIX:
 
     - Codigos unicos:
         Ahora 'codigo' no puede repetirse (lo normal, no?).
-
-    - ¿Como te llamas? --(Ya existen estos campos en el modelo User)--
-        Agregado 'nombre' y 'apellidos' al modelo de Usuario.
-
-TODO:
-    + --(Hecho)--Agregar un metodo en 'Usuario' para realizar el procedimiento 
-      de dar de alta un usuario en el sistema (de django) y enlazarlo 
-      aqui.
-
-      ej.
-      def Alta(self, codigo, usuario, nombre, apellidos, correo, rol):
-            nuevo = User.objects.create_user(/* ... */)
-            nuevo.save()
-
-            self.user = nuevo
-            self.nombre = nombre
-            self.apellidos = apellidos
-            /* ...(etc)... */
-
-    + Agregar metodo para cambiar de rol a un determinado usuario.
-        (Por si se llega a dar un caso de cambio de roles/posicion/etc)
 '''
 
 class Rol(models.Model):

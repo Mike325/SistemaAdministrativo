@@ -58,9 +58,6 @@ def logout(request):
         pass
     return redirect('/')
 
-
-''' *************** IMPORTACIONES DE admin/views_admin.py *************** '''
-
 #Verificar si el usuario está logeado, en caso contrario, redirecciona a página de log in
 @login_required(login_url='/')
 def inicio_admin(request):
@@ -80,25 +77,7 @@ def inicio_admin(request):
         return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
-def form_sistema_modificar_jefedep(request):
-    if request.session['rol'] == 3:
-        if request.method == 'POST':
-            errors = "No existen jefes de este departamento, favor de crear uno."
-            post_nombreDepartamento = request.POST.get('departamento', '')
-            departamento = Departamento.objects.get(nombre=post_nombreDepartamento)
-            try:
-                jefeActual = departamento.jefeDep
-                opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
-            except ObjectDoesNotExist:
-                errors = "No existen jefes de este departamento, favor de crear uno."
-            return render(request, 'modificar-jefe-departamento.html', locals())
-        else:
-            return redirect('/inicio-administrador/')
-    else:
-        return redirect('error403', origen=request.path)
-
-@login_required(login_url='/')
-def sistema_modificar_jefedep(request):
+def sistema_modificar_jefedep(request, dpto):
     if request.session['rol'] == 3:
         if request.method == 'POST':
             #Tomar valores del POST
@@ -128,8 +107,19 @@ def sistema_modificar_jefedep(request):
                         '" a "'+nuevoJefe.user.get_full_name()+'"', jefeActual,
                         nuevoJefe, 'Departamentos')
             registro.save()
-
-        return redirect('/inicio-administrador/')
+            return redirect('/inicio-administrador/')
+        else:
+            if Departamento.objects.filter(nick=dpto).exists():
+                errors = ""
+                try:
+                    departamento = Departamento.objects.get(nick=dpto)
+                    jefeActual = departamento.jefeDep
+                    opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
+                except ObjectDoesNotExist:
+                    errors = "No existen jefes de este departamento, favor de crear uno."
+                return render(request, 'modificar-jefe-departamento.html', locals())
+            else:
+                return redirect('/inicio-administrador/')
     else:
         return redirect('error403', origen=request.path)
 
@@ -257,7 +247,7 @@ def activar_usuarios(request):
 
 @login_required(login_url='/')
 def modificar_perfil(request):
-    if request.session['rol'] >=1:
+    if request.session['rol'] >= 1:
         user_modificar = request.session['usuario']['nick']
         perfil = Usuario.objects.filter(user__username = user_modificar)
         if request.method == 'POST':
@@ -282,12 +272,7 @@ def modificar_perfil(request):
             #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
             request.session['usuario'] = usuario
             request.session['just_logged'] = True
-            if request.session['rol'] == 1:   
-                return redirect('/inicio-secretaria/')
-            elif request.session['rol'] == 2:
-                return redirect('/inicio-jefedep/')
-            elif request.session['rol'] == 3:
-                return redirect('/inicio-administrador/')
+            return panelInicio(request)
         else:    
             return render(request, 'modificar-perfil.html', locals())        
     else:
