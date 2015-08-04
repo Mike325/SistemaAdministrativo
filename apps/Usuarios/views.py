@@ -87,8 +87,7 @@ def sistema_modificar_jefedep(request, dpto):
 
             #¿Qué hacer con el antiguo jefe de departamento?
             username_jefeActual = post_jefeActual.split(",",1)[0]
-            jefeActual = Usuario.objects.get(user__username=username_jefeActual)
-
+                
             #Query del objeto del nuevo jefe
             nuevoJefe = Usuario.objects.get(user__username = post_nuevoJefe)
 
@@ -101,6 +100,15 @@ def sistema_modificar_jefedep(request, dpto):
             #Guardar los cambios en la base de datos
             departamento.save()
 
+            try:
+                jefeActual = Usuario.objects.get(user__username=username_jefeActual)
+            except ObjectDoesNotExist:
+                registro = Registro.creacion(request.session['usuario']['nick'],
+                        'Se creo el jefe del departamento "'+
+                        post_departamento+'" "'+nuevoJefe.user.get_full_name()+'"',
+                        nuevoJefe, 'Departamentos')
+                registro.save()
+                return redirect('/inicio-administrador/')
             registro = Registro.modificacion(request.session['usuario']['nick'],
                         'Se cambio el jefe del departamento "'+
                         post_departamento+'" de "'+jefeActual.user.get_full_name()+

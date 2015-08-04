@@ -6,6 +6,7 @@ from datetime import date
 
 from apps.Departamentos.models import *
 from apps.Reportes.models import *
+from apps.Historicos.models import *
 
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
@@ -203,6 +204,12 @@ def reporte_incidencias(request, dpto):
 			)
 
 			nuevo_reporte.save()
+
+			registroReporte = Registro.creacion(request.session['usuario']['nick'], 
+										'Se creo el reporte de incidencia ['+nuevo_reporte.__unicode__()+
+										'('+nuevo_reporte.fk_profesor.codigo_udg+')]', 
+										nuevo_reporte.__unicode__(), 'Reportes')
+			registroReporte.save()
 
 			return render(request, 'hecho.html', 
 			{

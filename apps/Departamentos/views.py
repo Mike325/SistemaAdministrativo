@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from apps.Departamentos.models import *
+from apps.Historicos.models import *
 
 import re # libreria de expresiones regulares
 
@@ -97,6 +98,10 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 								'tipo': 'Objeto inexistente',
 								'desc': 'Se creo un edificio nuevo.'
 							})
+						edificioCreadoRegistro = Registro.creacion(request.session['usuario']['nick'], 
+														'Se creo el edificio "'+_edificio.nombre+'"',
+														_edificio.nombre, 'Edificios')
+						edificioCreadoRegistro.save()
 						pass
 				else:
 					errores.append(
@@ -119,6 +124,10 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 								'tipo': 'Objeto inexistente',
 								'desc': 'Se creo una aula nueva.'
 							})
+						aulaCreadaRegistro = Registro.creacion(request.session['usuario']['nick'], 
+														'Se creo el aula "'+_aula.nombre+'"',
+														_aula.nombre, 'Aulas')
+						aulaCreadaRegistro.save()
 						pass
 				else:
 					errores.append(
@@ -130,6 +139,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 
 				if not errores:
 					_horario = Horario.objects.get(id=str(clave))
+					horarioAnterior = Horario.objects.get(id=str(clave))
 					
 					_horario.hora_ini = datos[clave]['hora-ini'] if 'hora-ini' in datos[clave] else None
 					_horario.hora_fin = datos[clave]['hora-fin'] if 'hora-fin' in datos[clave] else None
@@ -147,6 +157,32 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 						_horario.pk = None
 
 					_horario.save()
+
+					if horarioAnterior.__unicode__() != _horario.__unicode__():
+						registroHorario = Registro.modificacion(request.session['usuario']['nick'],
+													'Se cambio el horario del curso "'+curso.NRC+'" de "'+
+													horarioAnterior.__unicode__()+'" a "'+
+													_horario.__unicode__()+'"',
+													horarioAnterior.__unicode__(), _horario.__unicode__(),
+													'Horarios')
+						registroHorario.save()
+					if horarioAnterior.fk_aula.nombre != _aula.nombre:
+						registroAula = Registro.modificacion(request.session['usuario']['nick'],
+													'Se cambio el aula del curso "'+curso.NRC+'" de "'+
+													horarioAnterior.fk_aula.nombre+'" a "'+
+													_aula.nombre+'"',
+													horarioAnterior.fk_aula.nombre, _aula.nombre,
+													'Horarios')
+						registroAula.save()
+					if horarioAnterior.fk_edif.id != _edificio.id:
+						registroEdif = Registro.modificacion(request.session['usuario']['nick'],
+													'Se cambio el edificio del curso "'+curso.NRC+'" de "'+
+													horarioAnterior.fk_edif.id+'" a "'+
+													_edificio.id+'"',
+													horarioAnterior.fk_edif.id, _edificio.id,
+													'Horarios')
+						registroEdif.save()
+
 					Horario.objects.filter(curso__isnull=True).delete()
 
 					# print '\nGuardado en la BD:', _horario # DEBUG
@@ -162,12 +198,29 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 			in_codigo_prof = request.POST.get('in-codigo', '')
 
 			if in_codigo_prof:
+				profesor_actual = curso.fk_profesor
 				_profesor = Profesor.objects.get(codigo_udg=in_codigo_prof)
+				if in_codigo_prof != profesor_actual.codigo_udg:
+					registroP = Registro.modificacion(request.session['usuario']['nick'],
+					                        'Se cambio el profesor "'+
+					                        profesor_actual.nombre+" "+profesor_actual.apellido+
+					                        '" por "'+_profesor.nombre+" "+_profesor.apellido+'"', 
+					                        profesor_actual.codigo_udg,
+					                        _profesor.codigo_udg, 'Cursos')
+					registroP.save()
 				curso.fk_profesor = _profesor
 				pass
 
 			if in_secc:
+				secc_actual = curso.fk_secc
 				_seccion = Seccion.objects.get(id=in_secc)
+				if in_secc != secc_actual.id:
+					registroS = Registro.modificacion(request.session['usuario']['nick'],
+					                        'Se cambio la seccion "'+
+					                        secc_actual.id+" por "+_seccion.id+'"', 
+					                        secc_actual.id,
+					                        _seccion.id, 'Cursos')
+					registroS.save()
 				curso.fk_secc = _seccion
 				pass
 

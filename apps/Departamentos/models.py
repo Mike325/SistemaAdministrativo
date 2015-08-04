@@ -124,6 +124,7 @@ class Horario(models.Model):
         return "%s - %s: %s"%(self.hora_ini, self.hora_fin, [x for x in ['L','M','I','J','V','S'] if eval('self.'+x)==True])
         pass
 
+
 class Curso(models.Model):
     NRC = models.CharField(max_length=5, primary_key=True) # inmod
 
