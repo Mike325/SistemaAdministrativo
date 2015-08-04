@@ -277,3 +277,43 @@ def modificar_perfil(request):
             return render(request, 'modificar-perfil.html', locals())        
     else:
         return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def modificar_password(request):
+    if request.session['rol'] >= 1:
+        if request.method == 'POST':
+            password_actual = request.POST.get('password_actual','')
+            password_nuevo = request.POST.get('password_nuevo','')
+            verificacion_password = request.POST.get('verificacion_password','')
+            #Autentificar que el usuario exista
+            user_actual = request.session['usuario']['nick']
+            usuario = User.objects.get(username=user_actual)
+            #Si el usuario existe  y está activo, cambia contrase~a
+            if password_nuevo == verificacion_password:
+                usuario.set_password(password_nuevo)
+                usuario.save()
+                user = auth.authenticate(username=user_actual, password=password_nuevo)
+                #Si el usuario existe  y está activo, se inicia la sesión
+                auth.login(request, user)
+                usuario = Usuario.objects.get(user=user)
+                usuario = {
+                        'nick': usuario.user.username,
+                        'correo': usuario.user.email,
+                        'nombre': usuario.user.first_name,
+                        'apellidos': usuario.user.last_name,
+                        'codigo': usuario.codigo,
+                        'rol': usuario.rol.id
+                    }
+                #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
+                request.session['usuario'] = usuario
+                request.session['rol'] = user.usuario.rol.id
+                request.session['just_logged'] = True
+                return redirect ('/inicio-administrador/')
+            else:
+                errors = "Confirmacion de contraseña erronea"
+                return render(request,'modificar-password.html', locals())
+        else:
+            return render(request,'modificar-password.html', locals())
+    else:
+        return redirect('error403', origen=request.path)
+
