@@ -4,6 +4,29 @@
     Formulario de Incidencias
 {% endblock %}
 
+{% block poshead %}
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/plugins/bootstrap-datepicker.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/plugins/jquery.timepicker.css' %}">
+    <script type="text/javascript" src="{% static 'js/datetime/bootstrap-datepicker.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/datetime/datepair.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/datetime/jquery.datepair.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/datetime/jquery.timepicker.min.js' %}"></script>
+    <script>
+        $(document).ready(function()
+        {
+            $('.dateOnlyExample .date').datepicker(
+            {
+                    'format': 'yyyy-mm-dd',
+                    'autoclose': true
+            });
+
+            var dateOnlyExampleEl = document.getElementById('dateOnlyExample');
+            var dateOnlyDatepair = new Datepair(dateOnlyExampleEl);
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
     <div class="row">
         <div class="medium-11 medium-centered columns panel">
@@ -12,7 +35,9 @@
                 <div class="row">                    
                     <div class="medium-6 columns">
                         <label>
-                            Fecha de inicio<input type="date" name="fechaIni" class="error">
+                            Fecha de inicio<p class="dateOnlyExample" id="dateOnlyExample">
+                            <input type="text" id="fecha" class="date error" name="fechaIni" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
+                            </p>
                         </label>
                         {% if 'Inicio' in errores %}
                         <small class="error">Fecha invalida</small>
@@ -20,7 +45,9 @@
                     </div>
                     <div class="medium-6 columns">
                         <label>
-                            Fecha fin<input type="date" name="fechaFin" class="error">
+                            Fecha fin<p class="dateOnlyExample" id="dateOnlyExample">
+                            <input type="text" id="fecha" class="date error" name="fechaFin" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
+                            </p>
                         </label>
                         {% if 'Fin' in errores %}
                         <small class="error">Fecha invalida</small>

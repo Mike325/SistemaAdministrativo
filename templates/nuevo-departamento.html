@@ -29,7 +29,7 @@
 			       			<input type="text" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios." required/>
 
 			       		<label>Jefe del departamento</label>
-				       		<select name="nuevoJefe">
+				       		<select name="nuevoJefe" required>
 	                            {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
 	                            <option value="{{opcionJefeDepartamento}}">{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}} ({{opcionJefeDepartamento.codigo}})</option>
 	                            {% endfor %}
