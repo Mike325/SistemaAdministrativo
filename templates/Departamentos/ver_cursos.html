@@ -100,8 +100,16 @@
 							<td class="row-materia{# non-editable #}">{{ curso.fk_materia.nombre }}</td>
 							<td class="row-area">{{ curso.fk_area }}</td>
 							<td class="row-seccion">{{ curso.fk_secc }}</td>
-							<td class="row-edif">{{ curso.fk_edif.id }}</td>
-							<td class="row-aula">{{ curso.fk_aula.nombre }}</td>
+							<td class="row-edif">{% spaceless %}
+								{% for horario in curso.fk_horarios.all %}
+									{{ horario.fk_edif }}{% if not forloop.last %}<br/>{% endif %}
+								{% endfor %}
+							{% endspaceless %}</td>
+							<td class="row-aula">{% spaceless %}
+								{% for horario in curso.fk_horarios.all %}
+									{{ horario.fk_aula }}{% if not forloop.last %}<br/>{% endif %}
+								{% endfor %}
+							{% endspaceless %}</td>
 							<td class="row-profesor">{{ curso.fk_profesor }} ({{ curso.fk_profesor.codigo_udg }})</td>
 							<td class="row-actions{# non-editable #} no-padding"><a class="button-edita-curso button no-margin" {# href="#modifica-materia" #}>Editar</a></td>
 						</tr>
@@ -132,8 +140,12 @@
 </div>
 
 <div id="modifica-materia" class="reveal-modal" data-reveal aria-labelledby="modal-titulo" aria-hidden="true" role="dialog">
-	<h2 id="modal-titulo">[titulo]</h2>
-	<div id="modal-contenido">[contenido]</div>
-	<a class="close-reveal-modal" aria-label="Close">&#215;</a>
+	<div class="row">
+		<div class="medium-8 columns">
+			<div class="alert-box warning">
+				Ha ocurrido un error desconocido.
+			</div>
+		</div>
+	</div>
 </div>
 {% endblock %}

@@ -27,6 +27,7 @@ body
 .no-padding { padding: 0 !important; }
 .no-margin { margin: 0 !important; }
 .white-bg { background-color: #FFF; }
+.upper { text-transform: uppercase; }
 
 .especialHead { background: #fff !important; }
 .sign-field 
@@ -136,6 +137,12 @@ ul.lt-large li
 	background-repeat: repeat;
 }
 
+/*
+ * FIX: 
+ 	* estilos para el acordeon se agregaron al archivo
+ 	* fix-sidebar.css y todavía NO son definitivos.
+ * 
+
 .inner-accordion{
 	margin:0 !important;
 	padding:0 !important;
@@ -147,3 +154,4 @@ ul.lt-large li
 	display: block;
 	border: solid 1px #9f9f9f;
 	}
+*/

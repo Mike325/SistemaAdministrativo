@@ -13,23 +13,174 @@ import re # libreria de expresiones regulares
 @login_required(login_url='/')
 def modifica_curso(request, dpto, nrc, ajax=False):
 	if request.session['rol'] >= 2: # es jefedep o mayor
+		_nrc = int(nrc)
+		curso = get_object_or_404(Curso, NRC=_nrc)
+
 		if request.method == 'POST':
-			# Nos envia los datos a traves del formulario.
-			'''
-			TODO:
-				+ Procesar la entrada.
-					+ Analizar si JSON serializado es mejor.
-				+ Guardar datos enviados en la DB.
-			'''
+			in_delete_req = [
+					k.replace('delete-horario-','') # valor asignado si...
+					for k, v in request.POST.items() # para cada (clave, valor) en los elementos POST
+						if k.startswith('delete-horario-') and v == 'true'
+						# ^ si la clave inicia con el prefijo 'delete-horario-'
+						#   y su valor es igual a "verdadero".
+				]
+
+			# print 'A eliminar:', in_delete_req # DEBUG
+
+			for x in in_delete_req: # para cada elemento en la lista de elementos a eliminar... 
+				_horario = Horario.objects.get(id=str(x))
+
+				if _horario and _horario.curso_set.all().count() <=1: 
+					# si hay solo 1 curso asignado al horario este se elimina de la BD.
+					# (tambien por si dada alguna extraña razon hay 0 cursos con ese horario)
+					_horario.delete()
+					pass
+				elif _horario and _horario.curso_set.all().count() > 1:
+					# si hay más de un solo curso asignado a ese horario
+					# (lo que muy probablemente signifique que en los demas cursos debe de  
+					#   quedar totalmente intacto), solo lo removemos del curso actual.
+					_curso.fk_horarios.remove(_horario)
+					pass
+				else:
+					pass
+				pass
+
+			if in_delete_req:
+				in_horarios = [
+						{ k.replace('in-horario-','') : v } # valor a asignar si...
+						for k, v in request.POST.items() if k.startswith('in-horario-') and 
+							[x not in k for x in in_delete_req]
+					]
+				pass
+			else:
+				in_horarios = [
+						{ k.replace('in-horario-','') : v } # valor a asignar si...
+						for k, v in request.POST.items() if k.startswith('in-horario-')
+					]
+				pass
+
+			in_horarios = sorted(in_horarios) # ordena los elementos
+
+			print 'Entradas horarios: ', in_horarios # DEBUG
+
+			actual=''
+			datos = {}
+			_horario = None
+			
+			errores = []
+			warns = []
+
+			for x in in_horarios:
+				for clave, valor in x.items():
+					temp = clave.split('-',1)
+
+					if temp[0] != actual:
+						actual = temp[0]
+						datos[actual] = {}
+
+					datos[actual].update({ temp[1] : valor })
+					#datos[actual].append({ temp[1].replace('-','_') : valor })
+					pass
+				pass
+
+			#print datos
+
+			for clave, valor in datos.items():
+				# PREPARACIONES EDIFICIO >> inicio
+				if 'edif' in datos[clave]:
+					# Tenemos un edificio en la solicitud
+					_edificio, created = Edificio.objects.get_or_create( id = datos[clave]['edif'].upper() )
+
+					if created:
+						warns.append(
+							{
+								'tipo': 'Objeto inexistente',
+								'desc': 'Se creo un edificio nuevo.'
+							})
+						pass
+				else:
+					errores.append(
+						{
+							'tipo': 'Edificio',
+							'desc': 'Entrada invalida.'
+						})
+				# PREPARACIONES EDIFICIO >> fin
+
+				# PREPARACIONES AULA >> inicio
+				if 'aula' in datos[clave]:
+					_aula, created = Aula.objects.get_or_create(
+							nombre = datos[clave]['aula'].upper(), 
+							fk_edif = _edificio
+						)
+
+					if created:
+						warns.append(
+							{
+								'tipo': 'Objeto inexistente',
+								'desc': 'Se creo una aula nueva.'
+							})
+						pass
+				else:
+					errores.append(
+						{
+							'tipo': 'Aula',
+							'desc': 'Entrada invalida.'
+						})
+				# PREPARACIONES AULA >> fin
+
+				if not errores:
+					_horario = Horario.objects.get(id=str(clave))
+					
+					_horario.hora_ini = datos[clave]['hora-ini'] if 'hora-ini' in datos[clave] else None
+					_horario.hora_fin = datos[clave]['hora-fin'] if 'hora-fin' in datos[clave] else None
+					_horario.L = True if 'dias-L' in datos[clave] and datos[clave]['dias-L'] == 'on' else False
+					_horario.M = True if 'dias-M' in datos[clave] and datos[clave]['dias-M'] == 'on' else False
+					_horario.I = True if 'dias-I' in datos[clave] and datos[clave]['dias-I'] == 'on' else False
+					_horario.J = True if 'dias-J' in datos[clave] and datos[clave]['dias-J'] == 'on' else False
+					_horario.V = True if 'dias-V' in datos[clave] and datos[clave]['dias-V'] == 'on' else False
+					_horario.S = True if 'dias-S' in datos[clave] and datos[clave]['dias-S'] == 'on' else False
+
+					_horario.fk_edif = _edificio
+					_horario.fk_aula = _aula
+
+					if _horario.curso_set.all().count() > 1:
+						_horario.pk = None
+
+					_horario.save()
+					Horario.objects.filter(curso__isnull=True).delete()
+
+					# print '\nGuardado en la BD:', _horario # DEBUG
+
+					'''AHORA HAY QUE PROCESAR LOS DATOS CORRESPONDIENTES AL CURSO'''
+					pass
+				else:
+					return JsonResponse(errores, safe=False)
+				pass
+
+			#print datos # DEBUG
+			in_secc = request.POST.get('in-secc', '').upper()
+			in_codigo_prof = request.POST.get('in-codigo', '')
+
+			if in_codigo_prof:
+				_profesor = Profesor.objects.get(codigo_udg=in_codigo_prof)
+				curso.fk_profesor = _profesor
+				pass
+
+			if in_secc:
+				_seccion = Seccion.objects.get(id=in_secc)
+				curso.fk_secc = _seccion
+				pass
+
+			curso.save()
+
+			return HttpResponse('Se guardaron los cambios correctamente.')
 			pass
 		else:
-			_nrc = int(nrc)
-			curso = get_object_or_404(Curso, NRC=_nrc)
+			lista_materias = Materia.objects.all()
+			lista_profesores = Profesor.objects.all()
+			id_nuevo_curso = Horario.objects.last().id + 1
 
-			lista_materias = Materia.objects.all();
-			lista_profesores = Profesor.objects.all();
-
-			options = locals();
+			options = locals()
 
 			return render(request, 'Departamentos/form_modifica_curso.html', options)
 	else:
@@ -153,9 +304,16 @@ def procesar_csv(request, dpto):
 			for x in cursos:
 				#return HttpResponse(_departamento.id) # DEBUG
 
-				_area, created = Area.objects.get_or_create(nombre=x['area'], fk_departamento=_departamento)
+				_area, created = Area.objects.get_or_create(
+						nombre=x['area'], 
+						fk_departamento=_departamento
+					)
 
-				_materia, created = Materia.objects.get_or_create(clave=x['clave'], nombre=x['materia'], fk_departamento = _departamento)
+				_materia, created = Materia.objects.get_or_create(
+						clave=x['clave'], 
+						nombre=x['materia'], 
+						fk_departamento = _departamento
+					)
 
 				# Agrega el area al campo m2m
 				_materia.fk_area.add(_area)
@@ -164,11 +322,6 @@ def procesar_csv(request, dpto):
 				# return HttpResponse(_materia) # DEBUG
 
 				# Preparaciones para Profesor
-				'''
-				TODO:
-					+ Pasar las preparaciones a una funcion en commons
-					  y que retorne un objeto con todos los datos.
-				'''
 				profesor = x['profesor'].split(', ')
 				profesor = {'nombre': profesor[1], 'apellidos': profesor[0]}
 
@@ -183,25 +336,24 @@ def procesar_csv(request, dpto):
 							'propiedad': 'Profesor',
 							'descripcion': '%s, %s no posee un codigo identificable por el sistema.<br/>Por favor, a&ntilde;adalo manualmente.'%(profesor['apellidos'], profesor['nombre'])
 						})
-					codigo_prof = '-'
+					codigo_prof = None
 					pass
 				# FIN PREPARACIONES
 
-				# return HttpResponse(str(profesor) + ' ## ' + codigo_prof) # DEBUG
-
-				_profesor, created = Profesor.objects.get_or_create(codigo_udg=codigo_prof, nombre=profesor['nombre'], apellido=profesor['apellidos'])
-
-				# return HttpResponse(_profesor.nombre) # DEBUG
+				_profesor, created = Profesor.objects.get_or_create(
+						codigo_udg=codigo_prof, 
+						nombre=profesor['nombre'], 
+						apellido=profesor['apellidos']
+					)
 
 				_edificio, created = Edificio.objects.get_or_create(id=x['edif'])
 
-				# return HttpResponse(_edificio) # DEBUG
-
-				_aula, created = Aula.objects.get_or_create(nombre=x['aula'], fk_edif=_edificio)
+				_aula, created = Aula.objects.get_or_create(
+						nombre=x['aula'], 
+						fk_edif=_edificio
+					)
 
 				_seccion, created = Seccion.objects.get_or_create(id=x['secc'])
-
-				# return HttpResponse(_seccion) # DEBUG
 
 				# PREPARACIONES HORA >> INICIO
 				if re.search( '\d+', x['ini'] ) is not None:
@@ -219,8 +371,6 @@ def procesar_csv(request, dpto):
 					hora_fin = None
 				# PREPARACIONES HORA >> FIN
 
-				# return HttpResponse(hora_ini + ', ' + hora_fin) # DEBUG
-
 				_horario, created = Horario.objects.get_or_create(
 						hora_ini = hora_ini,
 						hora_fin = hora_fin,
@@ -229,7 +379,9 @@ def procesar_csv(request, dpto):
 						I = x['dias']['mie'],
 						J = x['dias']['jue'],
 						V = x['dias']['vie'],
-						S = x['dias']['sab']
+						S = x['dias']['sab'],
+						fk_edif = _edificio,
+						fk_aula = _aula
 					)
 
 				# return HttpResponse(_horario) # DEBUG
@@ -240,8 +392,6 @@ def procesar_csv(request, dpto):
 						fk_profesor=_profesor, 
 						fk_materia=_materia, 
 						fk_area=_area,
-						fk_edif=_edificio,
-						fk_aula=_aula,
 						fk_secc=_seccion,
 						fk_ciclo=_ciclo
 					)
@@ -307,7 +457,7 @@ def inicio_jefedep(request):
 				'banner': True, 
 				'bienvenida': bienvenida,
 				'lista_departamentos': lista_departamentos
-			});
+			})
 	else:
 	   	return redirect('error403', origen=request.path)
 
@@ -329,7 +479,7 @@ def computacion_form_asistencias(request):
 					'fecha' : 'HOY', 
 					'nombrefirma' : 'Luisa Hermandia Limbo', 
 					'puesto' : 'Profesional'
-				});
+				})
 		else:
 			return render(request, 'form-reporte-asistencias.html');
 	else:

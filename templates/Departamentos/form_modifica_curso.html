@@ -9,22 +9,17 @@
 	.autocomplete-group strong { display: block; border-bottom: 1px solid #000; }
 	</style>
 	{% load staticfiles %}
+	<link rel="stylesheet" type="text/css" href="{% static 'css/plugins/jquery.timepicker.css' %}">
 	<script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/datetime/jquery.timepicker.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/datetime/datepair.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/datetime/jquery.datepair.min.js' %}"></script>
 
 	<script type="text/javascript">
-{% comment %}
-			var profesores = [];
-		{% for profe in lista_profesores %}
-			profesores['{{ profe.codigo_udg }}'] = {
-				'nombre': '{{ profe.nombre }}',
-				'apellidos': '{{ profe.apellido }}'
-			}
-		{% endfor %}
-{% endcomment %}
-
 		$(document).ready(function()
 		{
-			$('.in_profesor').autocomplete({
+			$('.in-profesor').autocomplete(
+			{
 			    lookup: [
 			    {% for profe in lista_profesores %}
 			    	{'value': "{{ profe.apellido }}, {{ profe.nombre }}", 'data': '{{ profe.codigo_udg }}'}{% if not forloop.last %},{% endif %}{% endfor %}
@@ -32,7 +27,7 @@
 			    onSelect: function (suggestion) 
 			    {
 			        // alert('Seleccionado: ' + suggestion.value + "|" + suggestion.data);
-			        $('.in_codigo').val(suggestion.data);
+			        $('.in-codigo').val(suggestion.data);
 			    },
 			    minChars: 3,
 			    lookupLimit: 10,
@@ -42,95 +37,181 @@
 
 			$(document).on('close.fndtn.reveal', '[data-reveal]', function() 
 			{
-  				$('.in_profesor').autocomplete().hide();
+  				$('.in-profesor').autocomplete().hide();
+  				$('.autocomplete-suggestions').remove();
 			});
+
+			//$('.in-hora_ini').timepicker({ 'forceRoundTime': true });
+
+			$('.select-horario .time').timepicker(
+			{
+				'scrollDefault': 'now',
+				'timeFormat': 'H:i',
+				'step': function(i) 
+				{
+					return (i%2) ? 55 : 5;
+				}
+			});
+
+			$('.select-horario').datepair();
+			$(document).foundation('tooltip', 'reflow');
 		});
+
+		function EliminarHorario(ref, id)
+		{
+			container = $(ref).parent();
+			botones = $('.button-delete');
+
+			ref = $(ref).parent().parent().parent().find('#delete-horario-'+id).get(0);
+			ref.value = "true";
+
+			$('#horario-'+id).remove();
+
+			if ( botones.length > 2 ) { container.remove(); }
+				else { botones.remove(); }
+
+			//console.log(ref.value);
+		}
+
+		function EnviarForm(ref)
+		{
+			//datos = $(ref).serializeArray();
+			//console.log(JSON.stringify(datos));
+			//console.log($(ref).serialize()); // DEBUG
+			
+			$.ajax({
+				url: ref.action,
+				method: 'POST',
+				data: $(ref).serialize()
+			})
+			.done(function(data)
+			{
+				alert(data);
+			});
+		}
+
+		var next_hor = 0;
 	</script>
 
 	<div class="row">
 		<div class="small-12 columns">
 			<h2 class="text-center">Modificar Curso</h2>
 
-			<form action="{{ request.path }}" onsubmit="alert('\'enviado\'\n...o eso dira cuando este completo.'); return false;">
+			<form action="{{ request.path }}" onsubmit="EnviarForm(this); return false;" method="POST">{% csrf_token %}
+
+				{# Datos materia #}
 				<div class="row">
+					<div class="medium-2 columns">
+						<label>NRC</label>
+							<input type="text" value="{{ curso.NRC }}" disabled>
+					</div>
 					<div class="medium-2 columns">
 						<label>Clave</label>
 							<input type="text" value="{{ curso.fk_materia.clave }}" disabled>
 					</div>
-					<div class="medium-10 columns">
+					<div class="medium-8 columns">
 						<label>Nombre</label>
 							<input type="text" value="{{ curso.fk_materia.nombre }}" disabled>
 					</div>
 				</div>
+
 				<div class="row">
-					<div class="medium-2 small-6 columns">
-						<label>Edificio</label>
-							<input type="text" name="in_edif" value="{{ curso.fk_edif }}">
+					<div class="medium-2 columns">
+						<label>Seccion</label>
+							<input class="upper" type="text" name="in-secc" value="{{ curso.fk_secc }}">
 					</div>
-					<div class="medium-2 small-6 columns">
-						<label>Aula</label>
-							<input type="text" name="in_aula" value="{{ curso.fk_aula }}">
-					</div>
-					<div class="medium-5 columns">
+					<div class="medium-8 columns">
 						<label>Profesor</label>
-							<input type="text" name="in_profesor" class="in_profesor" value="{{ curso.fk_profesor }}">
+							<input type="text" name="in-profesor" class="in-profesor" value="{{ curso.fk_profesor }}" data-tooltip aria-haspopup="true" title="Si quiere crear un profesor, por favor primero use la opcion correspondiente en el panel de Jefe de Departamento.">
 					</div>
-					<div class="medium-3 columns">
+					<div class="medium-2 columns">
 						<label>Codigo</label>
-							<input type="text" name="in_codigo" class="in_codigo" value="{{ curso.fk_profesor.codigo_udg }}" disabled>
+							<input type="text" name="in-codigo" class="in-codigo" value="{{ curso.fk_profesor.codigo_udg }}" readonly>
 					</div>
 				</div>
+
 				<div class="row">
-					<div class="medium-4 columns">
+					<div class="medium-12 columns">
 						<fieldset>
 							<legend>Horario(s)</legend>
 							{% for horario in curso.fk_horarios.all %}
-								<div class="row">
-									<div class="small-6 columns">
-										<label>Hora inicio</label>
-											<input type="text" name="in_hora_ini" class="in_hora_ini" value="{{ horario.hora_ini }}">
+								<input type="hidden" name="delete-horario-{{ horario.id }}" id="delete-horario-{{ horario.id }}" value="">
+								<div class="row horario" id="horario-{{ horario.id }}">
+									<div class="medium-4 columns">
+										<div class="row">
+											<div class="small-6 columns">
+												<label>Edificio</label>
+													<input type="text" name="in-horario-{{ horario.id }}-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}">
+											</div>
+											<div class="small-6 columns">
+												<label>Aula</label>
+													<input type="text" name="in-horario-{{ horario.id }}-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}">
+											</div>
+										</div>
 									</div>
-									<div class="small-6 columns">
-										<label>Hora fin</label>
-											<input type="text" name="in_hora_fin" class="in_hora_fin" value="{{ horario.hora_fin }}">
+
+									<div class="medium-4 columns">
+										<div class="row select-horario">
+											<div class="small-6 columns">
+												<label>Hora inicio</label>
+													<input type="text" name="in-horario-{{ horario.id }}-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}">
+											</div>
+											<div class="small-6 columns">
+												<label>Hora fin</label>
+													<input type="text" name="in-horario-{{ horario.id }}-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}">
+											</div>
+										</div>
+									</div>
+
+									<div class="medium-4 columns">
+										<div class="row" style="margin-top: 18px;">
+											<div class="small-2 columns text-center">
+												<label for="in-dias-L">L</label>
+													<input type="checkbox" name="in-horario-{{ horario.id }}-dias-L" class="in-dias" id="in-dias-L" {% if horario.L %}checked{% endif %}>
+											</div>
+											<div class="small-2 columns text-center">
+												<label for="in-dias-M">M</label>
+													<input type="checkbox" name="in-horario-{{ horario.id }}-dias-M" class="in-dias" id="in-dias-M" {% if horario.M %}checked{% endif %}>
+											</div>
+											<div class="small-2 columns text-center">
+												<label for="in-dias-I">I</label>
+													<input type="checkbox" name="in-horario-{{ horario.id }}-dias-I" class="in-dias" id="in-dias-I" {% if horario.I %}checked{% endif %}>
+											</div>
+											<div class="small-2 columns text-center">
+												<label for="in-dias-J">J</label>
+													<input type="checkbox" name="in-horario-{{ horario.id }}-dias-J" class="in-dias" id="in-dias-J" {% if horario.J %}checked{% endif %}>
+											</div>
+											<div class="small-2 columns text-center">
+												<label for="in-dias-V">V</label>
+													<input type="checkbox" name="in-horario-{{ horario.id }}-dias-V" class="in-dias" id="in-dias-V" {% if horario.V %}checked{% endif %}>
+											</div>
+											<div class="small-2 columns text-center">
+												<label for="in-dias-S">S</label>
+													<input type="checkbox" name="in-horario-{{ horario.id }}-dias-S" class="in-dias" id="in-dias-S" {% if horario.S %}checked{% endif %}>
+											</div>
+										</div>
 									</div>
 								</div>
+
 								<div class="row">
-									<div class="small-2 columns text-center">
-										<label for="in-dias-L">L</label>
-											<input type="checkbox" name="in-dias-L" class="in-dias" id="in-dias-L" {% if horario.L %}checked{% endif %}>
+									{% if curso.fk_horarios.all|length > 1 %}
+									<div class="small-4 columns right">
+										<button class="button tiny expand radius alert no-margin button-delete" onclick="EliminarHorario(this, '{{ horario.id }}')">Eliminar este horario</button>
 									</div>
-									<div class="small-2 columns text-center">
-										<label for="in-dias-M">M</label>
-											<input type="checkbox" name="in-dias-M" class="in-dias" id="in-dias-M" {% if horario.M %}checked{% endif %}>
-									</div>
-									<div class="small-2 columns text-center">
-										<label for="in-dias-I">I</label>
-											<input type="checkbox" name="in-dias-I" class="in-dias" id="in-dias-I" {% if horario.I %}checked{% endif %}>
-									</div>
-									<div class="small-2 columns text-center">
-										<label for="in-dias-J">J</label>
-											<input type="checkbox" name="in-dias-J" class="in-dias" id="in-dias-J" {% if horario.J %}checked{% endif %}>
-									</div>
-									<div class="small-2 columns text-center">
-										<label for="in-dias-V">V</label>
-											<input type="checkbox" name="in-dias-V" class="in-dias" id="in-dias-V" {% if horario.V %}checked{% endif %}>
-									</div>
-									<div class="small-2 columns text-center">
-										<label for="in-dias-S">S</label>
-											<input type="checkbox" name="in-dias-S" class="in-dias" id="in-dias-S" {% if horario.S %}checked{% endif %}>
-									</div>
+									{% endif %}
 								</div>
 							{% endfor %}
+
 							<div class="row">
-								<div class="small-12 columns">
-									<button class="button tiny radius success no-margin" style="width: 100%;" onclick="return false;">Añadir otro horario</button>
-								</div>
+									<div class="small-4 columns right">
+										<button class="button tiny radius success no-margin" style="width: 100%;" onclick="return false;">Añadir otro horario</button>
+									</div>
 							</div>
 						</fieldset>
 					</div>
-				</div>
-				<hr/>
+
+				</div><hr/>
+
 				<div class="row">
 					<div class="medium-5 columns right">
 						<div class="row collapse">

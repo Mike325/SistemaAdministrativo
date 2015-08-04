@@ -6,15 +6,10 @@ from apps.Usuarios.models import Usuario
 alfanumerico = RegexValidator(r'^[0-9a-zA-Z]*$', 'Use solo caracteres alfanumericos (a-Z, 0-9).')
 
 '''
-FIX:
-    - Jefe de departamento:
-        Faltaba ese campo. Ahora todo funciona bien.
-        Checar las notas en apps.Usuarios.models para mas detalles.
-
 TODO:
-    + Revisar relaciones.
-    + Revisar claves primarias de todos los modelos.
-    + Considerar models.AutoField() para algunos modelos.
+    + Tabla para contratos
+        (Relacionada a profesor y (opcionalmente) a materia.
+        Especificando el tipo de contrato)
 '''
 
 class Departamento(models.Model):
@@ -60,6 +55,17 @@ class Profesor(models.Model):
 
     def __unicode__(self):
         return "%s, %s" %(self.apellido, self.nombre)
+        pass
+
+class Suplente(models.Model):
+    id = models.AutoField(primary_key=True)
+    fk_profesor = models.ForeignKey(Profesor)
+
+    periodo_ini = models.DateField(blank=True, null=True)
+    periodo_fin = models.DateField(blank=True, null=True)
+
+    def __unicode__(self):
+        return "%s: del %s a %s"%(fk_profesor.codigo_udg, periodo_ini, periodo_fin)
         pass
 
 class Edificio(models.Model):
@@ -111,27 +117,42 @@ class Horario(models.Model):
     V = models.BooleanField(default=False, blank=True)
     S = models.BooleanField(default=False, blank=True)
 
+    fk_edif = models.ForeignKey(Edificio, blank=True, null=True)
+    fk_aula = models.ForeignKey(Aula, blank=True, null=True)
+
     def __unicode__(self):
         return "%s - %s: %s"%(self.hora_ini, self.hora_fin, [x for x in ['L','M','I','J','V','S'] if eval('self.'+x)==True])
         pass
-    
 
 class Curso(models.Model):
-    NRC = models.CharField(max_length=5, primary_key=True)
+    NRC = models.CharField(max_length=5, primary_key=True) # inmod
 
-    fk_area = models.ForeignKey(Area)
+    fk_area = models.ForeignKey(Area) # check mod
     
-    fk_ciclo = models.ForeignKey(Ciclo)
-    fk_materia = models.ForeignKey(Materia)
+    fk_ciclo = models.ForeignKey(Ciclo) # inmod
+    fk_materia = models.ForeignKey(Materia) # inmod
     fk_secc = models.ForeignKey(Seccion)
     
-    fk_edif = models.ForeignKey(Edificio)
-    fk_aula = models.ForeignKey(Aula)
     fk_horarios = models.ManyToManyField(Horario, blank=True)
     
     fk_profesor = models.ForeignKey(Profesor)
-    #fk_horario = models.ForeignKey(Horario, blank=True, null=True, default='')
+    fk_suplente = models.ForeignKey(Suplente, blank=True, null=True)
 
     def __unicode__(self):
         return self.NRC
+        pass
+
+class Contrato(models.Model):
+    opciones = (
+            ('T', 'Tiempo completo'),
+            ('P', 'Tiempo parcial'), 
+            ('', 'Sin especificar')
+        )
+
+    id = models.AutoField(primary_key=True)
+    fk_curso = models.ForeignKey(Curso)
+    tipo = models.CharField(max_length=1, choices=opciones, default='', blank=True)
+
+    def __unicode__(self):
+        return "%s, %s"%(fk_curso, tipo)
         pass
