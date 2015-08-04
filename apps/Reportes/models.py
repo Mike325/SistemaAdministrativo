@@ -3,17 +3,16 @@ from apps.Departamentos.models import *
 
 class Reporte(models.Model):
 	
-	codigo = models.IntegerField(primary_key = True)
+	id = models.AutoField(primary_key = True)
 	fecha = models.DateField()
-	profesor = models.CharField(max_length = 50)
-	codProf = models.ForeignKey(Profesor)
-	categoria = models.CharField(max_length = 50)
-	depto = models.ForeignKey(Departamento)
-	materia = models.ForeignKey(Materia)
-	secc = models.ForeignKey(Seccion)
-	horario = models.CharField(max_length = 10)
+	fk_profesor = models.ForeignKey(Profesor, default = False)
+	categoria = models.CharField(max_length = 30, blank = True, default = False)
+	fk_depto = models.ForeignKey(Departamento, default = False)
+	fk_materia = models.ForeignKey(Materia, default = False)
+	fk_seccion = models.ForeignKey(Seccion, default = False)
+	fk_horario = models.ManyToManyField(Horario, blank = True)
 	horasFalta = models.IntegerField()
 	
 	def __unicode__(self):
-		return self.codigo
+		return '%s -> %s'%(self.fecha, self.fk_profesor.nombre)
 		pass

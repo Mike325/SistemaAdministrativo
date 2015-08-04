@@ -2,9 +2,10 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-import datetime
+from datetime import date
 
 from apps.Departamentos.models import *
+from apps.Reportes.models import *
 
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
@@ -25,7 +26,7 @@ def inicio_secretaria(request):
 @login_required(login_url='/')
 def listas_tCompleto(request, dpto):
 	if request.session['rol'] >= 1:
-		hoy = datetime.date.today()
+		hoy = date.today()
 		dia = hoy.isoweekday()
 
 		disp_dia = dias[dia - 1].upper()
@@ -49,7 +50,7 @@ def listas_tMedio(request, dpto):
 	if request.session['rol'] >= 1:
 		dpto = get_object_or_404(Departamento, nick=dpto)
 
-		fecha = datetime.date.today()
+		fecha = date.today()
 		mesFc = int(fecha.month)
 		dia = fecha.isoweekday()
 
@@ -84,37 +85,56 @@ def ver_incidencias(request, dpto):
 		fechaI = str(request.POST.get('fechaIni'))
 		fechaF = str(request.POST.get('fechaFin'))
 
+		errores = []
+
 		try:
 			fI = fechaI.split('-')
+			fechaInicio = date(int(fI[0]), int(fI[1]), int(fI[2]))
+		except:
+			errores.append('Inicio')
+
+		try:
 			fF = fechaF.split('-')
-			num_mes = int(fI[1])
+			fechaFin = date(int(fF[0]), int(fF[1]), int(fF[2]))
+		except:
+			errores.append('Fin')
+
+		if not errores:
+			num_mes = int(fechaInicio.month)	
 			mes_ini = meses[(num_mes-1)].upper()
 
-			num_mes = int(fF[1])
+			num_mes = int(fechaFin.month)
 			mes_fin = meses[(num_mes-1)].upper()
 			
 			extender_info = False
 
 			if mes_ini != mes_fin:
 				extender_info = True
-			pass
-		except:
-			return render(request, 'form-incidencias.html',
+
+			listaIncidencias = Reporte.objects.all().filter(fecha__gte = fechaInicio, fecha__lte = fechaFin)
+
+			if listaIncidencias:
+				return render(request, 'incidencias.html',
 				{
-					'error': True,
+					'fechaI': fechaInicio, 
+					'fechaF': fechaFin, 
+					'mes_ini': mes_ini, 
+					'mes_fin': mes_fin, 
+					'extender_info': extender_info,
+					'listaIncidencias': listaIncidencias,
+				})
+			else:
+				return render(request, 'hecho.html', 
+				{
+					'accion': 'Vaya. No existe ningun reporte en esas fechas.',
 				})
 
-		return render(request, 'incidencias.html',
-			{
-				'dia_ini': fI[2], 
-				'dia_fin': fF[2], 
-				'mes_ini': mes_ini, 
-				'mes_fin': mes_fin, 
-				'anio_ini': fI[0],
-				'anio_fin': fF[0],
-				'extender_info': extender_info,
-			})
-		pass
+		else:
+			return render(request, 'form-incidencias.html',
+				{
+					'errores': errores,
+				})
+
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -139,6 +159,7 @@ def form_reporte_incidencias(request, dpto):
 					'error': True,
 					'departamento': _departamento,
 					'profesores': listaProf,
+					'materias': listaMaterias,
 				})
 		pass
 	else:
@@ -147,27 +168,55 @@ def form_reporte_incidencias(request, dpto):
 @login_required(login_url='/')
 def reporte_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
-		return render(request, 'hecho.html', 
+		_departamento = get_object_or_404(Departamento, nick=dpto)
+		listaProf = Profesor.objects.order_by('apellido')
+		listaMaterias = Curso.objects.all()
+
+		errores = []
+
+		try:
+			fechaReporte = str(request.POST.get('fecha'))
+			fechaReporte = fechaReporte.split('-')
+			fechaReporte = date(int(fechaReporte[0]), int(fechaReporte[1]), int(fechaReporte[2]))
+		except:
+			errores.append('Fecha')
+
+		try:
+			curso = str(request.POST.get('curso'))
+			infoCurso = Curso.objects.get(NRC = curso)
+		except:
+			errores.append('Curso')
+
+		try:
+			horasF = int(request.POST.get('horasFalta'))
+		except:
+			errores.append('Hora')
+
+		if not errores:
+			nuevo_reporte = Reporte(
+				fecha = fechaReporte, 
+				fk_profesor = infoCurso.fk_profesor, 
+				fk_depto = _departamento, 
+				fk_materia = infoCurso.fk_materia, 
+				fk_seccion = infoCurso.fk_secc, 
+				horasFalta = horasF
+			)
+
+			nuevo_reporte.save()
+
+			return render(request, 'hecho.html', 
 			{
 				'accion': 'Hecho. Se ha realizado el reporte.',
 			})
-		try:
-			fecha = str(request.POST.get('fecha'))
-			fecha = fecha.split('-')
-			maestro = str(request.POST.get('maestro'))
-			codigo = str(request.POST.get('codigo'))
-			categoria = str(request.POST.get('categoria'))
-			depto = str(request.POST.get('depto'))
-			materia = str(request.POST.get('materia'))
-			seccion = str(request.POST.get('seccion'))
-			horario = str(request.POST.get('horario'))
-			horasFalta = str(request.POST.get('horasFalta'))			
-		except:
+
+		else:
 			return render(request, 'form-reporte-incidencias.html', 
 				{
-					'error': True, 'departamento': dpto.upper(),
+					'errores': errores, 
+					'departamento': _departamento,
+					'profesores': listaProf,
+					'materias': listaMaterias,
 				})
-		pass
 	else:
 		return redirect('error403', origen=request.path)
 

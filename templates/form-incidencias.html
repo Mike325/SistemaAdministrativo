@@ -14,7 +14,7 @@
                         <label>
                             Fecha de inicio<input type="date" name="fechaIni" class="error">
                         </label>
-                        {% if error %}
+                        {% if 'Inicio' in errores %}
                         <small class="error">Fecha invalida</small>
                         {% endif %}
                     </div>
@@ -22,7 +22,7 @@
                         <label>
                             Fecha fin<input type="date" name="fechaFin" class="error">
                         </label>
-                        {% if error %}
+                        {% if 'Fin' in errores %}
                         <small class="error">Fecha invalida</small>
                         {% endif %}
                     </div>

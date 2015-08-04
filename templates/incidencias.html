@@ -24,18 +24,18 @@
                         CENTRO UNIVERSITARIO DE CIENCIAS EXACTAS E INGENIERIAS<br>
 
                         {% if extender_info %}
-                            DEL {{ dia_ini }} DE {{ mes_ini }} DE {{ anio_ini }}<br>
-                            AL {{ dia_fin }} DE {{ mes_fin }} DE {{ anio_fin }}
+                            DEL {{ fechaI.day }} DE {{ mes_ini }} DE {{ fechaI.year }}<br>
+                            AL {{ fechaF.day }} DE {{ mes_fin }} DE {{ fechaF.year }}
                         {% else %}
-                            DEL {{ dia_ini }} AL {{ dia_fin }} DE {{ mes_fin }} DE {{ anio_fin }}
+                            DEL {{ fechaI.day }} AL {{ fechaF.day }} DE {{ mes_fin }} DE {{ fechaF.year }}
                         {% endif %}
                     </th>
                 </thead>
 
                 <thead>
                     <th>FECHA</th>
-                    <th>NOMBRE</th>
                     <th>CODIGO</th>
+                    <th>NOMBRE</th>
                     <th>CATEGORIA</th>
                     <th>DEPTO.</th>
                     <th>MATERIA</th>
@@ -47,32 +47,19 @@
                 <tbody>
                     {% for x in listaIncidencias %}
                     <tr>
-                        <td class="row-fecha">{{ x.fecha }}</td>
-                        <td class="row-nombre">{{ x.nombre }}</td>
-                        <td class="row-codigo">{{ x.codigo }}</td>
+                        <td class="row-fecha">{{ x.fecha.day }}/{{ x.fecha.month }}/{{ x.fecha.year }}</td>
+                        <td class="row-codigo">{{ x.fk_profesor.codigo_udg }}</td>
+                        <td class="row-nombre">{{ x.fk_profesor }}</td>
                         <td class="row-categoria">{{ x.categoria }}</td>
-                        <td class="row-dpto">{{ x.dpto }}</td>
-                        <td class="row-materia">{{ x.materia }}</td>
-                        <td class="row-secc">{{ x.secc }}</td>
-                        <td class="row-horario">{{ x.horario }}</td>                            
-                        <td class="row-hrsFalta">{{ x.hrsFalta }}</td>
+                        <td class="row-dpto">{{ x.fk_depto.nick.upper }}</td>
+                        <td class="row-materia">{{ x.fk_materia.nombre }}</td>
+                        <td class="row-secc">{{ x.fk_seccion }}</td>
+                        <td class="row-horario">{{ x.fk_horario.hora_ini }}-{{ x.fk_horario.hora_fin }}</td>
+                        <td class="row-hrsFalta">{{ x.horasFalta }}</td>
                     </tr>
                     {% endfor %}
-
-                    {# para fines de demostrativos y visuales #}
-                    <tr>
-                        <td class="row-fecha">12/JUL/2015</td>
-                        <td class="row-nombre">JOSE LUIS RODRIGUEZ JIMENEZ</td>
-                        <td class="row-codigo">75343622</td>
-                        <td class="row-categoria">CAT98</td>
-                        <td class="row-dpto">COMP</td>
-                        <td class="row-materia">LOREM IPSUM DOLOR SIT AMET, CONSECTETUR</td>
-                        <td class="row-secc">D08</td>
-                        <td class="row-horario">17:00 - 19:00</td>                            
-                        <td class="row-hrsFalta">24</td>
-                    </tr>
                 </tbody>
-            </table><br>
+            </table>
         </div>
     </div>
 {% endblock %}

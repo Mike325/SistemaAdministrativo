@@ -12,7 +12,7 @@
 
         function filtra_materias(ref)
         {
-            sel_listaMat = $('#materia');
+            sel_listaMat = $('#curso');
             sel_listaMat.empty();
 
             seleccionada = ref.options[ref.selectedIndex];
@@ -22,13 +22,13 @@
             {
                 node = document.createElement('option');
                 node.value = this.id_curso;
-                node.innerHTML = this.id_materia + ' | ' + this.seccion;
+                node.innerHTML = this.id_curso + ' | ' + this.id_materia + ' | ' + this.seccion;
 
                 sel_listaMat.append(node);
             });
-
             // console.log(sel_listaMat); // DEBUG
         }
+
     </script>
 {% endblock %}
 
@@ -43,6 +43,9 @@
                             <label>
                                 Fecha <input type="date" name="fecha">
                             </label>
+                            {% if 'Fecha' in errores %}
+                            <small class="error">Fecha invalida</small>
+                            {% endif %}
                         </div>
                         <div class="medium-9 columns">
                             <label>
@@ -64,35 +67,26 @@
                         </div>
                         <div class="medium-5 columns">
                             <label>
-                                Materia | Sección | Horario
-                                <select name="materia" id="materia">
-                                    <option value="0" disabled="true" selected="true">-- seleccione profesor primero --</option>
-{% comment %}
-                                        {% for x in materias %}
-                                    <option value="{{ x.fk_materia }}">{{ x.fk_materia }} | {{ x.fk_secc }}</option>
-                                    {% endfor %}
-{% endcomment %}
+                                NRC | Materia | Sección | Horario
+                                <select name="curso" id="curso">
+                                    <option value="0" disabled="true" selected="true">-- Seleccione un profesor primero --</option>
+                                    <!-- Cursos -->
                                 </select>
                             </label>
+                            {% if 'Curso' in errores %}
+                            <small class="error">Materia invalida</small>
+                            {% endif %}
                         </div>
                         <div class="medium-2 columns">
                             <label>
                                 Horas falta <input type="text" name="horasFalta" placeholder="Horas falta">
                             </label>
+                            {% if 'Hora' in errores %}
+                            <small class="error">Hora invalida</small>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="button-bar">
-                        <ul class="button-group round">
-                            <li>
-                                <input type="submit" value="Enviar Reporte" class="button tiny">
-                            </li>
-                            {% if error %}
-                            <li data-alert class="alert-box warning round">
-                                    Revisa bien la información.
-                                    <a href="#" class="close">×</a>
-                            </li>
-                            {% endif %}
-                        </ul>
+                        <input type="submit" value="Enviar Reporte" class="button tiny round">
                     </div>
                 </fieldset>
             </form>
