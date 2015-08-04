@@ -15,14 +15,14 @@
     <script>
         $(document).ready(function()
         {
-            $('.dateOnlyExample .date').datepicker(
+            $('.dateOnly .date').datepicker(
             {
                     'format': 'yyyy-mm-dd',
                     'autoclose': true
             });
 
-            var dateOnlyExampleEl = document.getElementById('dateOnlyExample');
-            var dateOnlyDatepair = new Datepair(dateOnlyExampleEl);
+            var dateOnlyEl = document.getElementById('dateOnly');
+            var dateOnlyDatepair = new Datepair(dateOnlyEl);
         });
     </script>
 {% endblock %}
@@ -35,7 +35,7 @@
                 <div class="row">                    
                     <div class="medium-6 columns">
                         <label>
-                            Fecha de inicio<p class="dateOnlyExample" id="dateOnlyExample">
+                            Fecha de inicio<p class="dateOnly" id="dateOnly">
                             <input type="text" id="fecha" class="date error" name="fechaIni" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
                             </p>
                         </label>
@@ -45,7 +45,7 @@
                     </div>
                     <div class="medium-6 columns">
                         <label>
-                            Fecha fin<p class="dateOnlyExample" id="dateOnlyExample">
+                            Fecha fin<p class="dateOnly" id="dateOnly">
                             <input type="text" id="fecha" class="date error" name="fechaFin" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
                             </p>
                         </label>

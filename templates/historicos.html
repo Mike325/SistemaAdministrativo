@@ -15,14 +15,14 @@
     <script>
         $(document).ready(function()
         {
-            $('.dateOnlyExample .date').datepicker(
+            $('.dateOnly .date').datepicker(
             {
                     'format': 'yyyy-mm-dd',
                     'autoclose': true
             });
 
-            var dateOnlyExampleEl = document.getElementById('dateOnlyExample');
-            var dateOnlyDatepair = new Datepair(dateOnlyExampleEl);
+            var dateOnlyEl = document.getElementById('dateOnly');
+            var dateOnlyDatepair = new Datepair(dateOnlyEl);
         });
     </script>
 {% endblock %}
@@ -34,7 +34,7 @@
         <div class="row collapse">
             <div class="small-10 columns">
                 <form method="POST" action="/historicos/filtro/">{% csrf_token %}
-                    <p class="dateOnlyExample" id="dateOnlyExample">
+                    <p class="dateOnly" id="dateOnly">
                         <input type="text" id="fecha" class="date error" name="fecha" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
                     </p>
                     {% if errors %}

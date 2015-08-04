@@ -16,14 +16,14 @@
     <script type="text/javascript">
         $(document).ready(function()
         {
-            $('.dateOnlyExample .date').datepicker(
+            $('.dateOnly .date').datepicker(
             {
                     'format': 'yyyy-mm-dd',
                     'autoclose': true
             });
 
-            var dateOnlyExampleEl = document.getElementById('dateOnlyExample');
-            var dateOnlyDatepair = new Datepair(dateOnlyExampleEl);
+            var dateOnlyEl = document.getElementById('dateOnly');
+            var dateOnlyDatepair = new Datepair(dateOnlyEl);
         });
 
         var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %} {'id_curso':{{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}'}{% if not forloop.last %},{% endif %} {% endfor %} ]{% if not forloop.last %},{% endif %} 
@@ -60,7 +60,7 @@
                     <div class="row">
                         <div class="medium-3 columns">
                             <label>
-                                Fecha <p class="dateOnlyExample" id="dateOnlyExample">
+                                Fecha <p class="dateOnly" id="dateOnly">
                                 <input type="text" id="fecha" class="date error" name="fecha" placeholder="Seleccionar fecha (YYYY-MM-DD)" required/>
                                 </p>
                             </label>
