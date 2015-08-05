@@ -34,8 +34,8 @@
 
                 <thead>
                     <th>FECHA</th>
-                    <th>CODIGO</th>
                     <th>NOMBRE</th>
+                    <th>CODIGO</th>                    
                     <th>CATEGORIA</th>
                     <th>DEPTO.</th>
                     <th>MATERIA</th>
@@ -48,13 +48,25 @@
                     {% for x in listaIncidencias %}
                     <tr>
                         <td class="row-fecha">{{ x.fecha.day }}/{{ x.fecha.month }}/{{ x.fecha.year }}</td>
-                        <td class="row-codigo">{{ x.fk_profesor.codigo_udg }}</td>
-                        <td class="row-nombre">{{ x.fk_profesor }}</td>
-                        <td class="row-categoria">{{ x.categoria }}</td>
+                        <td class="row-nombre">{{ x.fk_contrato.fk_curso.fk_profesor }}</td>
+                        <td class="row-codigo">{{ x.fk_contrato.fk_curso.fk_profesor.codigo_udg }}</td>
+                        {% if x.fk_contrato.tipo == 'T' %}
+                        <td class="row-categoria">Tiempo Completo({{ x.fk_contrato.tipo }})</td>
+                        {% elif x.fk_contrato.tipo == 'P' %}
+                        <td class="row-categoria">Medio Tiempo({{ x.fk_contrato.tipo }})</td>
+                        {% elif x.fk_contrato.tipo == '' %}
+                        <td class="row-categoria">Sin especificar({{ x.fk_contrato.tipo }})</td>
+                        {% endif %}
                         <td class="row-dpto">{{ x.fk_depto.nick.upper }}</td>
-                        <td class="row-materia">{{ x.fk_materia.nombre }}</td>
-                        <td class="row-secc">{{ x.fk_seccion }}</td>
-                        <td class="row-horario">{{ x.fk_horario.hora_ini }}-{{ x.fk_horario.hora_fin }}</td>
+                        <td class="row-materia">{{ x.fk_contrato.fk_curso.fk_materia.nombre }}</td>
+                        <td class="row-secc">{{ x.fk_contrato.fk_curso.fk_secc }}</td>
+
+                        <td class="row-horario">
+                        {% for i in x.fk_contrato.fk_curso.fk_horarios.all %}
+                        {{ i.hora_ini }}-{{ i.hora_fin }}
+                        {% endfor %}
+                        </td>
+
                         <td class="row-hrsFalta">{{ x.horasFalta }}</td>
                     </tr>
                     {% endfor %}

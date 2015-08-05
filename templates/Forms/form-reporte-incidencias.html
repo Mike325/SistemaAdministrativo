@@ -26,7 +26,7 @@
             var dateOnlyDatepair = new Datepair(dateOnlyEl);
         });
 
-        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %} {'id_curso':{{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}'}{% if not forloop.last %},{% endif %} {% endfor %} ]{% if not forloop.last %},{% endif %} 
+        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %} {'id_curso':{{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endfor %} ]{% if not forloop.last %},{% endif %} 
         {% endfor %} };
 
         function filtra_materias(ref)
@@ -88,7 +88,7 @@
                         </div>
                         <div class="medium-5 columns">
                             <label>
-                                NRC | Materia | Sección | Horario
+                                NRC | Materia | Sección
                                 <select name="curso" id="curso">
                                     <option value="0" disabled="true" selected="true">-- Seleccione un profesor primero --</option>
                                     <!-- Cursos -->

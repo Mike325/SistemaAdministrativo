@@ -37,7 +37,7 @@ def listas_tCompleto(request, dpto):
 
 		fechaDia = disp_dia + " " + disp_num_dia + " DE " + disp_mes + " DE " + disp_anio
 
-		return render(request, 'listas.html',
+		return render(request, 'Listas/listas.html',
 			{
 				'today': fechaDia, 
 				'tiempoC': True,
@@ -59,7 +59,7 @@ def listas_tMedio(request, dpto):
 
 		fechaDia = dias[dia-1].upper()
 
-		return render(request, 'listas.html', 
+		return render(request, 'Listas/listas.html', 
 			{
 				'dayWeek': fechaDia, 
 				'day': fecha.day, 
@@ -75,7 +75,7 @@ def listas_tMedio(request, dpto):
 @login_required(login_url='/')
 def form_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
-		return render(request, 'form-incidencias.html', locals())
+		return render(request, 'Forms/form-incidencias.html', locals())
 		pass
 	else:
 		return redirect('error403', origen=request.path)
@@ -112,10 +112,10 @@ def ver_incidencias(request, dpto):
 			if mes_ini != mes_fin:
 				extender_info = True
 
-			listaIncidencias = Reporte.objects.all().filter(fecha__gte = fechaInicio, fecha__lte = fechaFin)
+			listaIncidencias = Reporte.objects.filter(fecha__gte = fechaInicio, fecha__lte = fechaFin)
 
 			if listaIncidencias:
-				return render(request, 'incidencias.html',
+				return render(request, 'Reportes/incidencias.html',
 				{
 					'fechaI': fechaInicio, 
 					'fechaF': fechaFin, 
@@ -148,14 +148,14 @@ def form_reporte_incidencias(request, dpto):
 			listaProf = Profesor.objects.order_by('apellido')
 			listaMaterias = Curso.objects.all()
 
-			return render(request, 'form-reporte-incidencias.html', 
+			return render(request, 'Forms/form-reporte-incidencias.html', 
 				{
 					'departamento': _departamento,
 					'profesores': listaProf,
 					'materias': listaMaterias,
 				})
 		except:
-			return render(request, 'form-reporte-incidencias.html', 
+			return render(request, 'Forms/form-reporte-incidencias.html', 
 				{
 					'error': True,
 					'departamento': _departamento,
@@ -184,7 +184,7 @@ def reporte_incidencias(request, dpto):
 
 		try:
 			curso = str(request.POST.get('curso'))
-			infoCurso = Curso.objects.get(NRC = curso)
+			contrato = Contrato.objects.get(fk_curso__NRC = curso)
 		except:
 			errores.append('Curso')
 
@@ -196,10 +196,8 @@ def reporte_incidencias(request, dpto):
 		if not errores:
 			nuevo_reporte = Reporte(
 				fecha = fechaReporte, 
-				fk_profesor = infoCurso.fk_profesor, 
+				fk_contrato = contrato, 
 				fk_depto = _departamento, 
-				fk_materia = infoCurso.fk_materia, 
-				fk_seccion = infoCurso.fk_secc, 
 				horasFalta = horasF
 			)
 
@@ -207,7 +205,7 @@ def reporte_incidencias(request, dpto):
 
 			registroReporte = Registro.creacion(request.session['usuario']['nick'], 
 										'Se creo el reporte de incidencia ['+nuevo_reporte.__unicode__()+
-										'('+nuevo_reporte.fk_profesor.codigo_udg+')]', 
+										'('+nuevo_reporte.fk_contrato.fk_curso.fk_profesor.codigo_udg+')]', 
 										nuevo_reporte.__unicode__(), 'Reportes')
 			registroReporte.save()
 
@@ -217,7 +215,7 @@ def reporte_incidencias(request, dpto):
 			})
 
 		else:
-			return render(request, 'form-reporte-incidencias.html', 
+			return render(request, 'Forms/form-reporte-incidencias.html', 
 				{
 					'errores': errores, 
 					'departamento': _departamento,
@@ -236,7 +234,7 @@ def estadisticasDepartamento(request, dpto):
 			datos = {
 				'nombre' : departamento.nombre
 			}
-			return render(request, 'estadisticas.html', locals())
+			return render(request, 'Listas/estadisticas.html', locals())
 			pass
 		except:
 			return redirect('inicio-secretaria.html')
@@ -255,14 +253,14 @@ def estadisticasProfesor(request):
 					'nombre' : (profesor.nombre + " " + profesor.apellido +
 								 "(" + profesor.codigo_udg + ")")
 				}
-				return render(request, 'estadisticas.html', locals())
+				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
 				return redirect('inicio-secretaria.html')
 		else:
 			lista_profesores = Profesor.objects.all()
 			objetos = "Profesores"
-			return render(request, 'estadisticas-listas.html', locals())
+			return render(request, 'Listas/estadisticas-listas.html', locals())
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -276,14 +274,14 @@ def estadisticasMateria(request):
 				datos = {
 					'nombre' : materia.nombre + " (" + materia.clave + ")"
 				}
-				return render(request, 'estadisticas.html', locals())
+				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
 				return redirect('inicio-secretaria')
 		else:
 			objetos = "Materias"
 			lista_materias = Materia.objects.all()
-			return render(request, 'estadisticas-listas.html', locals())		
+			return render(request, 'Listas/estadisticas-listas.html', locals())		
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -297,13 +295,13 @@ def estadisticasCiclo(request):
 				datos = {
 					'nombre' : "Ciclo " + ciclo.id
 				}
-				return render(request, 'estadisticas.html', locals())
+				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
 				return redirect('inicio-secretaria.html')
 		else:
 			objetos = "Ciclos"
 			lista_ciclos = Ciclo.objects.all()
-			return render(request, 'estadisticas-listas.html', locals())
+			return render(request, 'Listas/estadisticas-listas.html', locals())
 	else:
 		return redirect('error403', origen=request.path)
