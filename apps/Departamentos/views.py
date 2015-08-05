@@ -276,7 +276,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 
 			options = locals()
 
-			return render(request, 'Departamentos/form_modifica_curso.html', options)
+			return render(request, 'Forms/form_modifica_curso.html', options)
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -313,7 +313,7 @@ def procesar_csv_contratos(request, dpto):
 							'descripcion': 'Tipo de archivo no valido.'
 						})
 					archivo_csv = None
-					return render(request, 'Departamentos/form_subir_csv.html', 
+					return render(request, 'Forms/form_subir_csv.html', 
 					{
 						'errores': errores,
 						'departamento': _departamento,
@@ -367,14 +367,14 @@ def procesar_csv_contratos(request, dpto):
 
 				pass
 
-			return render(request, 'Departamentos/form_subir_csv.html', {'errores': errores, 'success': True, 'titulo_tipo': 'Contratos'})
+			return render(request, 'Forms/form_subir_csv.html', {'errores': errores, 'success': True, 'titulo_tipo': 'Contratos'})
 			pass
 		else: # mostrar el formulario
 			titulo_tipo = 'Contratos'
 			dpto = dpto[:20]
 			departamento = get_object_or_404(Departamento, nick=dpto)
 			lista_ciclos = Ciclo.objects.all()
-			return render(request, 'Departamentos/form_subir_csv.html', locals())
+			return render(request, 'Forms/form_subir_csv.html', locals())
 
 @login_required(login_url='/')
 def procesar_csv_cursos(request, dpto):
@@ -407,7 +407,7 @@ def procesar_csv_cursos(request, dpto):
 							'descripcion': 'Tipo de archivo no valido.'
 						})
 					archivo_csv = None
-					return render(request, 'Departamentos/form_subir_csv.html', 
+					return render(request, 'Forms/form_subir_csv.html', 
 					{
 						'errores': errores,
 						'departamento': _departamento,
@@ -428,7 +428,7 @@ def procesar_csv_cursos(request, dpto):
 						'propiedad': 'Archivo',
 						'descripcion': 'No se selecciono un archivo.'
 					})
-				return render(request, 'Departamentos/form_subir_csv.html', 
+				return render(request, 'Forms/form_subir_csv.html', 
 					{
 						'errores': errores,
 						'departamento': _departamento,
@@ -585,7 +585,7 @@ def procesar_csv_cursos(request, dpto):
 				_curso.save();
 				# return HttpResponse(_curso) #YOLO
 				pass
-			return render(request, 'Departamentos/form_subir_csv.html', {'errores': errores, 'success': True})
+			return render(request, 'Forms/form_subir_csv.html', {'errores': errores, 'success': True})
 			# return JsonResponse(cursos, safe=False); # temporal.
 			pass
 		else:
@@ -594,7 +594,7 @@ def procesar_csv_cursos(request, dpto):
 			departamento = get_object_or_404(Departamento, nick=dpto)
 			#lista_departamentos = Departamento.objects.all()
 			lista_ciclos = Ciclo.objects.all()
-			return render(request, 'Departamentos/form_subir_csv.html', locals())
+			return render(request, 'Forms/form_subir_csv.html', locals())
 
 	else:
 		return redirect('error403', origen=request.path)
@@ -629,26 +629,26 @@ def sistema_modifica_nrc(request, dpto, ciclo, nrc):
 
 
 
-@login_required(login_url='/')
-def computacion_form_asistencias(request):
-	if request.session['rol'] >= 2:
-		if request.method == 'POST':
+# @login_required(login_url='/')
+# def computacion_form_asistencias(request):
+# 	if request.session['rol'] >= 2:
+# 		if request.method == 'POST':
 
-			criterios = ['si', 'si', 'si', 'si', 'si', 'si']
+# 			criterios = ['si', 'si', 'si', 'si', 'si', 'si']
 
-			return render(request, 'reporte-asist.html', 
-				{
-					'departamento' : 'Departamento de Ciencias Computacionales',
-					'nombre' : 'Juan Perez Rodriguez', 
-					'codigo' : request.POST.get('field-codprof'), 
-					'calif' : 'excelente',
-					'ciclo' : '2015-A',
-					'criterios' : criterios, 
-					'fecha' : 'HOY', 
-					'nombrefirma' : 'Luisa Hermandia Limbo', 
-					'puesto' : 'Profesional'
-				})
-		else:
-			return render(request, 'form-reporte-asistencias.html');
-	else:
-	    return redirect('error403', origen=request.path)
+# 			return render(request, 'reporte-asist.html', 
+# 				{
+# 					'departamento' : 'Departamento de Ciencias Computacionales',
+# 					'nombre' : 'Juan Perez Rodriguez', 
+# 					'codigo' : request.POST.get('field-codprof'), 
+# 					'calif' : 'excelente',
+# 					'ciclo' : '2015-A',
+# 					'criterios' : criterios, 
+# 					'fecha' : 'HOY', 
+# 					'nombrefirma' : 'Luisa Hermandia Limbo', 
+# 					'puesto' : 'Profesional'
+# 				})
+# 		else:
+# 			return render(request, 'form-reporte-asistencias.html');
+# 	else:
+# 	    return redirect('error403', origen=request.path)

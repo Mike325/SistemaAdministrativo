@@ -32,16 +32,21 @@
 					<h3 class="text-center">{{ dep.nombre }}<h3>
 					<div class="row">
                         <div class="large-12 columns">
-                            <button class="button expand" onclick="location.href='/{{ dep.nick }}/sistema/csv'">Subir CSV</button>
+                            <button class="button expand" onclick="location.href='/{{ dep.nick }}/sistema/csv/cursos/'">Subir CSV Cursos</button>
                         </div>
                         <div class="large-12 columns">
                             <button class="button expand" onclick="location.href='/{{ dep.nick }}/ver_cursos'">Consulta/Modificacion de Cursos</button>
                         </div>
+
                         <div class="large-12 columns">
-                            <button class="button expand disabled" {# onclick="location.href='/{{ dep.nick }}/formatos/form-asistencias'" #}>Reporte de asistencia</button>
+                            <button class="button expand disabled" onclick="location.href='/{{ dep.nick }}/formatos/form-asistencias'">Carta de Desempeño</button>
                         </div>
                         <div class="large-12 columns">
                             <button class="button expand disabled" {# onclick="location.href='/usuarios/gestionar' #}">Gestionar encargados</button>
+                        </div>
+
+                        <div class="large-12 columns">
+                            <button class="button expand" onclick="location.href='/{{ dep.nick }}/sistema/csv/contratos/'">Subir CSV Contratos</button>
                         </div>
 					</div>
 				</div>
