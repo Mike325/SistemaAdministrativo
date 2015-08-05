@@ -155,5 +155,5 @@ class Contrato(models.Model):
     tipo = models.CharField(max_length=1, choices=opciones, default='', blank=True)
 
     def __unicode__(self):
-        return "%s, %s"%(fk_curso, tipo)
+        return "%s, %s"%(self.fk_curso, self.tipo)
         pass

@@ -12,6 +12,47 @@ from apps.Historicos.models import *
 import re # libreria de expresiones regulares
 
 @login_required(login_url='/')
+def inicio_jefedep(request):
+	if request.session['rol'] >= 2:
+		bienvenida = False
+
+		if request.session['just_logged']:
+			bienvenida = True
+			request.session['just_logged'] = False
+
+		lista_departamentos = Departamento.objects.all()
+
+		return render(request, 'inicio-jefedep.html', 
+			{
+				'banner': True, 
+				'bienvenida': bienvenida,
+				'lista_departamentos': lista_departamentos
+			})
+	else:
+	   	return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def ver_cursos(request, dpto):
+	if request.session['rol'] >= 2: # es jefedep o mayor
+		lista_cursos = Curso.objects.all()
+		paginator = Paginator(lista_cursos, 100)
+
+		pagina = request.GET.get('pagina')
+
+		try:
+			lista_cursos = paginator.page(pagina)
+		except PageNotAnInteger:
+			# If page is not an integer, deliver first page.
+			lista_cursos = paginator.page(1)
+		except EmptyPage:
+			# If page is out of range (e.g. 9999), deliver last page of results.
+			lista_cursos = paginator.page(paginator.num_pages)
+
+		return render(request, 'Departamentos/ver_cursos.html', locals())
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
 def modifica_curso(request, dpto, nrc, ajax=False):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		_nrc = int(nrc)
@@ -93,11 +134,11 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 					_edificio, created = Edificio.objects.get_or_create( id = datos[clave]['edif'].upper() )
 
 					if created:
-						warns.append(
-							{
-								'tipo': 'Objeto inexistente',
-								'desc': 'Se creo un edificio nuevo.'
-							})
+						# warns.append(
+						# 	{
+						# 		'tipo': 'Objeto inexistente',
+						# 		'desc': 'Se creo un edificio nuevo.'
+						# 	})
 						edificioCreadoRegistro = Registro.creacion(request.session['usuario']['nick'], 
 														'Se creo el edificio "'+_edificio.nombre+'"',
 														_edificio.nombre, 'Edificios')
@@ -119,11 +160,11 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 						)
 
 					if created:
-						warns.append(
-							{
-								'tipo': 'Objeto inexistente',
-								'desc': 'Se creo una aula nueva.'
-							})
+						# warns.append(
+						# 	{
+						# 		'tipo': 'Objeto inexistente',
+						# 		'desc': 'Se creo una aula nueva.'
+						# 	})
 						aulaCreadaRegistro = Registro.creacion(request.session['usuario']['nick'], 
 														'Se creo el aula "'+_aula.nombre+'"',
 														_aula.nombre, 'Aulas')
@@ -240,28 +281,103 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
-def ver_cursos(request, dpto):
+def procesar_csv_contratos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
-		lista_cursos = Curso.objects.all()
-		paginator = Paginator(lista_cursos, 100)
+		if request.method == 'POST': # se envio a traves del formulario
 
-		pagina = request.GET.get('pagina')
+			# Inicializacion de objetos.
+			errores = []
+			contratos = []
 
-		try:
-			lista_cursos = paginator.page(pagina)
-		except PageNotAnInteger:
-			# If page is not an integer, deliver first page.
-			lista_cursos = paginator.page(1)
-		except EmptyPage:
-			# If page is out of range (e.g. 9999), deliver last page of results.
-			lista_cursos = paginator.page(paginator.num_pages)
+			try: # validacion de las variables de departamento.
+				post_departamento = request.POST.get('depto', '')
+				_departamento = get_object_or_404(Departamento, nick=post_departamento)
 
-		return render(request, 'Departamentos/ver_cursos.html', locals())
-	else:
-		return redirect('error403', origen=request.path)
+				post_ciclo = request.POST.get('ciclo-esc', '')
+				_ciclo = get_object_or_404(Ciclo, id=post_ciclo)
+				pass
+			except Exception, e:
+				errores.append({
+						'propiedad': 'Departamento/Ciclo',
+						'descripcion': 'Hubo un error con alguno de los dos campos.'
+					})
+				pass
+
+			try: # validacion del archivo csv (existencia y tipo)
+				archivo_csv = request.FILES['archivo-csv']
+
+				if not archivo_csv or archivo_csv.content_type != 'text/csv':
+					ciclos = Ciclo.objects.all()
+					errores.append({
+							'propiedad': 'Archivo',
+							'descripcion': 'Tipo de archivo no valido.'
+						})
+					archivo_csv = None
+					return render(request, 'Departamentos/form_subir_csv.html', 
+					{
+						'errores': errores,
+						'departamento': _departamento,
+						'lista_ciclos': ciclos,
+						'titulo_tipo': 'Contratos'
+					})
+					pass
+
+				datos = archivo_csv.read().replace('\r\n', '\n').replace('\n',';;')
+				# Compatibilidad tanto para fin de linea de Windows como de Linux
+				# (esperemos que nunca ocurra que alguien modifique el archivo en Mac)
+			except Exception, e:
+				raise e
+
+			datos = datos.replace('"','').replace(', ','-') 
+			datos = datos.split(';;')
+
+			datos.pop() # elimina la linea en blanco
+			del datos[0] # elimina los cabezales
+
+			for fila in datos:
+				fila = fila.split(',')
+
+				contratos.append({
+						'nrc': fila[4],
+						'tipo': fila[6]
+					})
+				pass
+
+			print 'Contratos:', contratos
+
+			for fila in contratos:
+				try:
+					_curso = Curso.objects.get(NRC=fila['nrc'])
+					pass
+				except Exception, e:
+					errores.append({
+							'propiedad': 'Contrato',
+							'descripcion': 'El NRC ' + fila['nrc'] + ' no está registrado propiamente en los cursos.<br/>No se pudo agregar el contrato.'
+						})
+
+				if _curso:
+					_contrato, created = Contrato.objects.get_or_create(
+							fk_curso=_curso,
+							tipo=fila['tipo']
+						)
+					_contrato.save()
+
+					print _contrato, '\n'
+					pass
+
+				pass
+
+			return render(request, 'Departamentos/form_subir_csv.html', {'errores': errores, 'success': True, 'titulo_tipo': 'Contratos'})
+			pass
+		else: # mostrar el formulario
+			titulo_tipo = 'Contratos'
+			dpto = dpto[:20]
+			departamento = get_object_or_404(Departamento, nick=dpto)
+			lista_ciclos = Ciclo.objects.all()
+			return render(request, 'Departamentos/form_subir_csv.html', locals())
 
 @login_required(login_url='/')
-def procesar_csv(request, dpto):
+def procesar_csv_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		if request.method == 'POST': # se envio a traves del formulario
 			try:
@@ -272,22 +388,38 @@ def procesar_csv(request, dpto):
 				_ciclo = get_object_or_404(Ciclo, id=post_ciclo)
 				pass
 			except Exception, e:
-				raise e
+				errores.append({
+						'propiedad': 'Departamento/Ciclo',
+						'descripcion': 'Hubo un error con alguno de los campos.'
+					})
+				pass
 
 			errores = [] # inicializa errores
 			cursos = [] # inicializa el objeto para los cursos
 
 			try:
-				nombre_archivo = request.FILES['archivo-csv']
-				datos = unicode(nombre_archivo.read()).replace('\r\n', '\n').replace('\n',';;')
+				archivo_csv = request.FILES['archivo-csv']
+
+				if not archivo_csv or archivo_csv.content_type != 'text/csv':
+					ciclos = Ciclo.objects.all()
+					errores.append({
+							'propiedad': 'Archivo',
+							'descripcion': 'Tipo de archivo no valido.'
+						})
+					archivo_csv = None
+					return render(request, 'Departamentos/form_subir_csv.html', 
+					{
+						'errores': errores,
+						'departamento': _departamento,
+						'lista_ciclos': ciclos,
+						'titulo_tipo': 'Cursos'
+					})
+					pass
+
+				datos = unicode(archivo_csv.read()).replace('\r\n', '\n').replace('\n',';;')
 				# Compatibilidad tanto para fin de linea de Windows como de Linux
 				# (esperemos que nunca ocurra que alguien modifique el archivo en Mac)
 
-				'''
-				TODO:
-					+ Verificar la extension del archivo y, como medida adicional, comprobar
-					  que el archivo efectivamente esta separado por comas desde un inicio.
-				'''
 				pass
 			except Exception, e:
 				ciclos = Ciclo.objects.all()
@@ -457,6 +589,7 @@ def procesar_csv(request, dpto):
 			# return JsonResponse(cursos, safe=False); # temporal.
 			pass
 		else:
+			titulo_tipo = 'Cursos'
 			dpto = dpto[:20]
 			departamento = get_object_or_404(Departamento, nick=dpto)
 			#lista_departamentos = Departamento.objects.all()
@@ -494,25 +627,7 @@ def sistema_modifica_nrc(request, dpto, ciclo, nrc):
 
 ''' *************** IMPORTACIONES DE jefe_Depto/views_jefedep.py *************** '''
 
-@login_required(login_url='/')
-def inicio_jefedep(request):
-	if request.session['rol'] >= 2:
-		bienvenida = False
 
-		if request.session['just_logged']:
-			bienvenida = True
-			request.session['just_logged'] = False
-
-		lista_departamentos = Departamento.objects.all()
-
-		return render(request, 'inicio-jefedep.html', 
-			{
-				'banner': True, 
-				'bienvenida': bienvenida,
-				'lista_departamentos': lista_departamentos
-			})
-	else:
-	   	return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def computacion_form_asistencias(request):
