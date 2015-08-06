@@ -1,46 +1,39 @@
-{% extends 'base.html' %}
+{% extends 'Forms/base.html' %}
 
 {% block title %}
     Nuevo Departamento - Administrador
 {% endblock %}
 
-{% block content %}
-<div class="row">
-	<div class="medium-6 small-12 columns">
-		<div class="panel">
-			{% if not opcionesJefeDepartamento %}
-				<div class="alert-box warning radius">No hay jefes de departamento disponibles para asignar.<br/>
-					<a href="/nuevo_jefe/" style="color: #FFF190;">Por favor, cree uno primero.</a>
-				</div>
-			{% endif %}
-
-			{% if errors %}
-        	    <div class="alert-box alert radius">{{errors}}</div>
-            {% endif %}
-
-			<div class="row">
-				<div class="medium-12 columns">
-					<h4>Nuevo Departamento</h4>
-					<form method='POST' action="/nuevo_departamento">{% csrf_token %}
-						<label>Nombre del Departamento</label>
-							<input type="text" name='nombre' placeholder="Nombre de la nueva división" required/>
-
-			       		<label>Abreviación del Departamento</label>
-			       			<input type="text" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios." required/>
-
-			       		<label>Jefe del departamento</label>
-				       		<select name="nuevoJefe" required>
-	                            {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
-	                            <option value="{{opcionJefeDepartamento}}">{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}} ({{opcionJefeDepartamento.codigo}})</option>
-	                            {% endfor %}
-	                        </select>
-	                        
-			       		<button class="button expand" {% if not opcionesJefeDepartamento %}disabled{% endif %}>Continuar</button>
-			       	</form>
-				</div>
-			</div>	
+{% block formulario %}
+	{% if not opcionesJefeDepartamento %}
+		<div class="alert-box warning radius">No hay jefes de departamento disponibles para asignar.<br/>
+			<a href="/nuevo_jefe/" style="color: #FFF190;">Por favor, cree uno primero.</a>
 		</div>
-	</div>
-</div>
-{% endblock %}
+	{% endif %}
 
+	{% if errors %}
+	    <div class="alert-box alert radius">{{errors}}</div>
+    {% endif %}
+
+	<div class="row">
+		<div class="medium-12 columns">
+			<h4>Nuevo Departamento</h4>
+			<form method='POST' action="/nuevo_departamento">{% csrf_token %}
+				<label>Nombre del Departamento</label>
+					<input type="text" name='nombre' placeholder="Nombre de la nueva división" required/>
+
+	       		<label>Abreviación del Departamento</label>
+	       			<input type="text" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios." required/>
+
+	       		<label>Jefe del departamento</label>
+		       		<select name="nuevoJefe" required>
+                        {% for opcionJefeDepartamento in opcionesJefeDepartamento %}
+                        <option value="{{opcionJefeDepartamento}}">{{ opcionJefeDepartamento.user.last_name }}, {{opcionJefeDepartamento.rol}} ({{opcionJefeDepartamento.codigo}})</option>
+                        {% endfor %}
+                    </select>
+                    
+	       		<button class="button expand" {% if not opcionesJefeDepartamento %}disabled{% endif %}>Continuar</button>
+	       	</form>
+		</div>
+	</div>	
+{% endblock %}

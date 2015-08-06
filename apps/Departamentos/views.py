@@ -11,9 +11,13 @@ from apps.Historicos.models import *
 
 import re # libreria de expresiones regulares
 
+TEMPLATE_FORM_CSV = 'Forms/form_subir_csv.html'
+
 @login_required(login_url='/')
 def inicio_jefedep(request):
 	if request.session['rol'] >= 2:
+		options = {'banner': True} # Opciones por defecto
+
 		bienvenida = False
 
 		if request.session['just_logged']:
@@ -22,12 +26,10 @@ def inicio_jefedep(request):
 
 		lista_departamentos = Departamento.objects.all()
 
-		return render(request, 'inicio-jefedep.html', 
-			{
-				'banner': True, 
-				'bienvenida': bienvenida,
-				'lista_departamentos': lista_departamentos
-			})
+		options.update({'bienvenida': bienvenida})
+		options.update({'lista_departamentos': lista_departamentos})
+
+		return render(request, 'inicio-jefedep.html', options)
 	else:
 	   	return redirect('error403', origen=request.path)
 
@@ -283,6 +285,9 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 @login_required(login_url='/')
 def procesar_csv_contratos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
+		default_options = {'titulo_tipo':'Contratos', 'form_size': 'medium'}
+		options = {}
+
 		if request.method == 'POST': # se envio a traves del formulario
 
 			# Inicializacion de objetos.
@@ -313,20 +318,32 @@ def procesar_csv_contratos(request, dpto):
 							'descripcion': 'Tipo de archivo no valido.'
 						})
 					archivo_csv = None
-					return render(request, 'Forms/form_subir_csv.html', 
-					{
-						'errores': errores,
-						'departamento': _departamento,
-						'lista_ciclos': ciclos,
-						'titulo_tipo': 'Contratos'
-					})
+
+					options.update(default_options)
+					options.update({'errores': errores})
+					options.update({'departamento': _departamento})
+					options.update({'lista_ciclos': ciclos})
+
+					return render(request, TEMPLATE_FORM_CSV, options)
 					pass
 
 				datos = archivo_csv.read().replace('\r\n', '\n').replace('\n',';;')
 				# Compatibilidad tanto para fin de linea de Windows como de Linux
 				# (esperemos que nunca ocurra que alguien modifique el archivo en Mac)
 			except Exception, e:
-				raise e
+				ciclos = Ciclo.objects.all()
+				errores.append(
+					{
+						'propiedad': 'Archivo',
+						'descripcion': 'No se selecciono un archivo.'
+					})
+
+				options.update(default_options)
+				options.update({'errores': errores})
+				options.update({'departamento': _departamento})
+				options.update({'lista_ciclos': ciclos})
+
+				return render(request, TEMPLATE_FORM_CSV, options)
 
 			datos = datos.replace('"','').replace(', ','-') 
 			datos = datos.split(';;')
@@ -367,18 +384,27 @@ def procesar_csv_contratos(request, dpto):
 
 				pass
 
-			return render(request, 'Forms/form_subir_csv.html', {'errores': errores, 'success': True, 'titulo_tipo': 'Contratos'})
+			options.update(default_options)
+			options.update({'errores': errores, 'success': True})
+			return render(request, TEMPLATE_FORM_CSV, options)
 			pass
 		else: # mostrar el formulario
-			titulo_tipo = 'Contratos'
 			dpto = dpto[:20]
 			departamento = get_object_or_404(Departamento, nick=dpto)
 			lista_ciclos = Ciclo.objects.all()
-			return render(request, 'Forms/form_subir_csv.html', locals())
+
+			options.update(default_options)
+			options.update({'departamento': departamento})
+			options.update({'lista_ciclos': lista_ciclos})
+
+			return render(request, TEMPLATE_FORM_CSV, options)
 
 @login_required(login_url='/')
 def procesar_csv_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
+		default_options = {'titulo_tipo':'Cursos', 'form_size': 'medium'}
+		options = {}
+
 		if request.method == 'POST': # se envio a traves del formulario
 			try:
 				post_departamento = request.POST.get('depto', '')
@@ -407,13 +433,13 @@ def procesar_csv_cursos(request, dpto):
 							'descripcion': 'Tipo de archivo no valido.'
 						})
 					archivo_csv = None
-					return render(request, 'Forms/form_subir_csv.html', 
-					{
-						'errores': errores,
-						'departamento': _departamento,
-						'lista_ciclos': ciclos,
-						'titulo_tipo': 'Cursos'
-					})
+
+					options.update(default_options)
+					options.update({'errores': errores})
+					options.update({'departamento': _departamento})
+					options.update({'lista_ciclos': ciclos})
+
+					return render(request, TEMPLATE_FORM_CSV, options)
 					pass
 
 				datos = unicode(archivo_csv.read()).replace('\r\n', '\n').replace('\n',';;')
@@ -428,12 +454,13 @@ def procesar_csv_cursos(request, dpto):
 						'propiedad': 'Archivo',
 						'descripcion': 'No se selecciono un archivo.'
 					})
-				return render(request, 'Forms/form_subir_csv.html', 
-					{
-						'errores': errores,
-						'departamento': _departamento,
-						'lista_ciclos': ciclos
-					})
+
+				options.update(default_options)
+				options.update({'errores': errores})
+				options.update({'departamento': _departamento})
+				options.update({'lista_ciclos': ciclos})
+
+				return render(request, TEMPLATE_FORM_CSV, options)
 
 			datos = re.sub('\s{2,}', '', datos) # Elimina los espacios en blanco en el nombre de la materia.
 
@@ -500,8 +527,7 @@ def procesar_csv_cursos(request, dpto):
 						fk_departamento = _departamento
 					)
 
-				# Agrega el area al campo m2m
-				_materia.fk_area.add(_area)
+				_materia.fk_area.add(_area) # Agrega el area al campo m2m
 				_materia.save()
 
 				# return HttpResponse(_materia) # DEBUG
@@ -585,49 +611,37 @@ def procesar_csv_cursos(request, dpto):
 				_curso.save();
 				# return HttpResponse(_curso) #YOLO
 				pass
-			return render(request, 'Forms/form_subir_csv.html', {'errores': errores, 'success': True})
+
+			options.update(default_options)
+			options.update({'errores': errores})
+			options.update({'success': True})
+
+			return render(request, TEMPLATE_FORM_CSV, options)
 			# return JsonResponse(cursos, safe=False); # temporal.
 			pass
 		else:
-			titulo_tipo = 'Cursos'
 			dpto = dpto[:20]
 			departamento = get_object_or_404(Departamento, nick=dpto)
-			#lista_departamentos = Departamento.objects.all()
 			lista_ciclos = Ciclo.objects.all()
-			return render(request, 'Forms/form_subir_csv.html', locals())
+			
+			options.update(default_options)
+			options.update({'departamento': departamento})
+			options.update({'lista_ciclos': lista_ciclos})
 
-	else:
-		return redirect('error403', origen=request.path)
+			return render(request, TEMPLATE_FORM_CSV, options)
 
-@login_required(login_url='/')
-def sistema_consulta(request, dpto, ciclo):
-	if request.session['rol'] >= 2:
-		return render(request, 'Departamentos/modifica_curso.html',
-			{
-				'dpto': dpto,
-				'ciclo': ciclo
-			})
-		pass
 	else:
 		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def sistema_modifica_nrc(request, dpto, ciclo, nrc):
 	if request.session['rol'] >= 2:
-		return render(request, 'Departamentos/modifica_curso_individual.html',
-			{
-				'dpto': dpto,
-				'ciclo': ciclo,
-				'nrc': nrc
-			})
+		options = {'dpto': dpto, 'ciclo': ciclo, 'nrc': nrc}
+
+		return render(request, 'Departamentos/modifica_curso_individual.html', options)
 		pass
 	else:
 		return redirect('error403', origen=request.path)
-
-
-''' *************** IMPORTACIONES DE jefe_Depto/views_jefedep.py *************** '''
-
-
 
 # @login_required(login_url='/')
 # def computacion_form_asistencias(request):

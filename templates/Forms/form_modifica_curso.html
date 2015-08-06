@@ -75,10 +75,6 @@
 
 		function EnviarForm(ref)
 		{
-			//datos = $(ref).serializeArray();
-			//console.log(JSON.stringify(datos));
-			//console.log($(ref).serialize()); // DEBUG
-			
 			$.ajax({
 				url: ref.action,
 				method: 'POST',

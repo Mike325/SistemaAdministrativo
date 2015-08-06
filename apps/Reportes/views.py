@@ -75,6 +75,7 @@ def listas_tMedio(request, dpto):
 @login_required(login_url='/')
 def form_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
+		form_size = 'medium'
 		return render(request, 'Forms/form-incidencias.html', locals())
 		pass
 	else:
@@ -133,7 +134,7 @@ def ver_incidencias(request, dpto):
 		else:
 			return render(request, 'form-incidencias.html',
 				{
-					'errores': errores,
+					'errores': errores
 				})
 
 	else:
@@ -153,6 +154,7 @@ def form_reporte_incidencias(request, dpto):
 					'departamento': _departamento,
 					'profesores': listaProf,
 					'materias': listaMaterias,
+					'form_size': 'large'
 				})
 		except:
 			return render(request, 'Forms/form-reporte-incidencias.html', 
@@ -161,6 +163,7 @@ def form_reporte_incidencias(request, dpto):
 					'departamento': _departamento,
 					'profesores': listaProf,
 					'materias': listaMaterias,
+					'form_size': 'large'
 				})
 		pass
 	else:
@@ -225,6 +228,8 @@ def reporte_incidencias(request, dpto):
 	else:
 		return redirect('error403', origen=request.path)
 
+''' SECCION DE LAS ESTADISTICAS '''
+
 @login_required(login_url='/')
 def estadisticasDepartamento(request, dpto):
 	if request.session['rol'] >= 1:
@@ -234,6 +239,7 @@ def estadisticasDepartamento(request, dpto):
 			datos = {
 				'nombre' : departamento.nombre
 			}
+			form_size = 'small'
 			return render(request, 'Listas/estadisticas.html', locals())
 			pass
 		except:
@@ -253,6 +259,7 @@ def estadisticasProfesor(request):
 					'nombre' : (profesor.nombre + " " + profesor.apellido +
 								 "(" + profesor.codigo_udg + ")")
 				}
+				form_size = 'small'
 				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
@@ -260,6 +267,7 @@ def estadisticasProfesor(request):
 		else:
 			lista_profesores = Profesor.objects.all()
 			objetos = "Profesores"
+			form_size = 'small'
 			return render(request, 'Listas/estadisticas-listas.html', locals())
 	else:
 		return redirect('error403', origen=request.path)
@@ -274,11 +282,13 @@ def estadisticasMateria(request):
 				datos = {
 					'nombre' : materia.nombre + " (" + materia.clave + ")"
 				}
+				form_size = 'small'
 				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
 				return redirect('inicio-secretaria')
 		else:
+			form_size = 'small'
 			objetos = "Materias"
 			lista_materias = Materia.objects.all()
 			return render(request, 'Listas/estadisticas-listas.html', locals())		
@@ -295,6 +305,7 @@ def estadisticasCiclo(request):
 				datos = {
 					'nombre' : "Ciclo " + ciclo.id
 				}
+				form_size = 'small'
 				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
@@ -302,6 +313,7 @@ def estadisticasCiclo(request):
 		else:
 			objetos = "Ciclos"
 			lista_ciclos = Ciclo.objects.all()
+			form_size = 'small'
 			return render(request, 'Listas/estadisticas-listas.html', locals())
 	else:
 		return redirect('error403', origen=request.path)

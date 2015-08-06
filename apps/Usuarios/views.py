@@ -5,6 +5,8 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
+from django.db.models import Q
+
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -13,6 +15,11 @@ from SistemaAdministrativo.commons.shortcuts import panelInicio
 from apps.Departamentos.models import Departamento
 from apps.Usuarios.models import Usuario, Rol
 from apps.Historicos.models import Registro
+
+# las plantillas que se llamen mas de una vez es mejor ponerlas como constantes
+TEMPLATE_ALTA_JEFEDEP = 'nuevo-jefeDep.html'
+TEMPLATE_ALTA_SECRE = 'nueva-secretaria.html'
+TEMPLATE_MODIFICA_PASS = 'modificar-password.html'
 
 def login(request):
     if request.method == 'POST':
@@ -79,6 +86,7 @@ def inicio_admin(request):
 @login_required(login_url='/')
 def sistema_modificar_jefedep(request, dpto):
     if request.session['rol'] == 3:
+        form_size = 'small'
         if request.method == 'POST':
             #Tomar valores del POST
             post_jefeActual = request.POST.get('jefeActual', '')
@@ -134,6 +142,7 @@ def sistema_modificar_jefedep(request, dpto):
 @login_required(login_url='/')
 def nuevo_departamento(request):
     if request.session['rol'] == 3:
+        form_size = 'small'
         #Revisar si se entra a la página por POST
         if request.method == 'POST':
             #Obtener los campos del nuevo departamento
@@ -162,11 +171,13 @@ def nuevo_departamento(request):
             opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
             return render(request, 'nuevo-departamento.html', locals())
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def nuevo_jefe(request):
     if request.session['rol'] == 3:
+        form_size = 'small'
+
         if request.method == 'POST':
             usuario = request.POST.get('username','')
             password = request.POST.get('password', '')
@@ -175,28 +186,32 @@ def nuevo_jefe(request):
             apellido = request.POST.get('apellido','')
             correo = request.POST.get('correo', '')
             
-            if User.objects.filter(username = usuario ).exists():
+            if User.objects.filter(Q(username=usuario) | Q(email=correo)).exists():
+
                 errors = 'Ya existe registro con ese nombre'
-                return render(request,'nuevo_jefeDep.html',locals())
+                return render(request, TEMPLATE_ALTA_JEFEDEP, locals())
             else:
                 nuevo_usuario = Usuario.alta_jefe(usuario, password, nombre, 
                                                     apellido, correo, codigo)
                 nuevo_usuario.save()
 
                 registro = Registro.creacion(request.session['usuario']['nick'],
-                        'Se creo el jefe de departamento "'+nuevo_usuario.user.get_full_name()+'"'
-                        , usuario, 'Usuarios')
+                        'Se creo el jefe de departamento "'
+                        + nuevo_usuario.user.get_full_name() +'"',
+                        usuario, 'Usuarios')
                 registro.save()
 
                 return redirect('/inicio-administrador/')
         else:
-            return render(request, 'nuevo-jefeDep.html')
+            return render(request, TEMPLATE_ALTA_JEFEDEP, locals())
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def nueva_secretaria(request):
     if request.session['rol'] >= 2:
+        form_size = 'small'
+
         if request.method == 'POST':
             usuario = request.POST.get('username','')
             password = request.POST.get('password', '')
@@ -204,9 +219,11 @@ def nueva_secretaria(request):
             nombre = request.POST.get('nombre','')
             apellido = request.POST.get('apellido','')
             correo = request.POST.get('correo', '')
-            if User.objects.filter(username = usuario ).exists():
+
+            if User.objects.filter(Q(username=usuario) | Q(email=correo)).exists():
+
                 errors = 'Ya existe registro con ese nombre'
-                return render(request,'nueva-secretaria.html',locals())
+                return render(request, TEMPLATE_ALTA_SECRE, locals())
             else:
                 nuevo_usuario = Usuario.alta_secretaria(usuario, password, nombre, 
                                                     apellido, correo, codigo)
@@ -219,17 +236,19 @@ def nueva_secretaria(request):
 
                 return redirect('/inicio-administrador/')
         else:
-            return render(request, 'nueva-secretaria.html')
+            return render(request, TEMPLATE_ALTA_SECRE, locals())
     else:
-        return render(request, 'PermisoDenegado.html')
+        return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def activar_usuarios(request):
     if request.session['rol'] == 3:
         if request.method == 'POST':
             usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
+
             for x in usuarios:
                 estado = request.POST.get(x.user.username,'')
+
                 if estado=='active' and not x.user.is_active:
                     x.user.is_active = True
                     registro = Registro.modificacion(request.session['usuario']['nick'],
@@ -246,6 +265,7 @@ def activar_usuarios(request):
                             'Inactivo', 'Usuarios')
                     x.user.save()
                     registro.save()
+
             return redirect('/inicio-administrador/')
         else:
             usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
@@ -255,9 +275,12 @@ def activar_usuarios(request):
 
 @login_required(login_url='/')
 def modificar_perfil(request):
-    if request.session['rol'] >= 1:
+    if request.session['rol'] >= 1: # basicamente cualquier usuario, no? e.e
+
+        form_size = 'small'
         user_modificar = request.session['usuario']['nick']
         perfil = Usuario.objects.filter(user__username = user_modificar)
+
         if request.method == 'POST':
             usuario1 = request.POST.get('username','')
             codigo1 = request.POST.get('codigo','')
@@ -289,6 +312,8 @@ def modificar_perfil(request):
 @login_required(login_url='/')
 def modificar_password(request):
     if request.session['rol'] >= 1:
+        form_size = 'small'
+
         if request.method == 'POST':
             password_actual = request.POST.get('password_actual','')
             password_nuevo = request.POST.get('password_nuevo','')
@@ -319,9 +344,9 @@ def modificar_password(request):
                 return redirect ('/inicio-administrador/')
             else:
                 errors = "Confirmacion de contraseña erronea"
-                return render(request,'modificar-password.html', locals())
+                return render(request, TEMPLATE_MODIFICA_PASS, locals())
         else:
-            return render(request,'modificar-password.html', locals())
+            return render(request, TEMPLATE_MODIFICA_PASS, locals())
     else:
         return redirect('error403', origen=request.path)
 
