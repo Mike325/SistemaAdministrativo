@@ -17,9 +17,9 @@ from apps.Usuarios.models import Usuario, Rol
 from apps.Historicos.models import Registro
 
 # las plantillas que se llamen mas de una vez es mejor ponerlas como constantes
-TEMPLATE_ALTA_JEFEDEP = 'nuevo-jefeDep.html'
-TEMPLATE_ALTA_SECRE = 'nueva-secretaria.html'
-TEMPLATE_MODIFICA_PASS = 'modificar-password.html'
+TEMPLATE_ALTA_JEFEDEP = 'Usuarios/nuevo-jefeDep.html'
+TEMPLATE_ALTA_SECRE = 'Usuarios/nueva-secretaria.html'
+TEMPLATE_MODIFICA_PASS = 'Usuarios/modificar-password.html'
 
 def login(request):
     if request.method == 'POST':
@@ -56,7 +56,7 @@ def login(request):
         if request.user.is_authenticated():
             return panelInicio(request)
         else:
-            return render(request,'login.html')
+            return render(request, 'Usuarios/login.html')
 
 def logout(request):
     try:
@@ -133,7 +133,7 @@ def sistema_modificar_jefedep(request, dpto):
                     opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
                 except ObjectDoesNotExist:
                     errors = "No existen jefes de este departamento, favor de crear uno."
-                return render(request, 'modificar-jefe-departamento.html', locals())
+                return render(request, 'Forms/modificar-jefe-departamento.html', locals())
             else:
                 return redirect('/inicio-administrador/')
     else:
@@ -169,7 +169,7 @@ def nuevo_departamento(request):
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
             opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
-            return render(request, 'nuevo-departamento.html', locals())
+            return render(request, 'Forms/nuevo-departamento.html', locals())
     else:
         return redirect('error403', origen=request.path)
 
@@ -269,7 +269,7 @@ def activar_usuarios(request):
             return redirect('/inicio-administrador/')
         else:
             usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
-            return render(request, 'activar-usuarios.html', locals())
+            return render(request, 'Usuarios/activar-usuarios.html', locals())
     else:
         return redirect('error403', origen=request.path)
 
@@ -305,7 +305,7 @@ def modificar_perfil(request):
             request.session['just_logged'] = True
             return panelInicio(request)
         else:    
-            return render(request, 'modificar-perfil.html', locals())        
+            return render(request, 'Usuarios/modificar-perfil.html', locals())        
     else:
         return redirect('error403', origen=request.path)
 

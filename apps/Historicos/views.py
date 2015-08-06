@@ -6,12 +6,15 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import re
 
+TEMPLATE_HISTORICOS = 'Historicos/historicos.html'
+
 @login_required(login_url="/")
 def historicos(request):
     if request.session['rol'] >= 2:
         registros = Registro.objects.all().order_by("-fechaHoraModificacion")
         paginator = Paginator(registros, 50)
         pagina = request.GET.get('pagina')
+
         try:
             registros = paginator.page(pagina)
         except PageNotAnInteger:
@@ -20,7 +23,8 @@ def historicos(request):
         except EmptyPage:
             # If page is out of range (e.g. 9999), deliver last page of results.
             registros = paginator.page(paginator.num_pages)
-        return render(request, 'historicos.html', locals())
+            
+        return render(request, TEMPLATE_HISTORICOS, locals())
     else:
         return redirect('error403', origen=request.path)
 
@@ -43,11 +47,11 @@ def historicosFiltrados(request):
                 except EmptyPage:
                     # If page is out of range (e.g. 9999), deliver last page of results.
                     registros = paginator.page(paginator.num_pages)
-                return render(request, 'historicos.html', locals())
+                return render(request, TEMPLATE_HISTORICOS, locals())
             else:
                 registros = Registro.objects.all().order_by("-fechaHoraModificacion")
                 errors = "Ingresa una fecha válida"
-                return render(request, 'historicos.html', locals())
+                return render(request, TEMPLATE_HISTORICOS, locals())
         else:
             return redirect('/historicos/')
     else:
