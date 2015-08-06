@@ -8,7 +8,9 @@
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/plugins/bootstrap-datepicker.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/plugins/jquery.timepicker.css' %}">
+
     <script type="text/javascript" src="{% static 'js/datetime/bootstrap-datepicker.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/datetime/bootstrap-datepicker.es.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/datetime/datepair.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/datetime/jquery.datepair.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/datetime/jquery.timepicker.min.js' %}"></script>
@@ -18,11 +20,17 @@
             $('.dateOnly .date').datepicker(
             {
                     'format': 'yyyy-mm-dd',
-                    'autoclose': true
+                    'autoclose': true,
+                    'language': 'es'
             });
 
-            var dateOnlyEl = document.getElementById('dateOnly');
-            var dateOnlyDatepair = new Datepair(dateOnlyEl);
+            /*
+                FIX:
+                    + datepair() solo se usa en rangos
+            */
+
+            // var dateOnlyEl = document.getElementById('dateOnly');
+            // var dateOnlyDatepair = new Datepair(dateOnlyEl);
         });
     </script>
 {% endblock %}
