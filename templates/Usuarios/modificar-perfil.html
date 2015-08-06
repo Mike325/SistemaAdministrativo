@@ -1,34 +1,26 @@
-{% extends 'base.html' %}
+{% extends 'Forms/base.html' %}
 
 {% block title %}
     Modificar - Perfil
 {% endblock %}
 
-{% block content %}	
+{% block formulario %}	
+	{% if errors %}
+            <div class="alert-box alert radius">{{errors}}</div>
+    {% endif %}
+	<form id='formulario' method='post'>{% csrf_token %}
+		<h4 align="center">MODIFICAR PERFIL</h4>
+			<label>Usuario</label>
+			<input type="text" name="username" placeholder="Usuario" value = "{{ perfil.user.username }}" required  />
+			<label>Nombre</label>
+			<input type="text" name="nombre" placeholder="Nombre" value = "{{ perfil.user.first_name }}" required/>
+			<label>Apellido</label>
+			<input type="text" name="apellido" placeholder="Apellido" value = "{{ perfil.user.last_name }}" required/>
+			<label>Codigo</label>
+			<input type="text" name="codigo" maxlength=9 placeholder="Codigo" value = "{{ perfil.codigo }}" required/>
+			<label>Correo electrónico</label>
+			<input type="email" name="correo" placeholder="Email" value = "{{ perfil.user.email }}" required/>
+		<input type="submit" value="Continuar" class="button expand"/>
+	</form>
 
-<div class="row">
-	<div class="large-5 medium-8 columns ">
-		<div class="panel">
-			{% if errors %}
-                    <div class="alert-box alert radius">{{errors}}</div>
-            {% endif %}
-			<form id='formulario' method='post'>{% csrf_token %}
-				<h4 align="center">MODIFICAR PERFIL</h4>
-				{% for x in perfil %}
-					<label>Usuario</label>
-					<input type="text" name="username" placeholder="Usuario" value = "{{ x.user.username }}" required  />
-					<label>Nombre</label>
-					<input type="text" name="nombre" placeholder="Nombre" value = "{{ x.user.first_name }}" required/>
-					<label>Apellido</label>
-					<input type="text" name="apellido" placeholder="Apellido" value = "{{ x.user.last_name }}" required/>
-					<label>Codigo</label>
-					<input type="text" name="codigo" maxlength=9 placeholder="Codigo" value = "{{ x.codigo }}" required/>
-					<label>Correo electrónico</label>
-					<input type="email" name="correo" placeholder="Email" value = "{{ x.user.email }}" required/>
-				{% endfor %}
-				<input type="submit" value="Continuar" class="button expand"/>
-			</form>
-		</div>
-	</div>
-</div>
 {% endblock %}

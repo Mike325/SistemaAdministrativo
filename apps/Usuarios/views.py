@@ -51,7 +51,7 @@ def login(request):
 
             return panelInicio(request)
         else:
-            return render(request,'login.html', {'errors': "Usuario o contraseña incorrectos"})
+            return render(request,'Usuarios/login.html', {'errors': "Usuario o contraseña incorrectos"})
     else:
         if request.user.is_authenticated():
             return panelInicio(request)
@@ -279,7 +279,7 @@ def modificar_perfil(request):
 
         form_size = 'small'
         user_modificar = request.session['usuario']['nick']
-        perfil = Usuario.objects.filter(user__username = user_modificar)
+        perfil = Usuario.objects.get(user__username = user_modificar)
 
         if request.method == 'POST':
             usuario1 = request.POST.get('username','')
@@ -304,7 +304,7 @@ def modificar_perfil(request):
             request.session['usuario'] = usuario
             request.session['just_logged'] = True
             return panelInicio(request)
-        else:    
+        else:
             return render(request, 'Usuarios/modificar-perfil.html', locals())        
     else:
         return redirect('error403', origen=request.path)
