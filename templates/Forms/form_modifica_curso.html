@@ -186,7 +186,7 @@
 				<div class="row">
 					<div class="medium-2 columns">
 						<label>Seccion</label>
-							<input class="upper" type="text" name="in-secc" value="{{ curso.fk_secc }}">
+							<input class="upper" type="text" name="in-secc" value="{{ curso.fk_secc }}" maxlength="5">
 					</div>
 					<div class="medium-8 columns">
 						<label>Profesor</label>
@@ -209,11 +209,11 @@
 										<div class="row">
 											<div class="small-6 columns">
 												<label>Edificio</label>
-													<input type="text" name="in-horario-{{ horario.id }}-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}">
+													<input type="text" name="in-horario-{{ horario.id }}-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}" maxlength="5">
 											</div>
 											<div class="small-6 columns">
 												<label>Aula</label>
-													<input type="text" name="in-horario-{{ horario.id }}-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}">
+													<input type="text" name="in-horario-{{ horario.id }}-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}" maxlength="5">
 											</div>
 										</div>
 									</div>
@@ -222,11 +222,11 @@
 										<div class="row select-horario">
 											<div class="small-6 columns">
 												<label>Hora inicio</label>
-													<input type="text" name="in-horario-{{ horario.id }}-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}">
+													<input type="text" name="in-horario-{{ horario.id }}-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}" maxlength="5">
 											</div>
 											<div class="small-6 columns">
 												<label>Hora fin</label>
-													<input type="text" name="in-horario-{{ horario.id }}-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}">
+													<input type="text" name="in-horario-{{ horario.id }}-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}" maxlength="5">
 											</div>
 										</div>
 									</div>
@@ -309,11 +309,11 @@
 			<div class="row">
 				<div class="small-6 columns">
 					<label>Edificio</label>
-						<input type="text" name="in-horarioN-NUEVO-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}">
+						<input type="text" name="in-horarioN-NUEVO-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}" maxlength="5" required>
 				</div>
 				<div class="small-6 columns">
 					<label>Aula</label>
-						<input type="text" name="in-horarioN-NUEVO-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}">
+						<input type="text" name="in-horarioN-NUEVO-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}" maxlength="5" required>
 				</div>
 			</div>
 		</div>
@@ -322,11 +322,11 @@
 			<div class="row select-horario">
 				<div class="small-6 columns">
 					<label>Hora inicio</label>
-						<input type="text" name="in-horarioN-NUEVO-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}">
+						<input type="text" name="in-horarioN-NUEVO-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}" maxlength="5" required>
 				</div>
 				<div class="small-6 columns">
 					<label>Hora fin</label>
-						<input type="text" name="in-horarioN-NUEVO-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}">
+						<input type="text" name="in-horarioN-NUEVO-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}" maxlength="5" required>
 				</div>
 			</div>
 		</div>

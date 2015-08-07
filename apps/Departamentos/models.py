@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 
 from apps.Usuarios.models import Usuario
 
+numerico = RegexValidator(r'^[0-9]*$', 'Use solo caracteres numericos (0-9).')
 alfanumerico = RegexValidator(r'^[0-9a-zA-Z]*$', 'Use solo caracteres alfanumericos (a-Z, 0-9).')
 
 '''
@@ -49,7 +50,7 @@ class Seccion(models.Model):
         pass    
 
 class Profesor(models.Model):
-    codigo_udg = models.CharField(max_length=9, primary_key=True)
+    codigo_udg = models.CharField(max_length=9, primary_key=True, validators=[numerico])
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
 
