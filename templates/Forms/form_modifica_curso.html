@@ -16,6 +16,8 @@
 	<script type="text/javascript" src="{% static 'js/datetime/jquery.datepair.min.js' %}"></script>
 
 	<script type="text/javascript">
+		var next_hor = 0;
+
 		$(document).ready(function()
 		{
 			$('.in-profesor').autocomplete(
@@ -41,8 +43,6 @@
   				$('.autocomplete-suggestions').remove();
 			});
 
-			//$('.in-hora_ini').timepicker({ 'forceRoundTime': true });
-
 			$('.select-horario .time').timepicker(
 			{
 				'scrollDefault': 'now',
@@ -52,7 +52,6 @@
 					return (i%2) ? 55 : 5;
 				}
 			});
-
 			$('.select-horario').datepair();
 			$(document).foundation('tooltip', 'reflow');
 		});
@@ -73,8 +72,55 @@
 			//console.log(ref.value);
 		}
 
+		function CrearHorario(ref)
+		{
+			nuevoNodo = $('div#cloneHorario').clone();
+			contenedor = $('#add-horario-button-div').parent().get(0);
+			button_div = document.getElementById('add-horario-button-div');
+
+			nuevoNodo.get(0).id = '';
+
+			x = $(nuevoNodo).get(0).getElementsByTagName("input");
+			for (var i = 0; i < x.length; i++) 
+			{
+				temp_name = x[i].name;
+				if (temp_name)
+				{
+					temp_name = temp_name.replace('NUEVO', next_hor);
+
+					x[i].name = temp_name;
+
+					console.log(temp_name);
+				}
+			};
+
+			nuevoNodo.get(0).style.display = 'block';
+			$('.select-horario .time', nuevoNodo).timepicker(
+			{
+				'scrollDefault': 'now',
+				'timeFormat': 'H:i',
+				'step': function(i) 
+				{
+					return (i%2) ? 55 : 5;
+				}
+			});
+
+			$('.select-horario', nuevoNodo).datepair();
+
+			contenedor.insertBefore(nuevoNodo.get(0), button_div);
+
+			next_hor++;
+		}
+
 		function EnviarForm(ref)
 		{
+			//console.log($(ref).serialize());
+			ref.disabled=true;
+
+			div_error = document.getElementById('errores-div');
+			div_info = document.getElementById('info-div');
+			$(div_error).slideUp(165);
+
 			$.ajax({
 				url: ref.action,
 				method: 'POST',
@@ -82,11 +128,37 @@
 			})
 			.done(function(data)
 			{
-				alert(data);
+				if ( typeof(data)=='object' )
+				{
+					buffer = '<ul style="font-size: 0.8rem; margin-top: 15px;">';
+					for (var i = 0; i < data.length; i++) 
+					{
+						buffer += '<li>';
+						buffer += '<b>' + data[i].tipo + '</b>: ';
+						buffer += data[i].desc;
+						buffer += '</li>';
+					};
+					buffer += '</ul>';
+
+					div_error.innerHTML = buffer;
+					$(div_error).slideDown();
+				}
+				else
+				{
+					div_info.innerHTML='<p style="font-size: 14px; margin: 0;" class="text-center">' + data + '</p>';
+					$(div_info).slideDown(250, function()
+					{
+						setTimeout(function()
+						{
+							$('a.close-reveal-modal').trigger('click');
+						}, 1700);
+					});
+					$(div_info).slideDown(250);
+				}
 			});
 		}
 
-		var next_hor = 0;
+		
 	</script>
 
 	<div class="row">
@@ -198,10 +270,12 @@
 								</div>
 							{% endfor %}
 
-							<div class="row">
+							<div class="row" id="add-horario-button-div">
 									<div class="small-4 columns right">
-										<button class="button tiny radius success no-margin" style="width: 100%;" onclick="return false;">Añadir otro horario</button>
+										<button type="button" class="button tiny radius success no-margin" style="width: 100%;" onclick="CrearHorario(this)">Añadir otro horario</button>
 									</div>
+									<div data-alertbox class="alert-box alert radius small-8 columns left" id="errores-div" style="display: none; padding: 12px 6px;"></div>
+									<div data-alertbox class="alert-box success radius small-8 columns left" id="info-div" style="display: none; padding: 12px 6px;"></div>
 							</div>
 						</fieldset>
 					</div>
@@ -226,4 +300,75 @@
 			</form>
 		</div>
 	</div>
+
+<!-- HORARIO CLONABLE -->
+<div id="cloneHorario" style="display: none;">
+	{# <input type="hidden" name="delete-horarioN-NUEVO" id="delete-horarioN-NUEVO" value=""> #}
+	<div class="row horario" id="horarioN-NUEVO">
+		<div class="medium-4 columns">
+			<div class="row">
+				<div class="small-6 columns">
+					<label>Edificio</label>
+						<input type="text" name="in-horarioN-NUEVO-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}">
+				</div>
+				<div class="small-6 columns">
+					<label>Aula</label>
+						<input type="text" name="in-horarioN-NUEVO-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}">
+				</div>
+			</div>
+		</div>
+
+		<div class="medium-4 columns">
+			<div class="row select-horario">
+				<div class="small-6 columns">
+					<label>Hora inicio</label>
+						<input type="text" name="in-horarioN-NUEVO-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}">
+				</div>
+				<div class="small-6 columns">
+					<label>Hora fin</label>
+						<input type="text" name="in-horarioN-NUEVO-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}">
+				</div>
+			</div>
+		</div>
+
+		<div class="medium-4 columns">
+			<div class="row" style="margin-top: 18px;">
+				<div class="small-2 columns text-center">
+					<label for="in-dias-L">L</label>
+						<input type="checkbox" name="in-horarioN-NUEVO-dias-L" class="in-dias" id="in-dias-L" {% if horario.L %}checked{% endif %}>
+				</div>
+				<div class="small-2 columns text-center">
+					<label for="in-dias-M">M</label>
+						<input type="checkbox" name="in-horarioN-NUEVO-dias-M" class="in-dias" id="in-dias-M" {% if horario.M %}checked{% endif %}>
+				</div>
+				<div class="small-2 columns text-center">
+					<label for="in-dias-I">I</label>
+						<input type="checkbox" name="in-horarioN-NUEVO-dias-I" class="in-dias" id="in-dias-I" {% if horario.I %}checked{% endif %}>
+				</div>
+				<div class="small-2 columns text-center">
+					<label for="in-dias-J">J</label>
+						<input type="checkbox" name="in-horarioN-NUEVO-dias-J" class="in-dias" id="in-dias-J" {% if horario.J %}checked{% endif %}>
+				</div>
+				<div class="small-2 columns text-center">
+					<label for="in-dias-V">V</label>
+						<input type="checkbox" name="in-horarioN-NUEVO-dias-V" class="in-dias" id="in-dias-V" {% if horario.V %}checked{% endif %}>
+				</div>
+				<div class="small-2 columns text-center">
+					<label for="in-dias-S">S</label>
+						<input type="checkbox" name="in-horarioN-NUEVO-dias-S" class="in-dias" id="in-dias-S" {% if horario.S %}checked{% endif %}>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% comment %}
+		<div class="row">
+			{% if curso.fk_horarios.all|length > 1 %}
+			<div class="small-4 columns right">
+				<button class="button tiny expand radius alert no-margin button-delete" onclick="EliminarHorario(this, 'NUEVO')">Eliminar este horario</button>
+			</div>
+			{% endif %}
+		</div>
+	{% endcomment %}
+</div>
 {% endif %}

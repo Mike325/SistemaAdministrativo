@@ -143,6 +143,14 @@ class Curso(models.Model):
         return self.NRC
         pass
 
+class TipoContrato(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=50, unique=True)
+
+    def __unicode__(self):
+        return self.nombre
+        pass
+
 class Contrato(models.Model):
     opciones = (
             ('T', 'Tiempo completo'),
@@ -152,6 +160,8 @@ class Contrato(models.Model):
 
     id = models.AutoField(primary_key=True)
     fk_curso = models.ForeignKey(Curso)
+    fk_tipocont = models.ForeignKey(TipoContrato, null=True, blank=True)
+    
     tipo = models.CharField(max_length=1, choices=opciones, default='', blank=True)
 
     def __unicode__(self):

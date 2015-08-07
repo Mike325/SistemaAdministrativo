@@ -36,7 +36,7 @@ def inicio_jefedep(request):
 @login_required(login_url='/')
 def ver_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
-		lista_cursos = Curso.objects.all()
+		lista_cursos = Curso.objects.filter(fk_area__fk_departamento__nick=dpto).order_by('fk_materia__nombre')
 		paginator = Paginator(lista_cursos, 100)
 
 		pagina = request.GET.get('pagina')
@@ -61,6 +61,10 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 		curso = get_object_or_404(Curso, NRC=_nrc)
 
 		if request.method == 'POST':
+			errores = []
+			warns = []
+
+			'''ELIMINACIONES PENDIENTES'''
 			in_delete_req = [
 					k.replace('delete-horario-','') # valor asignado si...
 					for k, v in request.POST.items() # para cada (clave, valor) en los elementos POST
@@ -87,8 +91,130 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 					pass
 				else:
 					pass
+
 				pass
 
+			'''HORARIOS NUEVOS'''
+			in_new_req = [
+					{ k.replace('in-horarioN-','') : v } # valor a asignar si...
+					for k, v in request.POST.items() if k.startswith('in-horarioN-')
+				]
+
+			actual = ''
+			datos = {}
+			_horario = None
+
+			if in_new_req: # Si hay nuevos horarios
+				# Ordenamos los nuevos horarios y los pasamos a un arreglo con
+				# la clave principal.
+				in_new_req = sorted(in_new_req)
+
+				for x in in_new_req:
+					for clave, valor in x.items():
+						temp = clave.split('-',1)
+
+						if temp[0] != actual:
+							actual = temp[0]
+							datos[actual] = {}
+
+						datos[actual].update({ temp[1] : valor })
+						pass
+					pass
+
+				# Procesamos todas las entradas
+				for clave, valor in datos.items():
+					# PREPARACIONES EDIFICIO >> inicio
+					if 'edif' in datos[clave] and datos[clave]['edif'] != '':
+						# Tenemos un edificio en la solicitud
+						_edificio, created = Edificio.objects.get_or_create( id = datos[clave]['edif'].upper() )
+
+						if created:
+							# warns.append(
+							# 	{
+							# 		'tipo': 'Objeto inexistente',
+							# 		'desc': 'Se creo un edificio nuevo.'
+							# 	})
+							edificioCreadoRegistro = Registro.creacion(
+									request.session['usuario']['nick'], 
+									'Se creo el edificio "' + _edificio.id + '"',
+									_edificio.id, 'Edificios'
+								)
+
+							edificioCreadoRegistro.save()
+							pass
+					else:
+						errores.append(
+							{
+								'tipo': 'Edificio',
+								'desc': 'Entrada invalida.'
+							})
+					# PREPARACIONES EDIFICIO >> fin
+
+					# PREPARACIONES AULA >> inicio
+					if 'aula' in datos[clave] and datos[clave]['aula'] != '':
+						_aula, created = Aula.objects.get_or_create(
+								nombre = datos[clave]['aula'].upper(), 
+								fk_edif = _edificio
+							)
+
+						if created:
+							# warns.append(
+							# 	{
+							# 		'tipo': 'Objeto inexistente',
+							# 		'desc': 'Se creo una aula nueva.'
+							# 	})
+							aulaCreadaRegistro = Registro.creacion(
+									request.session['usuario']['nick'],
+									'Se creo el aula "' + _aula.nombre + '"',
+									_aula.nombre, 'Aulas'
+								)
+							aulaCreadaRegistro.save()
+							pass
+					else:
+						errores.append(
+							{
+								'tipo': 'Aula',
+								'desc': 'Entrada invalida.'
+							})
+					# PREPARACIONES AULA >> fin
+
+					if not errores:
+						_horario = Horario()
+
+						_horario.hora_ini = datos[clave]['hora-ini'] if 'hora-ini' in datos[clave] else None
+						_horario.hora_fin = datos[clave]['hora-fin'] if 'hora-fin' in datos[clave] else None
+						_horario.L = True if 'dias-L' in datos[clave] and datos[clave]['dias-L'] == 'on' else False
+						_horario.M = True if 'dias-M' in datos[clave] and datos[clave]['dias-M'] == 'on' else False
+						_horario.I = True if 'dias-I' in datos[clave] and datos[clave]['dias-I'] == 'on' else False
+						_horario.J = True if 'dias-J' in datos[clave] and datos[clave]['dias-J'] == 'on' else False
+						_horario.V = True if 'dias-V' in datos[clave] and datos[clave]['dias-V'] == 'on' else False
+						_horario.S = True if 'dias-S' in datos[clave] and datos[clave]['dias-S'] == 'on' else False
+
+						_horario.fk_edif = _edificio
+						_horario.fk_aula = _aula
+
+						try:
+							_horario.save()
+							curso.fk_horarios.add(_horario)
+							pass
+						except Exception, e:
+							errores.append({
+									'tipo': 'Nuevo horario # ' + clave,
+									'desc': 'Hubo un problema al guardar los datos.<br/><small>Olvidó algun campo?</small>'
+								})
+						pass
+					else:
+						errores.append({
+								'tipo': 'Datos incompletos',
+								'desc': 'Imposible continuar.<br/><b>No se guardaron todos los cambios.</b>'
+							})
+				pass
+
+				if errores:
+					return JsonResponse(errores, safe=False)
+					pass
+
+			'''HORARIOS EXISTENTES'''
 			if in_delete_req:
 				in_horarios = [
 						{ k.replace('in-horario-','') : v } # valor a asignar si...
@@ -110,9 +236,6 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 			actual=''
 			datos = {}
 			_horario = None
-			
-			errores = []
-			warns = []
 
 			for x in in_horarios:
 				for clave, valor in x.items():
@@ -202,28 +325,41 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 					_horario.save()
 
 					if horarioAnterior.__unicode__() != _horario.__unicode__():
-						registroHorario = Registro.modificacion(request.session['usuario']['nick'],
-													'Se cambio el horario del curso "'+curso.NRC+'" de "'+
-													horarioAnterior.__unicode__()+'" a "'+
-													_horario.__unicode__()+'"',
-													horarioAnterior.__unicode__(), _horario.__unicode__(),
-													'Horarios')
+						registroHorario = Registro.modificacion(
+								request.session['usuario']['nick'],
+
+								'Se cambio el horario del curso "' + curso.NRC + '" de "'
+								+ horarioAnterior.__unicode__() + '" a "' + _horario.__unicode__() + '"',
+
+								horarioAnterior.__unicode__(), 
+								_horario.__unicode__(), 
+								'Horarios'
+							)
 						registroHorario.save()
+
 					if horarioAnterior.fk_aula.nombre != _aula.nombre:
-						registroAula = Registro.modificacion(request.session['usuario']['nick'],
-													'Se cambio el aula del curso "'+curso.NRC+'" de "'+
-													horarioAnterior.fk_aula.nombre+'" a "'+
-													_aula.nombre+'"',
-													horarioAnterior.fk_aula.nombre, _aula.nombre,
-													'Horarios')
+						registroAula = Registro.modificacion(
+								request.session['usuario']['nick'],
+
+								'Se cambio el aula del curso "' + curso.NRC + '" de "' 
+								+ horarioAnterior.fk_aula.nombre+'" a "' + _aula.nombre+'"',
+
+								horarioAnterior.fk_aula.nombre, 
+								_aula.nombre,
+								'Horarios'
+							)
 						registroAula.save()
 					if horarioAnterior.fk_edif.id != _edificio.id:
-						registroEdif = Registro.modificacion(request.session['usuario']['nick'],
-													'Se cambio el edificio del curso "'+curso.NRC+'" de "'+
-													horarioAnterior.fk_edif.id+'" a "'+
-													_edificio.id+'"',
-													horarioAnterior.fk_edif.id, _edificio.id,
-													'Horarios')
+						registroEdif = Registro.modificacion(
+								request.session['usuario']['nick'],
+
+								'Se cambio el edificio del curso "'+curso.NRC+'" de "'+
+								horarioAnterior.fk_edif.id+'" a "'+ _edificio.id+'"',
+
+								horarioAnterior.fk_edif.id, 
+								_edificio.id,
+								'Horarios'
+							)
 						registroEdif.save()
 
 					Horario.objects.filter(curso__isnull=True).delete()
@@ -244,12 +380,14 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 				profesor_actual = curso.fk_profesor
 				_profesor = Profesor.objects.get(codigo_udg=in_codigo_prof)
 				if in_codigo_prof != profesor_actual.codigo_udg:
-					registroP = Registro.modificacion(request.session['usuario']['nick'],
-					                        'Se cambio el profesor "'+
-					                        profesor_actual.nombre+" "+profesor_actual.apellido+
-					                        '" por "'+_profesor.nombre+" "+_profesor.apellido+'"', 
-					                        profesor_actual.codigo_udg,
-					                        _profesor.codigo_udg, 'Cursos')
+					registroP = Registro.modificacion(
+							request.session['usuario']['nick'],
+							'Se cambio el profesor "' 
+							+ profesor_actual.nombre + " " + profesor_actual.apellido+
+		                    '" por "'+_profesor.nombre+" "+_profesor.apellido+'"', 
+		                    profesor_actual.codigo_udg,
+		                    _profesor.codigo_udg, 'Cursos'
+                    	)
 					registroP.save()
 				curso.fk_profesor = _profesor
 				pass
@@ -258,11 +396,14 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 				secc_actual = curso.fk_secc
 				_seccion = Seccion.objects.get(id=in_secc)
 				if in_secc != secc_actual.id:
-					registroS = Registro.modificacion(request.session['usuario']['nick'],
-					                        'Se cambio la seccion "'+
-					                        secc_actual.id+" por "+_seccion.id+'"', 
-					                        secc_actual.id,
-					                        _seccion.id, 'Cursos')
+					registroS = Registro.modificacion(
+							request.session['usuario']['nick'],
+							'Se cambio la seccion "' +
+	                        secc_actual.id+" por "+_seccion.id+'"', 
+	                        secc_actual.id,
+	                        _seccion.id, 
+	                        'Cursos'
+                        )
 					registroS.save()
 				curso.fk_secc = _seccion
 				pass
@@ -356,7 +497,8 @@ def procesar_csv_contratos(request, dpto):
 
 				contratos.append({
 						'nrc': fila[4],
-						'tipo': fila[6]
+						'tipo': fila[6],
+						'tipoC': fila[11]
 					})
 				pass
 
@@ -373,13 +515,18 @@ def procesar_csv_contratos(request, dpto):
 						})
 
 				if _curso:
+					_tipo_cont, created = TipoContrato.objects.get_or_create(
+							nombre = fila['tipoC']
+						)
+
 					_contrato, created = Contrato.objects.get_or_create(
 							fk_curso=_curso,
-							tipo=fila['tipo']
+							tipo=fila['tipo'],
+							fk_tipocont=_tipo_cont
 						)
 					_contrato.save()
 
-					print _contrato, '\n'
+					# print _contrato, '\n'
 					pass
 
 				pass
