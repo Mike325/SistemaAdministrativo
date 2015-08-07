@@ -6,7 +6,7 @@
 
 {% block formulario %}
 	{% if errors %}
-	        <div class="alert-box alert radius">{{errors}}</div>
+	        <div class="alert-box warning radius">{{errors}}</div>
 	{% endif %}
 	<form id='formulario' method='post' action='/nuevo_jefe/'>{% csrf_token %}
 		<h4 align="center">Nuevo Jefe de Departamento</h4>
@@ -24,7 +24,7 @@
 			<input type="text" name="apellido" placeholder="Apellido" required/>
 
 		<label>Codigo</label>
-			<input type="text" name="codigo" maxlength=9 placeholder="Codigo" required/>
+			<input type="text" name="codigo" pattern="[0-9]{9}" maxlength=9 placeholder="Codigo" data-tooltip aria-haspopup="true" title="Código UDG, solo números, 9 dígitos" required/>
 
 		<label>Correo electrónico</label>
 			<input type="email" name="correo" placeholder="Email" required/>

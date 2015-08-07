@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from django.http import HttpResponse
 from django.contrib import auth
 from django.contrib.sessions.models import Session
@@ -169,7 +169,10 @@ def nuevo_departamento(request):
         #Si no se entra con POST, se regresa el formulario de nuevo departamento
         else:
             opcionesJefeDepartamento = Usuario.objects.filter(user__is_active=True, rol__id__gte=1, departamento=None)
-            return render(request, 'Forms/nuevo-departamento.html', locals())
+            return render(request, 'Forms/nuevo-departamento.html', {
+                                                'opcionesJefeDepartamento':opcionesJefeDepartamento,
+                                                'form_size':form_size,
+                                                })
     else:
         return redirect('error403', origen=request.path)
 
@@ -187,7 +190,7 @@ def nuevo_jefe(request):
             correo = request.POST.get('correo', '')
             
             if User.objects.filter(Q(username=usuario) | Q(email=correo)).exists():
-
+                
                 errors = 'Ya existe registro con ese nombre'
                 return render(request, TEMPLATE_ALTA_JEFEDEP, locals())
             else:
@@ -279,6 +282,7 @@ def modificar_perfil(request):
 
         form_size = 'small'
         user_modificar = request.session['usuario']['nick']
+        correo_modificar = request.session['usuario']['correo']
         perfil = Usuario.objects.get(user__username = user_modificar)
 
         if request.method == 'POST':
@@ -287,23 +291,32 @@ def modificar_perfil(request):
             nombre = request.POST.get('nombre','')
             apellido = request.POST.get('apellido','')
             correo = request.POST.get('correo', '')
-            modificar = Usuario.objects.filter(user__username = user_modificar).update(codigo = codigo1 )
-            modificar_user = User.objects.filter(username = user_modificar).update(
-                                                username = usuario1, first_name = nombre,
-                                                last_name = apellido, email = correo)
-            usuario = Usuario.objects.get(user__username = usuario1)
-            usuario = {
-                    'nick': usuario.user.username,
-                    'correo': usuario.user.email,
-                    'nombre': usuario.user.first_name,
-                    'apellidos': usuario.user.last_name,
-                    'codigo': usuario.codigo,
-                    'rol': usuario.rol.id
-                }
-            #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
-            request.session['usuario'] = usuario
-            request.session['just_logged'] = True
-            return panelInicio(request)
+            modificar = Usuario.objects.filter(user__username = user_modificar).update(codigo = codigo1)
+
+            if not User.objects.exclude(username=user_modificar).filter(username=usuario1).exists():
+                if not User.objects.exclude(email=correo_modificar).filter(email=correo).exists():
+                    modificar_user = User.objects.filter(username = user_modificar).update(
+                                                    username = usuario1, first_name = nombre,
+                                                    last_name = apellido, email = correo)
+                    usuario = Usuario.objects.get(user__username = usuario1)
+                    usuario = {
+                            'nick': usuario.user.username,
+                            'correo': usuario.user.email,
+                            'nombre': usuario.user.first_name,
+                            'apellidos': usuario.user.last_name,
+                            'codigo': usuario.codigo,
+                            'rol': usuario.rol.id
+                        }
+                    #Se asigna una variable de sesión para poder acceder a ella desde cualquier página
+                    request.session['usuario'] = usuario
+                    request.session['just_logged'] = True
+                    return panelInicio(request)
+                else:
+                    errors = "Ya esta siendo usado ese correo"
+                    return render(request, 'Usuarios/modificar-perfil.html', locals())
+            else:
+                errors = "Ya existe usuario con ese nombre"
+                return render(request, 'Usuarios/modificar-perfil.html', locals())
         else:
             return render(request, 'Usuarios/modificar-perfil.html', locals())        
     else:
