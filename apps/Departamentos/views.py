@@ -449,6 +449,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 						_horario.pk = None
 
 					_horario.save()
+					_horario = Horario.objects.get(id=str(clave))
 
 					if horarioAnterior.__unicode__() != _horario.__unicode__():
 						registroHorario = Registro.modificacion(
@@ -457,7 +458,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 								'Se cambio el horario del curso "' + curso.NRC + '" de "'
 								+ horarioAnterior.__unicode__() + '" a "' + _horario.__unicode__() + '"',
 
-								horarioAnterior.__unicode__(), 
+								horarioAnterior.__unicode__(),
 								_horario.__unicode__(), 
 								'Horarios'
 							)
