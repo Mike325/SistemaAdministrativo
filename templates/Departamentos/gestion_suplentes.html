@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+	Gestionar {{ titulo }}
+{% endblock %}
+
+{% block poshead %}
+	{% load staticfiles %}
+	<script type="text/javascript">
+		$(document).ready(function() 
+		{
+			$('.button-editar').click(function()
+			{
+				nodo_act = $(this).parent().parent().children('.indentifier');
+				id = parseInt($(nodo_act).text());
+
+				//console.log(NRC);
+				//return false;
+
+				$.ajax(
+				{
+					url: "./sistema/gestionar/{{ area }}/" + id + '/ajax',
+					//(?P<area>)/(?P<id_area>.+)/(?P<ajax>
+					dataType: 'html'
+				})
+				.done(function( data ) 
+				{
+					//console.log(this, data);
+					$('#dialogo-modif').html(data).foundation('reveal', 'open');
+					$('html, body').delay(400).animate(
+					{
+						scrollTop: $("#dialogo-modif").offset().top+100
+					}, 'fast');
+				})
+				.error(function(data)
+				{
+					$('#dialogo-modif').foundation('reveal', 'open');
+				});
+			});
+		});
+	</script>
+{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<div class="medium-12 columns">	
+			<h3 class="text-center">{{ titulo }}</h3>
+
+			{# PAGINACION >> INICIO #}
+			<ul class="pagination" role="menubar" aria-label="Pagination">
+				{% if lista_cursos.has_other_pages %}
+				{# Si hay otras paginas... #}
+					<li class="arrow">
+						<a href="{% if lista_cursos.has_previous %}?pagina={{ lista_cursos.previous_page_number }}{% else %}#{% endif %}">&laquo; Anterior</a>
+					</li>
+					
+					{% for i in lista_cursos.paginator.page_range %}
+						<li {% if lista_cursos.number = i %} class="current"{% endif %}><a href="?pagina={{ i }}">{{ i }}</a></li>
+					{% endfor %}
+
+					<li class="arrow">
+						<a href="{% if lista_cursos.has_next %}?pagina={{ lista_cursos.next_page_number }}{% else %}#{% endif %}">Siguiente &raquo;</a></li>
+					</li>
+				{% endif %}
+
+				{# Cantidad de resultados #}
+				<li><p class="no-margin no-padding" style="position: absolute; right: 0; right: 32px;">Mostrando {{ lista_cursos.start_index }}-{{ lista_cursos.end_index }} de {{ lista_cursos.paginator.count }}.</p></li>
+			</ul>
+			{# PAGINACION >> FIN #}
+
+			<table class="full-width-table" id="cursos">
+				<thead>
+					<th>NRC</th>
+					<th>CLAVE</th>
+					<th>SECC</th>
+					<th>PROFESOR</th>
+					<th>SUPLENTE</th>
+					<th>INICIO</th>
+					<th>FIN</th>
+					<th>ACCIONES</th>
+				</thead>
+
+				<tbody>
+					{% for dato in datos %}
+						<tr>
+							<td class="row-nrc indentifier">{{ dato.id }}</td>
+							<td class="row-clave">{{ dato.fk_curso.fk_materia.clave }}</td>
+							<td class="row-secc">{{ dato.fk_curso.fk_secc }}</td>
+							<td class="row-profesor">{{ dato.fk_curso.fk_profesor }}</td>
+							<td class="row-suplente">{{ dato.fk_profesor }}</td>
+							<td class="row-inicio">{{ dato.periodo_ini }}</td>
+							<td class="row-fin">{{ dato.periodo_fin }}</td>
+							<td class="no-padding"><button class="button expand no-margin button-editar" type="button">EDITAR</button></td>
+						</tr>
+					{% endfor %}
+					<tr>
+						<td class="row-nrc indentifier">1</td>
+						<td class="row-clave">I386A</td>
+						<td class="row-secc">D03</td>
+						<td class="row-profesor">LOPEZ GUDI~O GUTIERREZ</td>
+						<td class="row-suplente">LUIS HERNANDEZ HERNANDI~O</td>
+						<td class="row-inicio">17/08/2015</td>
+						<td class="row-fin">24/02/2016</td>
+						<td class="no-padding"><button class="button expand no-margin button-editar" type="button">EDITAR</button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+<div id="dialogo-modif" class="reveal-modal" data-reveal aria-labelledby="modal-titulo" aria-hidden="true" role="dialog">
+	<div class="row">
+		<div class="medium-12 medium-centered columns">
+			<div class="alert-box warning">
+				Ha ocurrido un error desconocido.
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

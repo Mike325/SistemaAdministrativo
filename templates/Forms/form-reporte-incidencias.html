@@ -34,8 +34,13 @@
             // var dateOnlyDatepair = new Datepair(dateOnlyEl);
         });
 
-        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %} {'id_curso':{{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endfor %} ]{% if not forloop.last %},{% endif %} 
-        {% endfor %} };
+{% comment %}
+        {# ANTIGUO CODIGO #}
+        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %} {'id_curso':{{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endfor %} ]{% if not forloop.last %},{% endif %} {% endfor %} };
+{% endcomment %}
+
+        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %}{% if curso.fk_area.fk_departamento = departamento %} {'id_curso': {{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endif %}{% endfor %} ]{% if not forloop.last %},{% endif %} {% endfor %} };
+
 
         function filtra_materias(ref)
         {

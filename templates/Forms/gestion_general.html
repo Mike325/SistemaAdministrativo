@@ -1,0 +1,42 @@
+{% if ajax %}
+<script type="text/javascript">
+	// $(document).ready(function()
+	// {
+
+	// });
+
+	function EnviarFormulario(ref)
+	{
+		console.log(ref);
+		return false;
+	}
+</script>
+	<div class="row">
+			<div class="small-12 columns">
+				<form action="{{ request.path }}" onsubmit="return EnviarFormulario(this)">
+					<div class="row">
+						{% for campo in campos %}
+						<div class="medium-{{ campo.size }} columns">
+							{% if campo.label %}
+								<label>{{ campo.label }}</label>
+							{% endif %}
+								<input type="{% spaceless %}
+									{% if campo.type %}
+										{{ campo.type }}
+									{% else %}
+										text
+									{% endif %}
+								{% endspaceless %}" id="{{ campo.id }}" {% if not campo.send = False %}name="{{ campo.id }}"{% endif %} {% if campo.disable %}disabled{% endif %} value="{{ campo.value }}">
+						</div>
+						{% endfor %}
+					</div>
+					<hr/>
+					<div class="row">
+						<div class="medium-4 columns right">
+							<button type="submit" class="button success expand">Guardar cambios</button>
+						</div>
+					</div>
+				</form>
+			</div>
+	</div>
+{% endif %}

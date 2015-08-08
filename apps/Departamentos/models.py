@@ -58,17 +58,6 @@ class Profesor(models.Model):
         return "%s, %s" %(self.apellido, self.nombre)
         pass
 
-class Suplente(models.Model):
-    id = models.AutoField(primary_key=True)
-    fk_profesor = models.ForeignKey(Profesor)
-
-    periodo_ini = models.DateField(blank=True, null=True)
-    periodo_fin = models.DateField(blank=True, null=True)
-
-    def __unicode__(self):
-        return "%s: del %s a %s"%(fk_profesor.codigo_udg, periodo_ini, periodo_fin)
-        pass
-
 class Edificio(models.Model):
     '''
     REV:
@@ -125,7 +114,6 @@ class Horario(models.Model):
         return "%s - %s: %s"%(self.hora_ini, self.hora_fin, [x for x in ['L','M','I','J','V','S'] if eval('self.'+x)==True])
         pass
 
-
 class Curso(models.Model):
     NRC = models.CharField(max_length=5, primary_key=True) # inmod
 
@@ -138,10 +126,22 @@ class Curso(models.Model):
     fk_horarios = models.ManyToManyField(Horario, blank=True)
     
     fk_profesor = models.ForeignKey(Profesor)
-    fk_suplente = models.ForeignKey(Suplente, blank=True, null=True)
+    # fk_suplente = models.ForeignKey(Suplente, blank=True, null=True)
 
     def __unicode__(self):
         return self.NRC
+        pass
+
+class Suplente(models.Model):
+    id = models.AutoField(primary_key=True)
+    fk_curso = models.OneToOneField(Curso)
+    fk_profesor = models.ForeignKey(Profesor)
+
+    periodo_ini = models.DateField(blank=True, null=True)
+    periodo_fin = models.DateField(blank=True, null=True)
+
+    def __unicode__(self):
+        return str(self.id)
         pass
 
 class TipoContrato(models.Model):

@@ -19,7 +19,7 @@
 					<input type="text" name='nombre' placeholder="Nombre de la nueva división" data-tooltip aria-haspopup="true" title="Nombre completo del departamento" required/>
 
 	       		<label>Abreviación del Departamento</label>
-	       			<input type="text" pattern=".{3,9}" maxlength="9" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios. De 3 a 9 caracteres" required/>
+	       			<input type="text" pattern="[a-zA-Z0-9]{3,20}" maxlength="20" name="abreviacion" placeholder="(ej: computacion, electronica)" data-tooltip aria-haspopup="true" title="Solo puede contener letras y numeros, sin espacios. De 3 a 9 caracteres" required/>
 
 	       		<label>Jefe del departamento</label>
 		       		<select name="nuevoJefe" required>

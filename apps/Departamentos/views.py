@@ -11,6 +11,20 @@ from apps.Historicos.models import *
 
 import re # libreria de expresiones regulares
 
+# from django import template
+
+# register = template.Library()
+
+# @register.assignment_tag
+# def query(qs, **kwargs):
+#     """ template tag which allows queryset filtering. Usage:
+#           {% query books author=author as mybooks %}
+#           {% for book in mybooks %}
+#             ...
+#           {% endfor %}
+#     """
+#     return qs.filter(**kwargs)
+
 TEMPLATE_FORM_CSV = 'Forms/form_subir_csv.html'
 
 @login_required(login_url='/')
@@ -32,6 +46,118 @@ def inicio_jefedep(request):
 		return render(request, 'inicio-jefedep.html', options)
 	else:
 	   	return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def gestion_sistema(request, dpto, area, area_id, ajax=False):
+	_tabla = None
+	options = {}
+	filtros = {}
+	campos = []
+
+	if area == 'suplentes':
+		_tabla = Suplente
+		filtros.update({'id': area_id})
+
+		campos.append({
+				'label': 'NRC',
+				'id': 'in-nrc',
+				'value': 'fk_curso.NRC',
+				'send': False,
+				'disable': True,
+				'size': 2
+			})
+		campos.append({
+				'label': 'Clave',
+				'id': 'in-cvemat',
+				'value': 'fk_curso.fk_materia.clave',
+				'send': False,
+				'disable': True,
+				'size': 2
+			})
+		campos.append({
+				'label': 'Materia',
+				'id': 'in-materia',
+				'value': 'fk_curso.fk_materia.nombre',
+				'send': False,
+				'disable': True,
+				'size': 8
+			})
+		campos.append({
+				'label': 'SECC',
+				'id': 'in-secc',
+				'value': 'fk_curso.fk_secc',
+				'send': False,
+				'disable': True,
+				'max_length': 5,
+				'size': 2
+			})
+		campos.append({
+				'label': 'Profesor',
+				'id': 'in-profesor',
+				'value': 'fk_curso.fk_profesor',
+				'send': False,
+				'disable': True,
+				'size': 5
+			})
+		campos.append({
+				'label': 'Suplente',
+				'id': 'in-supp',
+				'send': False,
+				'value': 'fk_profesor',
+				'rel': 'in-codigo',
+				'size': 5
+			})
+		campos.append({
+				'id': 'in-codigo',
+				'type': 'hidden',
+				'value': 'fk_profesor.codigo_udg'
+			})
+		pass
+	elif area == 'profesores':
+		_tabla = Profesor
+		filtros.update({'codigo_udg': area_id})
+		pass
+	elif area == 'ciclos':
+		_tabla = Ciclo
+		filtros.update({'id': area_id})
+		pass
+
+	try:
+		_objeto = _tabla.objects.get(**filtros)
+		print _objeto
+	except:
+		_objeto = None
+		print 'fack'
+		pass
+
+	if _objeto:
+		for campo in campos:
+			if 'value' in campo:
+				campo['value'] = eval('_objeto.' + campo['value'])
+				#print eval('_objeto.' + campo['value'])
+				pass
+			pass
+		pass
+
+	options.update({'ajax': ajax})
+	options.update({'campos': campos})
+	#print campos
+	#return HttpResponse(_objeto)
+	return render(request, 'Forms/gestion_general.html', options)
+
+@login_required(login_url='/')
+def administrar_suplentes(request, dpto):
+	if request.session['rol'] >= 2:
+		options = {'area':'suplentes', 'titulo': 'Suplentes'}
+
+		suplentes = Suplente.objects.all()
+		_departamento = get_object_or_404(Departamento, nick=dpto)
+
+		options.update({'datos': suplentes})
+		return render(request, 'Departamentos/gestion_suplentes.html', options)
+		pass
+	else:
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 def ver_cursos(request, dpto):
@@ -429,11 +555,11 @@ def procesar_csv_contratos(request, dpto):
 		default_options = {'titulo_tipo':'Contratos', 'form_size': 'medium'}
 		options = {}
 
-		if request.method == 'POST': # se envio a traves del formulario
+		# Inicializacion de objetos.
+		errores = []
+		contratos = []
 
-			# Inicializacion de objetos.
-			errores = []
-			contratos = []
+		if request.method == 'POST': # se envio a traves del formulario
 
 			try: # validacion de las variables de departamento.
 				post_departamento = request.POST.get('depto', '')
@@ -538,6 +664,17 @@ def procesar_csv_contratos(request, dpto):
 		else: # mostrar el formulario
 			dpto = dpto[:20]
 			departamento = get_object_or_404(Departamento, nick=dpto)
+
+			if Curso.objects.filter(fk_area__fk_departamento=departamento).count() <= 0:
+				# al parecer no hay cursos para ese departamento
+				errores.append({
+						'propiedad': 'Imposible continuar',
+						'descripcion': 'No hay cursos registrados para este departamento.'
+					})
+				options.update({'errores': errores})
+				options.update({'desactivar': True})
+				pass
+
 			lista_ciclos = Ciclo.objects.all()
 
 			options.update(default_options)

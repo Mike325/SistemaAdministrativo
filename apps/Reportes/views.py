@@ -2,6 +2,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+
 from datetime import date
 
 from apps.Departamentos.models import *
@@ -16,10 +17,17 @@ def inicio_secretaria(request):
 	if request.session['rol'] >= 1:
 		_departamentos = Departamento.objects.all()
 
+		bienvenida = False
+
+		if request.session['just_logged']:
+			bienvenida = True
+			request.session['just_logged'] = False
+
 		return render(request, 'inicio-secretaria.html', 
 			{
 				'banner': True,
-				'lista_departamentos': _departamentos
+				'lista_departamentos': _departamentos,
+				'bienvenida': bienvenida
 			})
 	else:
 		return redirect('error403', origen=request.path)
@@ -146,23 +154,35 @@ def form_reporte_incidencias(request, dpto):
 		_departamento = get_object_or_404(Departamento, nick=dpto)
 		
 		try:
-			listaProf = Profesor.objects.order_by('apellido')
-			listaMaterias = Curso.objects.all()
+			print 'op'
+			# listaProf = Profesor.objects.order_by('apellido')
+			# listaMaterias = Curso.objects.filter(fk_area__fk_departamento_id=2)
+
+			listaProf = Profesor.objects.filter(
+					curso__fk_area__fk_departamento=_departamento
+				).distinct().order_by('apellido')
+
+			# listaMaterias = {}
+
+			# listaMaterias = Curso.objects.filter(
+			# 		fk_area__fk_departamento=_departamento
+			# 	)
+
+			# print listaMaterias # DEBUG
 
 			return render(request, 'Forms/form-reporte-incidencias.html', 
 				{
 					'departamento': _departamento,
 					'profesores': listaProf,
-					'materias': listaMaterias,
 					'form_size': 'large'
 				})
-		except:
+		except Exception, e:
+			print e
 			return render(request, 'Forms/form-reporte-incidencias.html', 
 				{
 					'error': True,
 					'departamento': _departamento,
 					'profesores': listaProf,
-					'materias': listaMaterias,
 					'form_size': 'large'
 				})
 		pass

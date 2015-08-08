@@ -8,8 +8,10 @@ app_dep_urls = [
 	url(r'^(?P<dpto>.+)/sistema/csv/cursos/subir$', procesar_csv_cursos),
 	url(r'^(?P<dpto>.+)/sistema/csv/contratos/$', procesar_csv_contratos),
 	url(r'^(?P<dpto>.+)/sistema/csv/contratos/subir$', procesar_csv_contratos),
+	url(r'^(?P<dpto>.+)/suplentes$', administrar_suplentes),
 
 	#url(r'^(?P<dpto>.+)/consulta/(?P<ciclo>.+)$', sistema_consulta),
 	#url(r'^(?P<dpto>.+)/modifica/(?P<ciclo>.+)/(?P<nrc>)$', sistema_modifica_nrc),
-	url(r'^(?P<dpto>.+)/modifica_curso/(?P<nrc>.+)/(?P<ajax>.*)$', modifica_curso)
+	url(r'^(?P<dpto>.+)/modifica_curso/(?P<nrc>.+)/(?P<ajax>.*)$', modifica_curso),
+	url(r'^(?P<dpto>.+)/sistema/gestionar/(?P<area>.+)/(?P<area_id>.+)/(?P<ajax>.*)$', gestion_sistema),
 ]
