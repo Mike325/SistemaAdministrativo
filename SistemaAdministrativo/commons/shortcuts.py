@@ -2,6 +2,7 @@
 # utiles y/o automatizar procesos largos que tienden a repetirse
 # a lo largo de todo el codigo.
 
+from functools import wraps
 from django.shortcuts import render, redirect
 from apps.Departamentos.models import Departamento
 
@@ -20,3 +21,21 @@ def sidebar_context(request):
     return{
         'lista_departamentos' : Departamento.objects.all(),
     }
+
+def verifica_dpto(view):
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        try:
+            dptoObjeto = Departamento.objects.get(jefeDep__user__username=request.session['usuario']['nick'])
+            print dptoObjeto.nick
+            print kwargs
+            if dptoObjeto.nick == kwargs['dpto']:
+                return view(request, *args, **kwargs)
+            else:
+                return redirect('/')
+        except:
+            if request.session['usuario']['rol']>2:
+                return view(request, *args, **kwargs)
+            else:
+                return redirect('/')
+    return wrapper

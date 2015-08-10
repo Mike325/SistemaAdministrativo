@@ -14,8 +14,8 @@ url_admin = [
     url(r'^activar_usuarios',activar_usuarios),
     url(r'^nuevo_jefe',nuevo_jefe),
     url(r'^nueva_secretaria/$', nueva_secretaria),
-    url(r'^historicos/$', historicos),
-    url(r'^historicos/filtro/$', historicosFiltrados),
+    url(r'^(?P<dpto>.+)/historicos/$', historicos),
+    url(r'^(?P<dpto>.+)/historicos/filtro/$', historicosFiltrados),
     url(r'^modificar-perfil/$',modificar_perfil),
     url(r'^modificar-password/$',modificar_password), 
     
