@@ -86,7 +86,11 @@
 				    <div id="panel2" class="content no-margin no-padding">
 				    	<a href="/inicio-jefedep/">Panel de inicio</a>
 			    		<a href="/nueva_secretaria" class="accordion-top-sublink">Crear Nueva Secretaria</a>
-			    		<a href="/historicos" class="accordion-top-sublink">Históricos</a>
+			    		{% for x in lista_departamentos %}
+			    			{% if x.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
+			    				<a href="/{{x.nick}}/historicos" class="accordion-top-sublink">Históricos {{x}}</a>
+			    			{% endif %}
+			    		{% endfor %}
 
 						{% for x in lista_departamentos %}
 							{% if x.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
@@ -121,7 +125,9 @@
 			    		<a href="/nuevo_jefeDep">Crear Jefe de Departamento</a>
 			    		<a href="/nuevo_departamento">Crear Nuevo Departamento</a>
 			    		<a href="/activar_usuarios">Administrar Usuarios</a>
-			    		<a href="/historicos">Históricos</a>
+			    		{% for x in lista_departamentos %}
+			    				<a href="/{{x.nick}}/historicos" class="accordion-top-sublink">Históricos {{x}}</a>
+			    		{% endfor %}
 
 						<ul class="accordion inner-accordion" data-accordion>
 							<li class="accordion-navigation">
