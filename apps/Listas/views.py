@@ -4,6 +4,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 
 from datetime import date, time, datetime, timedelta
+from collections import Counter
+from django.db.models import Q
 
 from apps.Departamentos.models import *
 from apps.Reportes.models import *
@@ -29,7 +31,7 @@ def crear_lista_diaria_TCompleto(request, dpto):
 	Override del día para pruebas.
 	(COMENTAR O ELIMINAR PARA PRODUCCION)
 	'''
-	dia = DAY_OVR # DEBUG
+	#dia = DAY_OVR # DEBUG
 
 	_profesor = None
 	filtro = {}
@@ -108,7 +110,7 @@ def crear_lista_diaria_TMedio(request, dpto):
 	Override del día para pruebas.
 	(COMENTAR O ELIMINAR PARA PRODUCCION)
 	'''
-	dia = DAY_OVR # DEBUG
+	#dia = DAY_OVR # DEBUG
 
 	'''
 		REV: Horario puede que no se ocupe aqui
@@ -177,7 +179,7 @@ def listas_tCompleto(request, dpto):
 			Override del día para pruebas.
 			(COMENTAR O ELIMINAR PARA PRODUCCION)
 			'''
-			dia = DAY_OVR # DEBUG
+			#dia = DAY_OVR # DEBUG
 
 			profesores = Profesor.objects.filter(
 					curso__fk_area__fk_departamento=dpto
@@ -227,7 +229,7 @@ def listas_tCompleto(request, dpto):
 					fk_contrato__fk_curso__fk_materia__fk_departamento__nick = dpto.nick
 				).count()
 			yaRegistradas = yaRegistradas!=0
-
+			print yaRegistradas
 			return render(request, 'Listas/listas.html',
 				{
 					'today': fechaDia, 
@@ -258,7 +260,7 @@ def listas_tMedio(request, dpto):
 			Override del día para pruebas.
 			(COMENTAR O ELIMINAR PARA PRODUCCION)
 			'''
-			dia = DAY_OVR # DEBUG
+			#dia = DAY_OVR # DEBUG
 
 			filtro = { dias_abrev[dia-1]: True }
 
@@ -320,17 +322,63 @@ def estadisticasProfesor(request):
 	if request.session['rol'] >= 1:
 		if request.GET.get('profesor'):
 			profesor = get_object_or_404(Profesor, codigo_udg=request.GET.get('profesor'))
-			try:
-				#Aquí se genera la información que se pasará a la gráfica
-				datos = {
-					'nombre' : (profesor.nombre + " " + profesor.apellido +
-								 "(" + profesor.codigo_udg + ")")
-				}
-				form_size = 'small'
-				return render(request, 'Listas/estadisticas.html', locals())
-				pass
-			except:
-				return redirect('inicio-secretaria.html')
+
+			#Aquí se genera la información que se pasará a la gráfica
+			asistenciasTotales = Asistencia.objects.filter(fk_contrato__fk_curso__fk_profesor=profesor)
+			faltasTotales = asistenciasTotales.filter(asistio=False)
+			asistenciasTCompleto = asistenciasTotales.filter(asistio=True, fk_contrato__tipo='T')
+			faltasTCompleto = asistenciasTotales.filter(asistio=False, fk_contrato__tipo='T')
+			asistenciasTMedio = asistenciasTotales.filter(asistio=True, fk_contrato__tipo='P')
+			faltasTMedio = asistenciasTotales.filter(asistio=False, fk_contrato__tipo='P')
+			datos = {
+				'nombre' : (profesor.nombre + " " + profesor.apellido +
+							 "(" + profesor.codigo_udg + ")"),
+				'asisTotales' : asistenciasTotales,
+				'inasisTotales' : faltasTotales,
+				'asisTCompleto' : asistenciasTCompleto,
+				'asisTMedio' : asistenciasTMedio,
+				'inasisTMedio' : faltasTMedio,
+				'inasisTCompleto' : faltasTCompleto,
+			}
+			tablaTCompleto = {}
+			tablaTMedio = {}
+			for x in asistenciasTotales:
+				asistencias = asistenciasTCompleto.filter(fk_contrato=x.fk_contrato).count()
+				inasistencias = faltasTCompleto.filter(fk_contrato=x.fk_contrato).count()
+				total = asistencias+inasistencias
+				if total == 0.0 : continue
+				asistP = 100 * float(asistencias)/float(total)
+				inasistP = 100 * float(inasistencias)/float(total)
+				tablaTCompleto.update({str(x.fk_contrato.id):
+					{'tipoContrato' : x.fk_contrato.fk_tipocont,
+					'nombre': x.fk_contrato.fk_curso.fk_materia.nombre,
+					'secc' : x.fk_contrato.fk_curso.fk_secc,
+					'asist' : "%s (%s%%)"%(asistencias, asistP),
+					'inasist' : "%s (%s%%)"%(inasistencias, inasistP),
+					'total' : total
+					}})
+			
+			for x in asistenciasTotales:
+				asistencias = asistenciasTMedio.filter(fk_contrato=x.fk_contrato).count()
+				inasistencias = faltasTMedio.filter(fk_contrato=x.fk_contrato).count()
+				total = asistencias+inasistencias
+				if total == 0.0 : continue
+				asistP = 100 * float(asistencias)/float(total)
+				inasistP = 100 * float(inasistencias)/float(total)
+				tablaTMedio.update({str(x.fk_contrato.id):
+					{'tipoContrato' : x.fk_contrato.fk_tipocont,
+					'nombre': x.fk_contrato.fk_curso.fk_materia.nombre,
+					'secc' : x.fk_contrato.fk_curso.fk_secc,
+					'asist' : "%s (%s%%)"%(asistencias, asistP),
+					'inasist' : "%s (%s%%)"%(inasistencias, inasistP),
+					'total' : total
+					}})
+
+			form_size = 'small'
+			return render(request, 'Listas/estadisticasProfesor.html', locals())
+			pass
+
+			return redirect('/inicio-secretaria/')
 		else:
 			lista_profesores = Profesor.objects.all()
 			objetos = "Profesores"
