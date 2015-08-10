@@ -89,6 +89,7 @@
 			    		<a href="/historicos" class="accordion-top-sublink">Históricos</a>
 
 						{% for x in lista_departamentos %}
+							{% if x.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
 							<ul class="accordion inner-accordion" data-accordion>
 								<li class="accordion-navigation">
 					   				<a href="#panel2{{x.nick}}">{{x.nombre}}</a>
@@ -105,6 +106,7 @@
 					   				</div>
 				   				</li>
 							</ul>
+							{% endif %}
 						{% endfor %}
 				    </div>
 

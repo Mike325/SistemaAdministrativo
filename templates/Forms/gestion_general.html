@@ -1,22 +1,67 @@
 {% if ajax %}
-<script type="text/javascript">
-	// $(document).ready(function()
-	// {
+	{% load staticfiles %}
+	<link rel="stylesheet" type="text/css" href="{% static 'css/plugins/autocomplete.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/plugins/jquery.timepicker.css' %}">
+	<script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/datetime/jquery.timepicker.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/datetime/datepair.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/datetime/jquery.datepair.min.js' %}"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			{% if area = 'suplentes' %}
+			$('#in-full-periodo').change(function()
+			{
+				if ( this.checked == true )
+				{
+					$('.rango-fecha > input').attr("disabled", true);
+				}
+				else
+				{
+					$('.rango-fecha > input').removeAttr("disabled");
+				}
+			});
 
-	// });
+			$('#in-supp').autocomplete(
+				{
+				    lookup: [
+				    {% for profe in lista_profesores %}
+				    	{'value': "{{ profe.apellido }}, {{ profe.nombre }}", 'data': '{{ profe.codigo_udg }}'}{% if not forloop.last %},{% endif %}{% endfor %}
+				    ],
+				    onSelect: function (suggestion) 
+				    {
+				        // alert('Seleccionado: ' + suggestion.value + "|" + suggestion.data);
+				        $('#in-codigo').val(suggestion.data);
+				        alert($('#in-codigo').val());
+				    },
+				    minChars: 3,
+				    lookupLimit: 10,
+				    triggerSelectOnValidInput: true,
+				    autoSelectFirst: true
+				});
 
-	function EnviarFormulario(ref)
-	{
-		console.log(ref);
-		return false;
-	}
-</script>
+				$(document).on('close.fndtn.reveal', '[data-reveal]', function() 
+				{
+	  				$('#in-supp').autocomplete().hide();
+	  				$('.autocomplete-suggestions').remove();
+				});
+			{% endif %}
+		});
+
+		function EnviarFormulario(ref)
+		{
+			console.log($(ref).serialize());
+			alert('"enviado"... o eso dirá luego');
+			return false;
+		}
+	</script>
 	<div class="row">
 			<div class="small-12 columns">
+				<h2 class="text-center">Modificar {{ area|title }}</h2>
 				<form action="{{ request.path }}" onsubmit="return EnviarFormulario(this)">
 					<div class="row">
 						{% for campo in campos %}
-						<div class="medium-{{ campo.size }} columns">
+						<div class="medium-{{ campo.size }} columns{% if campo.rootclass %} {{ campo.rootclass }}{% endif %}" {% if campo.rootstyle %}style="{{ campo.rootstyle }}"{% endif %}>
 							{% if campo.label %}
 								<label>{{ campo.label }}</label>
 							{% endif %}
@@ -26,14 +71,27 @@
 									{% else %}
 										text
 									{% endif %}
-								{% endspaceless %}" id="{{ campo.id }}" {% if not campo.send = False %}name="{{ campo.id }}"{% endif %} {% if campo.disable %}disabled{% endif %} value="{{ campo.value }}">
+								{% endspaceless %}" id="{{ campo.id }}" {% if not campo.send = False %}name="{{ campo.id }}"{% endif %} {% if campo.disable %}disabled{% endif %} value="{{ campo.value }}" {% if campo.class %}class="{{ campo.class }}"{% endif %} {% if campo.max_length %}maxlength="{{ campo.max_length }}"{% endif %}>
+							{% if campo.checklabel %}
+								<label for="{{ campo.id }}">{{ campo.checklabel }}</label>
+							{% endif %}
 						</div>
 						{% endfor %}
 					</div>
 					<hr/>
 					<div class="row">
-						<div class="medium-4 columns right">
-							<button type="submit" class="button success expand">Guardar cambios</button>
+						<div class="medium-5 columns right">
+							<div class="row collapse">
+								<div class="medium-6 columns">
+									<button type="submit" class="button success expand">Guardar cambios</button>
+								</div>
+
+								<div class="medium-6 columns">
+									<a class="button alert expand" onclick="$('a.close-reveal-modal').trigger('click');">Cancelar</a>
+								</div>
+
+								<a class="close-reveal-modal" style="display: none !important;">X</a>
+							</div>
 						</div>
 					</div>
 				</form>

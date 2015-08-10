@@ -1,24 +1,15 @@
-{% comment %}
-    TODO:
-        + Hacer que la barra sea dinamica.
-{% endcomment %}
     <nav class="top-bar hide-on-print" data-topbar role="navigation" style="background-color:#4285F4;">
         <section class="top-bar-section">
             <ul class="title-area">
                 <li class="name" style="background-color:#4285F4;">
                     <h1>
-                        <a
-                        "{% if request.session.rol == 1 %}
-                           href ="/inicio-secretaria/"
-                        {% endif %}"
-                        "{% if request.session.rol == 2 %}
-                            href="/inicio-jefedep/"
-                        {% endif %}"
-                        "{% if request.session.rol == 3 %}
-                            href="/inicio-administrador/"
-                        {% endif %}" 
-
-                        style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario.nick }}{% endblock %}{% endspaceless %}</a>
+                        {% comment %}
+                            FIX:
+                                + Corregido link del usuario.
+                                  (href="/" lleva automaticamente al panel 
+                                  perteneciente al rol del usuario.)
+                        {% endcomment %}
+                        <a href="/" style="background-color:#4285F4;">{% spaceless %}{% block usuario %}{{ request.session.usuario.nick }}{% endblock %}{% endspaceless %}</a>
                     </h1>
                 </li>
             </ul>

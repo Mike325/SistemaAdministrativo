@@ -14,9 +14,6 @@
 				nodo_act = $(this).parent().parent().children('.indentifier');
 				id = parseInt($(nodo_act).text());
 
-				//console.log(NRC);
-				//return false;
-
 				$.ajax(
 				{
 					url: "./sistema/gestionar/{{ area }}/" + id + '/ajax',
@@ -90,19 +87,21 @@
 							<td class="row-suplente">{{ dato.fk_profesor }}</td>
 							<td class="row-inicio">{{ dato.periodo_ini }}</td>
 							<td class="row-fin">{{ dato.periodo_fin }}</td>
-							<td class="no-padding"><button class="button expand no-margin button-editar" type="button">EDITAR</button></td>
+							<td class="no-padding"><button class="button expand no-margin button-editar" type="button">Editar</button></td>
 						</tr>
 					{% endfor %}
-					<tr>
-						<td class="row-nrc indentifier">1</td>
-						<td class="row-clave">I386A</td>
-						<td class="row-secc">D03</td>
-						<td class="row-profesor">LOPEZ GUDI~O GUTIERREZ</td>
-						<td class="row-suplente">LUIS HERNANDEZ HERNANDI~O</td>
-						<td class="row-inicio">17/08/2015</td>
-						<td class="row-fin">24/02/2016</td>
-						<td class="no-padding"><button class="button expand no-margin button-editar" type="button">EDITAR</button></td>
-					</tr>
+					{% comment %}
+						<tr>
+							<td class="row-nrc indentifier">1</td>
+							<td class="row-clave">I386A</td>
+							<td class="row-secc">D03</td>
+							<td class="row-profesor">LOPEZ GUDI~O GUTIERREZ</td>
+							<td class="row-suplente">LUIS HERNANDEZ HERNANDI~O</td>
+							<td class="row-inicio">17/08/2015</td>
+							<td class="row-fin">24/02/2016</td>
+							<td class="no-padding"><button class="button expand no-margin button-editar" type="button">EDITAR</button></td>
+						</tr>
+					{% endcomment %}
 				</tbody>
 			</table>
 		</div>

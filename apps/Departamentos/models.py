@@ -6,13 +6,6 @@ from apps.Usuarios.models import Usuario
 numerico = RegexValidator(r'^[0-9]*$', 'Use solo caracteres numericos (0-9).')
 alfanumerico = RegexValidator(r'^[0-9a-zA-Z]*$', 'Use solo caracteres alfanumericos (a-Z, 0-9).')
 
-'''
-TODO:
-    + Tabla para contratos
-        (Relacionada a profesor y (opcionalmente) a materia.
-        Especificando el tipo de contrato)
-'''
-
 class Departamento(models.Model):
     id = models.AutoField(primary_key=True)
     nick = models.CharField(max_length=20, validators=[alfanumerico], unique=True)
@@ -59,12 +52,6 @@ class Profesor(models.Model):
         pass
 
 class Edificio(models.Model):
-    '''
-    REV:
-        + 'Edificio' para contener una variable de aulas.
-        (y asi ahorrar tantos duplicados en aula?)
-        + 'id' para ser una variable de tipo auto.
-    '''
     id = models.CharField(max_length=5, primary_key=True)
     nombre = models.CharField(max_length=50, null=True)
 
@@ -75,11 +62,6 @@ class Edificio(models.Model):
 class Aula(models.Model):
     nombre = models.CharField(max_length=5)
     fk_edif = models.ForeignKey(Edificio)
-    '''
-    REV:
-        + 'fk_edif' para ser una variable de tipo
-            models.ManyToManyField().
-    '''
 
     def __unicode__(self):
         return self.nombre

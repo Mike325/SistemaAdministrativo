@@ -9,6 +9,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from apps.Departamentos.models import *
 from apps.Historicos.models import *
 
+import copy
+from .fieldsets import *
+
 import re # libreria de expresiones regulares
 
 # from django import template
@@ -57,69 +60,24 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 	if area == 'suplentes':
 		_tabla = Suplente
 		filtros.update({'id': area_id})
+		campos = copy.deepcopy(FieldSet_Suplente)
 
-		campos.append({
-				'label': 'NRC',
-				'id': 'in-nrc',
-				'value': 'fk_curso.NRC',
-				'send': False,
-				'disable': True,
-				'size': 2
+		options.update({
+				'lista_profesores': Profesor.objects.all()
 			})
-		campos.append({
-				'label': 'Clave',
-				'id': 'in-cvemat',
-				'value': 'fk_curso.fk_materia.clave',
-				'send': False,
-				'disable': True,
-				'size': 2
-			})
-		campos.append({
-				'label': 'Materia',
-				'id': 'in-materia',
-				'value': 'fk_curso.fk_materia.nombre',
-				'send': False,
-				'disable': True,
-				'size': 8
-			})
-		campos.append({
-				'label': 'SECC',
-				'id': 'in-secc',
-				'value': 'fk_curso.fk_secc',
-				'send': False,
-				'disable': True,
-				'max_length': 5,
-				'size': 2
-			})
-		campos.append({
-				'label': 'Profesor',
-				'id': 'in-profesor',
-				'value': 'fk_curso.fk_profesor',
-				'send': False,
-				'disable': True,
-				'size': 5
-			})
-		campos.append({
-				'label': 'Suplente',
-				'id': 'in-supp',
-				'send': False,
-				'value': 'fk_profesor',
-				'rel': 'in-codigo',
-				'size': 5
-			})
-		campos.append({
-				'id': 'in-codigo',
-				'type': 'hidden',
-				'value': 'fk_profesor.codigo_udg'
-			})
+
 		pass
 	elif area == 'profesores':
 		_tabla = Profesor
 		filtros.update({'codigo_udg': area_id})
+		campos = copy.deepcopy(FieldSet_Profesor)
+
 		pass
 	elif area == 'ciclos':
 		_tabla = Ciclo
 		filtros.update({'id': area_id})
+		campos = copy.deepcopy(FieldSet_Ciclo)
+
 		pass
 
 	try:
@@ -127,7 +85,6 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 		print _objeto
 	except:
 		_objeto = None
-		print 'fack'
 		pass
 
 	if _objeto:
@@ -140,6 +97,7 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 		pass
 
 	options.update({'ajax': ajax})
+	options.update({'area': area})
 	options.update({'campos': campos})
 	#print campos
 	#return HttpResponse(_objeto)

@@ -7,7 +7,20 @@
 {% block poshead %}
     {% load staticfiles %}
     <link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
+    <script type="text/javascript">
+    function ConfirmarEnvio(ref)
+    {
+        mensaje = "Recuerde que las asistencias solo pueden enviarse una \
+                    vez, y no pueden modificarse posteriormente.\n \
+                    Revise bien la información antes de continuar. \n\n \
+                    ¿Desea proceder con el envio?";
 
+        return confirm(mensaje);
+    }
+    </script>
+    {% if yaRegistradas %}
+    <style type="text/css">.assist-col { display: none !important; }</style>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -34,7 +47,7 @@
                                 <th>{{ today }}</th>
                                 <th colspan="2">ENTRADA</th>
                                 <th colspan="2">SALIDA</th>
-                                <th rowspan="2" class="hide-for-print">Asistencia</th>
+                                <th rowspan="2" class="hide-for-print assist-col">Asistencia</th>
                             </tr>
                             <tr> 
                                 <th>NOMBRE</th>
@@ -47,33 +60,22 @@
 
                         <tbody>
                             <form method="POST">{% csrf_token %}
-                            {% for x in listaContratos %}
+                            {% for x in listaAsistencia %}
                                 <tr>
                                     <td class="hide-for-print">{{ forloop.counter }}</td>
-                                    <td class="row-nombre">{{ x.fk_curso.fk_profesor.apellido }} {{x.fk_curso.fk_profesor.nombre}} ({{ x.fk_curso.fk_profesor.codigo_udg }})</td>
-                                    <td class="row-hora-in">
-                                        {% for horario in x.fk_curso.fk_horarios.all %}
-                                            {% if horario in horarios %}
-                                                {{ horario.hora_ini }}<br>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
+                                    <td class="row-nombre">{{ x.profesor }}</td>
+                                    <td class="row-hora-in">{{ x.hora_ini }}</td>
                                     <td class="row-sign">{# firma #}</td>
-                                    <td class="row-hora-in">
-                                        {% for horario in x.fk_curso.fk_horarios.all %}
-                                            {% if horario in horarios %}
-                                                {{ horario.hora_fin }}<br>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
+                                    <td class="row-hora-in">{{ x.hora_fin }}</td>
                                     <td class="row-sign">{# firma #}</td>
-                                    <td class="hide-for-print">
-                                        <input type="checkbox" id="asistencia" name="{{x.id}}" checked/>
+                                    <td class="hide-for-print assist-col">
+                                        <input type="hidden" name="{{x.codigo_prof}}" value="off" />
+                                        <input type="checkbox" id="asistencia" name="{{x.codigo_prof}}" checked/>
                                     </td>
                                 </tr>
                             {% endfor %}
                             <tr class="hide-for-print">
-                                <td colspan="7"><input type="submit" class="button expand" onclick="return confirm('Recuerda que esta información solo se puede enviar una vez y será permanente ¿estás seguro de que deseas continuar?')" value="Registrar Asistencias" {% if yaRegistradas == True or not listaContratos %}disabled{% endif %}/></td>
+                                <td colspan="7"><input type="submit" class="button expand" onclick="return ConfirmarEnvio(this);" value="Registrar Asistencias" {% if yaRegistradas == True or not listaContratos %}disabled{% endif %}/></td>
                             </tr>
                             </form>
                         </tbody>
@@ -95,21 +97,21 @@
                         {% endif %}
                         <thead>
                             <tr class="especialHead">
-                                <th class="hide-for-print"></th>
+                                {# <th class="hide-for-print"></th> #}
                                 <th colspan="2">
                                     {% load staticfiles %}
-                                    <img src="{% static 'img/udglogo.jpg' %}">
+                                    <img style="height: 180px;" src="{% static 'img/udglogo.jpg' %}">
                                 </th>
 
-                                <th style="text-align: center" colspan="4">
+                                <th style="text-align: center" colspan="3">
                                     UNIVERSIDAD DE GUADALAJARA<br>
                                     {{ departamento|upper }}<br>
                                     LISTADO DE FIRMAS {{ dayWeek }}
                                 </th>
-                                <th colspan="2">
+                                <th colspan="3">
                                     FECHA <u>&nbsp;&nbsp;{{ day }} {{ month }} {{ year }}&nbsp;&nbsp;</u>
                                 </th>
-                                 <th class="hide-for-print"></th>
+                                 <th class="hide-for-print assist-col"></th>
                             </tr>
                             <tr>
                                 <th rowspan="2" class="hide-for-print">N°</th>
@@ -121,7 +123,7 @@
                                 <th>AULA</th>
                                 <th>HOR.</th>
                                 <th class="sign-field text-center">FIRMA</th>
-                                <th class="hide-for-print">Asistencia</th>
+                                <th class="hide-for-print assist-col">Asistencia</th>
                             </tr>
                         </thead>
 
@@ -137,7 +139,7 @@
                                     <td class="row-edif">
                                     {% for horario in x.fk_curso.fk_horarios.all %}
                                         {% if horario in horarios %}
-                                            {{ horario.fk_edif.id }}<br>  
+                                            {{ horario.fk_edif.id }}{% if not forloop.last %}<br>{% endif %}
                                         {% endif %}
                                     {% endfor %}
                                     </td>
@@ -156,13 +158,14 @@
                                     {% endfor %}
                                     </td>
                                     <td class="row-firma">{# firma #}</td>
-                                    <td class="hide-for-print">
+                                    <td class="hide-for-print assist-col">
+                                        <input type="hidden" name="{{x.id}}" value="off"/>
                                         <input type="checkbox" id="asistencia" name="{{x.id}}" checked/>
                                     </td>
                                 </tr>
                             {% endfor %}
                             <tr class="hide-for-print">
-                                <td colspan="10"><input type="submit" class="button expand" onclick="return confirm('Recuerda que esta información solo se puede enviar una vez y será permanente ¿estás seguro de que deseas continuar?')" value="Registrar Asistencias" {% if yaRegistradas == True or not listaContratos %}disabled{% endif %}/></td>
+                                <td colspan="10"><input type="submit" class="button expand" onclick="return ConfirmarEnvio(this);" {% if yaRegistradas == True or not listaContratos %}disabled{% endif %}/></td>
                             </tr>
                             </form>
                         </tbody>

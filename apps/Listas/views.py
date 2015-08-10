@@ -10,8 +10,13 @@ from apps.Reportes.models import *
 from apps.Historicos.models import *
 from apps.Listas.models import *
 
-dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+import re, math
+
+# Override del día
+DAY_OVR = 2
+
 dias_abrev = ['L', 'M', 'I', 'J', 'V', 'S']
+dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
 #Creacion de la lista de asistencias para profesores de tiempo completo
@@ -19,111 +24,131 @@ def crear_lista_diaria_TCompleto(request, dpto):
 	hoy = date.today()
 	dia = hoy.isoweekday()
 	dpto = Departamento.objects.get(nick=dpto)
-	'''if dia<6:
-		args = {
-			dias_abrev[dia - 1]: True
-		}
 
-		horarios = Horario.objects.filter(**args)
-	else:
-		horarios = []'''
-	horarios = Horario.objects.filter(L=True)
+	'''
+	Override del día para pruebas.
+	(COMENTAR O ELIMINAR PARA PRODUCCION)
+	'''
+	dia = DAY_OVR # DEBUG
 
-	cursosTCompleto = Asistencia.objects.filter(
-		fecha__startswith = hoy,
-		fk_contrato__fk_curso__fk_horarios__in = horarios, 
-		fk_contrato__tipo = 'T',
-		fk_contrato__fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-	).order_by('fk_contrato__fk_curso__fk_horarios__hora_ini','fk_contrato__fk_curso__fk_profesor__apellido')
+	_profesor = None
+	filtro = {}
 
-	if not cursosTCompleto:
-		cursosTCompleto = Contrato.objects.filter(
-			fk_curso__fk_horarios__in = horarios,
-			tipo = 'T',
-			fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-		).order_by('fk_curso__fk_horarios__hora_ini','fk_curso__fk_profesor__apellido')
+	for clave, valor in request.POST.items():
+		if not clave.startswith('csrf'): # no tiene que ver con el key CSRF
+			_profesor = Profesor.objects.get(
+					codigo_udg=str(clave)
+				) ## GG OPT
 
-		for curso in cursosTCompleto:
+			filtro = { 'fk_curso__fk_horarios__' + dias_abrev[dia-1]: True }
+			contratos = Contrato.objects.filter(
+					tipo='T',
+					fk_curso__fk_profesor=_profesor,
+					**filtro
+				) ## GG OPT
 
-			'''agrs = {
-				dias_abrev[dia - 1]: True
-			}'''
-			args = {'L':'True'}
-			objeto = curso.fk_curso.fk_horarios.get(**args)
+			filtro = { dias_abrev[dia-1]: True }
 
-			horasClase = ((datetime.combine(date.today(), objeto.hora_fin) - datetime.combine(date.today(), objeto.hora_ini)) + timedelta(minutes = 5)).seconds/3600
-			asis = Asistencia(
-					horas_clase = horasClase, 
-					fk_contrato = curso
-				)
-			if str(curso.id) in request.POST:
-				asis.asistio = True
-			else:
-				asis.asistio = False
-			asis.save()
+			_asistencia = None
+			tipoActual = contratos[0].fk_tipocont
+			for contrato in contratos:
+				'''
+				REV:
+					+ La validación del contrato no sería necesaria aqui
+					  dado que se almacena la asistencia para cada contrato.
+					+ Estadisticas tendría que analizar los distintos tipos 
+					  de contrato.
+				'''
+				# if contrato.fk_tipocont != tipoActual:
+				#   print tipoActual, '-', contrato.fk_tipocont
+				#   pass
 
-		historico = Registro.creacion(request.session['usuario']['nick'],
-					'Se guardaron las asistencias de Tiempo Completo del "'+ dpto.nombre +'"',
-					'Guardadas', 'Asistencias')
-		historico.save()
-		return redirect("/inicio-secretaria/")
-	else:
-		pass
+				assist = Asistencia()
+				assist.asistio = True if valor=='on' else False
+				assist.fk_contrato = contrato
+
+				# PREPARACIONES HORAS DE CLASE >> inicio
+				horas_clase = None
+				for x in contrato.fk_curso.fk_horarios.filter(**filtro):
+					hora_ini = datetime.combine(hoy, x.hora_ini)
+					hora_fin = datetime.combine(hoy, x.hora_fin)
+
+					if horas_clase:
+						horas_clase = horas_clase + (hora_fin - hora_ini)
+					else:
+						horas_clase = hora_fin - hora_ini
+
+					#print horas_clase # DEBUG
+					pass # for
+				# PREPARACIONES HORAS DE CLASE >> fin
+
+				horas = horas_clase.seconds/60
+				assist.horas_clase = int(math.ceil(horas/60.0))
+				assist.save()
+
+				# print assist # DEBUG
+				pass # for 
+			pass # if
+
+			historico = Registro.creacion(request.session['usuario']['nick'],
+					  'Se guardaron las asistencias de Tiempo Completo del "'+ dpto.nombre +'"',
+					  'Guardadas', 'Asistencias')
+			historico.save()
+		pass # for
+
+	return redirect("/")
+	pass # view
 
 def crear_lista_diaria_TMedio(request, dpto):
 	hoy = date.today()
 	dia = hoy.isoweekday()
 	dpto = Departamento.objects.get(nick=dpto)
-	'''if dia<6:
-		args = {
-			dias_abrev[dia - 1]: True
-		}
 
-		horarios = Horario.objects.filter(**args)
-	else:
-		horarios = []'''
-	horarios = Horario.objects.filter(L=True)
+	'''
+	Override del día para pruebas.
+	(COMENTAR O ELIMINAR PARA PRODUCCION)
+	'''
+	dia = DAY_OVR # DEBUG
 
-	cursosTCompleto = Asistencia.objects.filter(
-		fecha__startswith = hoy,
-		fk_contrato__fk_curso__fk_horarios__in = horarios, 
-		fk_contrato__tipo = 'P',
-		fk_contrato__fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-	).order_by('fk_contrato__fk_curso__fk_horarios__hora_ini','fk_contrato__fk_curso__fk_profesor__apellido')
+	'''
+		REV: Horario puede que no se ocupe aqui
+	'''
 
-	if not cursosTCompleto:
-		cursosTCompleto = Contrato.objects.filter(
-			fk_curso__fk_horarios__in = horarios,
-			tipo = 'P',
-			fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-		).order_by('fk_curso__fk_horarios__hora_ini','fk_curso__fk_profesor__apellido')
+	filtro = { dias_abrev[dia-1]: True }
 
-		for curso in cursosTCompleto:
+	for clave, valor in request.POST.items():
+		print clave, '\t\t', valor
+		if not clave.startswith('csrf'): # no tiene que ver con el key CSRF
+			_contrato = Contrato.objects.get(id=clave)
+			assist = Asistencia()
+			assist.fk_contrato = _contrato
+			assist.asistio = True if valor=='on' else False
 
-			'''agrs = {
-				dias_abrev[dia - 1]: True
-			}'''
-			args = {'L':'True'}
-			objeto = curso.fk_curso.fk_horarios.get(**args)
+			# PREPARACIONES HORAS DE CLASE >> inicio
+			horas_clase = None
+			for x in _contrato.fk_curso.fk_horarios.filter(**filtro):
+				hora_ini = datetime.combine(hoy, x.hora_ini)
+				hora_fin = datetime.combine(hoy, x.hora_fin)
 
-			horasClase = ((datetime.combine(date.today(), objeto.hora_fin) - datetime.combine(date.today(), objeto.hora_ini)) + timedelta(minutes = 5)).seconds/3600
-			asis = Asistencia(
-					horas_clase = horasClase, 
-					fk_contrato = curso
-				)
-			if str(curso.id) in request.POST:
-				asis.asistio = True
-			else:
-				asis.asistio = False
-			asis.save()
+				if horas_clase:
+					horas_clase = horas_clase + (hora_fin - hora_ini)
+				else:
+					horas_clase = hora_fin - hora_ini
 
-		historico = Registro.creacion(request.session['usuario']['nick'],
-					'Se guardaron las asistencias de Tiempo Completo del "'+ dpto.nombre +'"',
-					'Guardadas', 'Asistencias')
-		historico.save()
-		return redirect("/inicio-secretaria/")
-	else:
-		pass
+				#print horas_clase # DEBUG
+				pass # for
+			# PREPARACIONES HORAS DE CLASE >> fin
+
+			horas = horas_clase.seconds/60
+			assist.horas_clase = int(math.ceil(horas/60.0))
+
+			assist.save() # GUARDA LOS DATOS
+			print assist
+
+			pass # if
+		pass # for
+
+	return redirect('/')
 
 #Listas de tiempo completo
 @login_required(login_url='/')
@@ -143,37 +168,66 @@ def listas_tCompleto(request, dpto):
 
 			fechaDia = disp_dia + " " + disp_num_dia + " DE " + disp_mes + " DE " + disp_anio
 
-			'''if dia<6:
-				args = {
-					dias_abrev[dia - 1]: True
-				}
+			'''
+			Override del día para pruebas.
+			(COMENTAR O ELIMINAR PARA PRODUCCION)
+			'''
+			dia = DAY_OVR # DEBUG
 
-				horarios = Horario.objects.filter(**args)
-			else:
-				horarios = []'''
-			horarios = Horario.objects.filter(L = True)
+			profesores = Profesor.objects.filter(
+					curso__fk_area__fk_departamento=dpto
+				).distinct().order_by('apellido')
 
-			asistencias = Asistencia.objects.filter(
-				fecha__startswith = hoy,
-				fk_contrato__fk_curso__fk_horarios__in = horarios, 
-				fk_contrato__tipo = 'T',
-				fk_contrato__fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-				)
+			filtro = {'fk_horarios__'+dias_abrev[dia-1]: True}
 
-			yaRegistradas = True if asistencias else False
-	
-			cursosTCompleto = Contrato.objects.filter(
-				fk_curso__fk_horarios__in = horarios,
-				tipo = 'T',
-				fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-			).order_by('fk_curso__fk_horarios__hora_ini','fk_curso__fk_profesor__apellido')
+			#cursos = Curso.objects.filter(**filtro)
 
+			listaAsistencia = []
+
+			for x in profesores:
+				cursos = x.curso_set.filter(
+						fk_profesor=x,
+						contrato__isnull=False, # todos los cursos con un contrato
+						fk_area__fk_departamento=dpto, # que tengan el departamento
+						**filtro # más el filtro extra
+					)
+				contratos = Contrato.objects.filter(
+						tipo='T',
+						fk_curso__in=cursos
+					).values('fk_tipocont__nombre')
+				horarios = Horario.objects.filter(
+						curso__in=cursos
+					).order_by('hora_ini')#.values()
+
+				cuenta = horarios.count()
+
+				if contratos and cuenta > 0:
+					listaAsistencia.append({
+							'profesor': x.apellido + ', ' + x.nombre + '(' + x.codigo_udg + ')',
+							'hora_ini': horarios[0].hora_ini,
+							'hora_fin': horarios[cuenta-1].hora_fin,
+							'codigo_prof': x.codigo_udg
+						})
+					pass
+				pass
+
+				'''DESCOMENTAR SI QUIERE ORDENARSE POR HORA DE INICIO'''
+				#listaAsistencia = sorted(listaAsistencia, key=lambda d: (d['hora_ini'], d['profesor']))
+
+			# return HttpResponse('') # DEBUG
+
+			yaRegistradas = Asistencia.objects.filter(
+					fecha__startswith = hoy,
+					fk_contrato__tipo = 'T',
+					fk_contrato__fk_curso__fk_materia__fk_departamento__nick = dpto.nick
+				).count()
+			yaRegistradas = yaRegistradas!=0
 
 			return render(request, 'Listas/listas.html',
 				{
 					'today': fechaDia, 
 					'tiempoC': True,
-					'listaContratos' : cursosTCompleto,
+					'listaAsistencia' : listaAsistencia,
 					'horarios' : horarios,
 					'yaRegistradas' : yaRegistradas
 				})
@@ -187,52 +241,48 @@ def listas_tMedio(request, dpto):
 		if request.method == 'POST':
 			return crear_lista_diaria_TMedio(request, dpto)
 		else:
-			hoy = date.today()
 			dpto = get_object_or_404(Departamento, nick=dpto)
+			hoy = date.today()
+			dia = hoy.isoweekday()
+			mes_num = int(hoy.month)
 
-			fecha = date.today()
-			mesFc = int(fecha.month)
-			dia = fecha.isoweekday()
+			disp_dia = dias[dia-1].upper()
+			disp_mes = meses[mes_num-1][:3].upper()
 
-			mes = meses[ mesFc-1 ][:3].upper()
+			'''
+			Override del día para pruebas.
+			(COMENTAR O ELIMINAR PARA PRODUCCION)
+			'''
+			dia = DAY_OVR # DEBUG
 
-			fechaDia = dias[dia-1].upper()
+			filtro = { dias_abrev[dia-1]: True }
 
-			'''if dia<6:
-				args = {
-					dias_abrev[dia - 1]: True
-				}
+			horarios = Horario.objects.filter(**filtro)
 
-				horarios = Horario.objects.filter(**args)
-			else:
-				horarios = []'''
-			horarios = Horario.objects.filter(L = True)
-
-			asistencias = Asistencia.objects.filter(
-				fecha__startswith = hoy,
-				fk_contrato__fk_curso__fk_horarios__in = horarios, 
-				fk_contrato__tipo = 'P',
-				fk_contrato__fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-				)
-
-			yaRegistradas = True if asistencias else False
+			yaRegistradas = Asistencia.objects.filter(
+					fecha__startswith = hoy,
+					fk_contrato__tipo = 'P',
+					fk_contrato__fk_curso__fk_materia__fk_departamento = dpto
+				).count()
+			yaRegistradas = yaRegistradas!=0
 
 			cursosTMedio = Contrato.objects.filter(
-				fk_curso__fk_horarios__in = horarios, 
-				tipo = 'P',
-				fk_curso__fk_materia__fk_departamento__nick = dpto.nick
-			).order_by('fk_curso__fk_horarios__hora_ini','fk_curso__fk_profesor__apellido')
+					tipo = 'P',
+					fk_curso__fk_horarios__in = horarios,
+					fk_curso__fk_area__fk_departamento = dpto
+				).order_by('fk_curso__fk_horarios__hora_ini','fk_curso__fk_profesor__apellido')
 
 			return render(request, 'Listas/listas.html', 
 				{
-					'dayWeek': fechaDia, 
-					'day': fecha.day, 
-					'month': mes, 
-					'year': fecha.year, 
 					'tiempoM': True,
 					'departamento': dpto,
-					'listaContratos' : cursosTMedio,
+					'dayWeek': disp_dia, 
+					'day': hoy.day, 
+					'month': disp_mes, 
+					'year': hoy.year, 
+
 					'horarios' : horarios,
+					'listaContratos' : cursosTMedio,
 					'yaRegistradas' : yaRegistradas
 				})
 	else:
@@ -304,7 +354,7 @@ def estadisticasMateria(request):
 			form_size = 'small'
 			objetos = "Materias"
 			lista_materias = Materia.objects.all()
-			return render(request, 'Listas/estadisticas-listas.html', locals())		
+			return render(request, 'Listas/estadisticas-listas.html', locals())     
 	else:
 		return redirect('error403', origen=request.path)
 
