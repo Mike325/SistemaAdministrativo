@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from apps.Reportes.views import *
+from apps.Listas.views import *
 
 url_secretaria = [
 	url(r'^inicio-secretaria/$', inicio_secretaria, name='inicio_secretaria'),

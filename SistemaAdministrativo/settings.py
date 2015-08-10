@@ -52,7 +52,7 @@ LOCAL_APPS = (
     'apps.Departamentos',
     'apps.Historicos',
     'apps.Reportes',
-    
+    'apps.Listas',
 )
 
 

@@ -12,6 +12,7 @@ from apps.Historicos.models import *
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
+#Carga de la pagina de incio de las secretarias
 @login_required(login_url='/')
 def inicio_secretaria(request):
 	if request.session['rol'] >= 1:
@@ -32,54 +33,7 @@ def inicio_secretaria(request):
 	else:
 		return redirect('error403', origen=request.path)
 
-@login_required(login_url='/')
-def listas_tCompleto(request, dpto):
-	if request.session['rol'] >= 1:
-		hoy = date.today()
-		dia = hoy.isoweekday()
-
-		disp_dia = dias[dia - 1].upper()
-		disp_num_dia = str(hoy.day)
-		disp_mes = meses[hoy.month - 1].upper()
-		disp_anio = str(hoy.year)
-
-		fechaDia = disp_dia + " " + disp_num_dia + " DE " + disp_mes + " DE " + disp_anio
-
-		return render(request, 'Listas/listas.html',
-			{
-				'today': fechaDia, 
-				'tiempoC': True,
-			})
-		pass
-	else:
-		return redirect('error403', origen=request.path)
-
-@login_required(login_url='/')
-def listas_tMedio(request, dpto):
-	if request.session['rol'] >= 1:
-		dpto = get_object_or_404(Departamento, nick=dpto)
-
-		fecha = date.today()
-		mesFc = int(fecha.month)
-		dia = fecha.isoweekday()
-
-		mes = meses[ mesFc-1 ][:3].upper()
-
-		fechaDia = dias[dia-1].upper()
-
-		return render(request, 'Listas/listas.html', 
-			{
-				'dayWeek': fechaDia, 
-				'day': fecha.day, 
-				'month': mes, 
-				'year': fecha.year, 
-				'tiempoM': True,
-				'departamento': dpto,
-			})
-		pass
-	else:
-		return redirect('error403', origen=request.path)
-
+#Carga del formulario de incidencias
 @login_required(login_url='/')
 def form_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
@@ -89,6 +43,7 @@ def form_incidencias(request, dpto):
 	else:
 		return redirect('error403', origen=request.path)
 
+#Formulario para la consulta de las incidencias (por fechas)
 @login_required(login_url='/')
 def ver_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
@@ -148,6 +103,7 @@ def ver_incidencias(request, dpto):
 	else:
 		return redirect('error403', origen=request.path)
 
+#Formulario para reportar una incidencia
 @login_required(login_url='/')
 def form_reporte_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
@@ -189,6 +145,7 @@ def form_reporte_incidencias(request, dpto):
 	else:
 		return redirect('error403', origen=request.path)
 
+#Procesamiento del formulario para aregar el reporte
 @login_required(login_url='/')
 def reporte_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
@@ -245,95 +202,5 @@ def reporte_incidencias(request, dpto):
 					'profesores': listaProf,
 					'materias': listaMaterias,
 				})
-	else:
-		return redirect('error403', origen=request.path)
-
-''' SECCION DE LAS ESTADISTICAS '''
-
-@login_required(login_url='/')
-def estadisticasDepartamento(request, dpto):
-	if request.session['rol'] >= 1:
-		departamento = get_object_or_404(Departamento, nick=dpto)
-		try:
-			#Aquí se genera la información que se pasará a la gráfica
-			datos = {
-				'nombre' : departamento.nombre
-			}
-			form_size = 'small'
-			return render(request, 'Listas/estadisticas.html', locals())
-			pass
-		except:
-			return redirect('inicio-secretaria.html')
-	else:
-		return redirect('error403', origen=request.path)
-
-
-@login_required(login_url='/')
-def estadisticasProfesor(request):
-	if request.session['rol'] >= 1:
-		if request.GET.get('profesor'):
-			profesor = get_object_or_404(Profesor, codigo_udg=request.GET.get('profesor'))
-			try:
-				#Aquí se genera la información que se pasará a la gráfica
-				datos = {
-					'nombre' : (profesor.nombre + " " + profesor.apellido +
-								 "(" + profesor.codigo_udg + ")")
-				}
-				form_size = 'small'
-				return render(request, 'Listas/estadisticas.html', locals())
-				pass
-			except:
-				return redirect('inicio-secretaria.html')
-		else:
-			lista_profesores = Profesor.objects.all()
-			objetos = "Profesores"
-			form_size = 'small'
-			return render(request, 'Listas/estadisticas-listas.html', locals())
-	else:
-		return redirect('error403', origen=request.path)
-
-@login_required(login_url='/')
-def estadisticasMateria(request):
-	if request.session['rol'] >= 1:
-		if request.GET.get('materia'):
-			materia = get_object_or_404(Materia, clave=request.GET.get('materia'))
-			try:
-				#Aquí se genera la información que se pasará a la gráfica
-				datos = {
-					'nombre' : materia.nombre + " (" + materia.clave + ")"
-				}
-				form_size = 'small'
-				return render(request, 'Listas/estadisticas.html', locals())
-				pass
-			except:
-				return redirect('inicio-secretaria')
-		else:
-			form_size = 'small'
-			objetos = "Materias"
-			lista_materias = Materia.objects.all()
-			return render(request, 'Listas/estadisticas-listas.html', locals())		
-	else:
-		return redirect('error403', origen=request.path)
-
-@login_required(login_url='/')
-def estadisticasCiclo(request):
-	if request.session['rol'] >= 1:
-		if request.GET.get('ciclo'):
-			ciclo = get_object_or_404(Ciclo, id=request.GET.get('ciclo'))
-			try:
-				#Aquí se genera la información que se pasará a la gráfica
-				datos = {
-					'nombre' : "Ciclo " + ciclo.id
-				}
-				form_size = 'small'
-				return render(request, 'Listas/estadisticas.html', locals())
-				pass
-			except:
-				return redirect('inicio-secretaria.html')
-		else:
-			objetos = "Ciclos"
-			lista_ciclos = Ciclo.objects.all()
-			form_size = 'small'
-			return render(request, 'Listas/estadisticas-listas.html', locals())
 	else:
 		return redirect('error403', origen=request.path)
