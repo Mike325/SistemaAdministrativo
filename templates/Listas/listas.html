@@ -10,9 +10,9 @@
     <script type="text/javascript">
     function ConfirmarEnvio(ref)
     {
-        mensaje = "Recuerde que las asistencias solo pueden enviarse una \
-                    vez, y no pueden modificarse posteriormente.\n \
-                    Revise bien la información antes de continuar. \n\n \
+        mensaje = "Recuerde que las asistencias solo pueden enviarse una
+                    vez, y no pueden modificarse posteriormente.
+                    Revise bien la información antes de continuar.
                     ¿Desea proceder con el envio?";
 
         return confirm(mensaje);
@@ -75,7 +75,7 @@
                                 </tr>
                             {% endfor %}
                             <tr class="hide-for-print">
-                                <td colspan="7"><input type="submit" class="button expand" onclick="return ConfirmarEnvio(this);" value="Registrar Asistencias" {% if yaRegistradas == True or not listaContratos %}disabled{% endif %}/></td>
+                                <td colspan="7"><input type="submit" class="button expand" onclick="return ConfirmarEnvio(this);" value="Registrar Asistencias" {% if yaRegistradas == True or not listaAsistencia %}disabled{% endif %}/></td>
                             </tr>
                             </form>
                         </tbody>
