@@ -2,19 +2,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-'''
-FIX:
-    - Mejor relacion:
-        Jefe de departamento es una propiedad del departamento
-        mismo, por lo que se movio a apps.Departamentos.Departamento
-
-        La relacion fue establecida como 1-a-1, por lo que se puede
-        accesar tanto desde el Departamento como desde el Usuario.
-
-    - Codigos unicos:
-        Ahora 'codigo' no puede repetirse (lo normal, no?).
-'''
-
 class Rol(models.Model):
     id = models.IntegerField(primary_key=True)
     tipo = models.CharField(max_length=15)

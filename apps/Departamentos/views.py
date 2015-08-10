@@ -9,6 +9,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from apps.Departamentos.models import *
 from apps.Historicos.models import *
 
+from SistemaAdministrativo.commons.shortcuts import *
+
 import copy
 from .fieldsets import *
 
@@ -104,6 +106,7 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 	return render(request, 'Forms/gestion_general.html', options)
 
 @login_required(login_url='/')
+@verifica_dpto
 def administrar_suplentes(request, dpto):
 	if request.session['rol'] >= 2:
 		options = {'area':'suplentes', 'titulo': 'Suplentes'}
@@ -118,6 +121,7 @@ def administrar_suplentes(request, dpto):
 		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
+@verifica_dpto
 def ver_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		lista_cursos = Curso.objects.filter(fk_area__fk_departamento__nick=dpto).order_by('fk_materia__nombre')
@@ -139,10 +143,12 @@ def ver_cursos(request, dpto):
 		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
+@verifica_dpto
 def modifica_curso(request, dpto, nrc, ajax=False):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		_nrc = int(nrc)
 		curso = get_object_or_404(Curso, NRC=_nrc)
+		dpto = Departamento.objects.get(nick=dpto)#para historicos
 
 		if request.method == 'POST':
 			errores = []
@@ -221,7 +227,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 							edificioCreadoRegistro = Registro.creacion(
 									request.session['usuario']['nick'], 
 									'Se creo el edificio "' + _edificio.id + '"',
-									_edificio.id, 'Edificios'
+									_edificio.id, 'Edificios', dpto
 								)
 
 							edificioCreadoRegistro.save()
@@ -250,7 +256,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 							aulaCreadaRegistro = Registro.creacion(
 									request.session['usuario']['nick'],
 									'Se creo el aula "' + _aula.nombre + '"',
-									_aula.nombre, 'Aulas'
+									_aula.nombre, 'Aulas', dpto
 								)
 							aulaCreadaRegistro.save()
 							pass
@@ -350,7 +356,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 						# 	})
 						edificioCreadoRegistro = Registro.creacion(request.session['usuario']['nick'], 
 														'Se creo el edificio "'+_edificio.nombre+'"',
-														_edificio.nombre, 'Edificios')
+														_edificio.nombre, 'Edificios', dpto)
 						edificioCreadoRegistro.save()
 						pass
 				else:
@@ -376,7 +382,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 						# 	})
 						aulaCreadaRegistro = Registro.creacion(request.session['usuario']['nick'], 
 														'Se creo el aula "'+_aula.nombre+'"',
-														_aula.nombre, 'Aulas')
+														_aula.nombre, 'Aulas', dpto)
 						aulaCreadaRegistro.save()
 						pass
 				else:
@@ -418,7 +424,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 
 								horarioAnterior.__unicode__(),
 								_horario.__unicode__(), 
-								'Horarios'
+								'Horarios', dpto
 							)
 						registroHorario.save()
 
@@ -431,7 +437,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 
 								horarioAnterior.fk_aula.nombre, 
 								_aula.nombre,
-								'Horarios'
+								'Horarios',dpto
 							)
 						registroAula.save()
 					if horarioAnterior.fk_edif.id != _edificio.id:
@@ -443,7 +449,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 
 								horarioAnterior.fk_edif.id, 
 								_edificio.id,
-								'Horarios'
+								'Horarios', dpto
 							)
 						registroEdif.save()
 
@@ -471,7 +477,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 							+ profesor_actual.nombre + " " + profesor_actual.apellido+
 		                    '" por "'+_profesor.nombre+" "+_profesor.apellido+'"', 
 		                    profesor_actual.codigo_udg,
-		                    _profesor.codigo_udg, 'Cursos'
+		                    _profesor.codigo_udg, 'Cursos', dpto
                     	)
 					registroP.save()
 				curso.fk_profesor = _profesor
@@ -487,7 +493,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 	                        secc_actual.id+" por "+_seccion.id+'"', 
 	                        secc_actual.id,
 	                        _seccion.id, 
-	                        'Cursos'
+	                        'Cursos', dpto
                         )
 					registroS.save()
 				curso.fk_secc = _seccion
@@ -509,6 +515,7 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
+@verifica_dpto
 def procesar_csv_contratos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		default_options = {'titulo_tipo':'Contratos', 'form_size': 'medium'}
@@ -643,6 +650,7 @@ def procesar_csv_contratos(request, dpto):
 			return render(request, TEMPLATE_FORM_CSV, options)
 
 @login_required(login_url='/')
+@verifica_dpto
 def procesar_csv_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		default_options = {'titulo_tipo':'Cursos', 'form_size': 'medium'}

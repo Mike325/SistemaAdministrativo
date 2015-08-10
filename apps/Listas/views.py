@@ -92,7 +92,7 @@ def crear_lista_diaria_TCompleto(request, dpto):
 
 			historico = Registro.creacion(request.session['usuario']['nick'],
 					  'Se guardaron las asistencias de Tiempo Completo del "'+ dpto.nombre +'"',
-					  'Guardadas', 'Asistencias')
+					  'Guardadas', 'Asistencias', dpto)
 			historico.save()
 		pass # for
 
@@ -147,6 +147,11 @@ def crear_lista_diaria_TMedio(request, dpto):
 
 			pass # if
 		pass # for
+
+	historico = Registro.creacion(request.session['usuario']['nick'],
+					'Se guardaron las asistencias de Medio Tiempo del "'+ dpto.nombre +'"',
+					'Guardadas', 'Asistencias', dpto)
+	historico.save()
 
 	return redirect('/')
 

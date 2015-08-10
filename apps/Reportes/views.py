@@ -186,7 +186,7 @@ def reporte_incidencias(request, dpto):
 			registroReporte = Registro.creacion(request.session['usuario']['nick'], 
 										'Se creo el reporte de incidencia ['+nuevo_reporte.__unicode__()+
 										'('+nuevo_reporte.fk_contrato.fk_curso.fk_profesor.codigo_udg+')]', 
-										nuevo_reporte.__unicode__(), 'Reportes')
+										nuevo_reporte.__unicode__(), 'Reportes', _departamento)
 			registroReporte.save()
 
 			return render(request, 'hecho.html', 

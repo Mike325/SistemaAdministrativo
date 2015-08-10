@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 
-from SistemaAdministrativo.commons.shortcuts import panelInicio
+from SistemaAdministrativo.commons.shortcuts import *
 
 from apps.Departamentos.models import Departamento
 from apps.Usuarios.models import Usuario, Rol
@@ -108,20 +108,22 @@ def sistema_modificar_jefedep(request, dpto):
             #Guardar los cambios en la base de datos
             departamento.save()
 
+            dpto = Departamento.objects.get(nick=dpto)
+
             try:
                 jefeActual = Usuario.objects.get(user__username=username_jefeActual)
             except ObjectDoesNotExist:
                 registro = Registro.creacion(request.session['usuario']['nick'],
                         'Se creo el jefe del departamento "'+
                         post_departamento+'" "'+nuevoJefe.user.get_full_name()+'"',
-                        nuevoJefe, 'Departamentos')
+                        nuevoJefe, 'Departamentos', dpto)
                 registro.save()
                 return redirect('/inicio-administrador/')
             registro = Registro.modificacion(request.session['usuario']['nick'],
                         'Se cambio el jefe del departamento "'+
                         post_departamento+'" de "'+jefeActual.user.get_full_name()+
                         '" a "'+nuevoJefe.user.get_full_name()+'"', jefeActual,
-                        nuevoJefe, 'Departamentos')
+                        nuevoJefe, 'Departamentos', dpto)
             registro.save()
             return redirect('/inicio-administrador/')
         else:
@@ -159,9 +161,10 @@ def nuevo_departamento(request):
             #Guardar en la base de datos el nuevo departamento
             nuevoDepartamento.save()
 
+            dpto = Departamento.objects.get(nick=post_abreviacion)
             registro = Registro.creacion(request.session['usuario']['nick'],
                         'Se creo el departamento "'+post_nombre+'"'
-                        , post_nombre, 'Departamentos')
+                        , post_nombre, 'Departamentos', dpto)
             registro.save()
 
             return redirect('/inicio-administrador/')
@@ -197,11 +200,17 @@ def nuevo_jefe(request):
                 nuevo_usuario = Usuario.alta_jefe(usuario, password, nombre, 
                                                     apellido, correo, codigo)
                 nuevo_usuario.save()
-
-                registro = Registro.creacion(request.session['usuario']['nick'],
+                try:
+                    dpto = Departamento.objects.get(jefeDep=nuevo_usuario)
+                    registro = Registro.creacion(request.session['usuario']['nick'],
                         'Se creo el jefe de departamento "'
                         + nuevo_usuario.user.get_full_name() +'"',
-                        usuario, 'Usuarios')
+                        usuario, 'Usuarios', dpto)
+                except:
+                    registro = Registro.creacion(request.session['usuario']['nick'],
+                        'Se creo el jefe de departamento "'
+                        + nuevo_usuario.user.get_full_name() +'"',
+                        usuario, 'Usuarios', None)
                 registro.save()
 
                 return redirect('/inicio-administrador/')
@@ -232,12 +241,13 @@ def nueva_secretaria(request):
                                                     apellido, correo, codigo)
                 nuevo_usuario.save()
 
+                dpto = Departamento.objects.get(jefeDep__user__username=request.session['usuario']['nick'])
                 registro = Registro.creacion(request.session['usuario']['nick'],
                         'Se creo la secretaria "'+nuevo_usuario.user.get_full_name()+'"'
-                        , usuario, 'Usuarios')
+                        , usuario, 'Usuarios', dpto)
                 registro.save()
 
-                return redirect('/inicio-administrador/')
+                return redirect('/')
         else:
             return render(request, TEMPLATE_ALTA_SECRE, locals())
     else:
@@ -257,7 +267,7 @@ def activar_usuarios(request):
                     registro = Registro.modificacion(request.session['usuario']['nick'],
                             'Se activo el usuario "'+
                             x.user.username +'"', 'Inactivo',
-                            'Activo', 'Usuarios')
+                            'Activo', 'Usuarios', None)
                     x.user.save()
                     registro.save()
                 elif estado=='unactive' and x.user.is_active:
@@ -265,11 +275,11 @@ def activar_usuarios(request):
                     registro = Registro.modificacion(request.session['usuario']['nick'],
                             'Se desactivo el usuario "'+
                             x.user.username +'"', 'Activo',
-                            'Inactivo', 'Usuarios')
+                            'Inactivo', 'Usuarios', None)
                     x.user.save()
                     registro.save()
 
-            return redirect('/inicio-administrador/')
+            return redirect('/')
         else:
             usuarios = Usuario.objects.exclude(user__username = 'admin').order_by('user__username')
             return render(request, 'Usuarios/activar-usuarios.html', locals())
@@ -362,4 +372,3 @@ def modificar_password(request):
             return render(request, TEMPLATE_MODIFICA_PASS, locals())
     else:
         return redirect('error403', origen=request.path)
-
