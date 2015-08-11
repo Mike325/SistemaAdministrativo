@@ -10,7 +10,7 @@
     {% endif %}
 
     <h3 class="text-center">Cambiar Jefe de Departamento<h3>
-    <form method='POST' action="/departamento/modificar/jefe-departamento">{% csrf_token %}
+    <form method='POST' action="/{{departamento.nick}}/modificar/jefe-departamento">{% csrf_token %}
         <label>Jefe actual</label>
             <input type="text" name="jefeActual" readonly="readonly" value="{{jefeActual}}, {{jefeActual.user.last_name}}, {{jefeActual.user.first_name}} ({{jefeActual.codigo}})"/>
 

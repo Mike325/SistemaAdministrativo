@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block poshead %}
+    {% load staticfiles %}
+        <script src="{% static 'js/Chart.Core.js' %}"></script>
+        <script src="{% static 'js/Chart.Doughnut.js' %}"></script>
+        <style>
+            .canvas-holder{
+                width:inherit;
+                display: inherit;
+            }
+            .pie-chart{
+                width:inherit;
+                height:400;
+            }
+        </style>
+    <script>
+
+        var pieData = [
+                {
+                    value: {{datos.asisTCompleto}},
+                    color:"#009ACD",
+                    highlight: "#00749a",
+                    label: "Asistencias Tiempo Completo"
+                },
+                {
+                    value: {{datos.inasisTCompleto}},
+                    color: "#668B8B",
+                    highlight: "#838B8B",
+                    label: "Inasistencias Tiempo Completo"
+                },
+                {
+                    value: {{datos.asisTMedio}},
+                    color:"#5CACEE",
+                    highlight: "#2e94e9",
+                    label: "Asistencias Medio Tiempo"
+                },
+                {
+                    value: {{datos.inasisTMedio}},
+                    color:"#528B8B",
+                    highlight: "#2F4F4F",
+                    label: "Inasistencias Medio Tiempo"
+                }
+            ];
+
+            window.onload = function(){
+                var ctx = document.getElementById("chart-area").getContext("2d");
+                window.myPie = new Chart(ctx).Pie(pieData);
+                window.myPie.generateLegend();
+            };
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="large-12 medium-10 columns medium-centered">
+            <div class="panel">
+                <h3 class="text-center">Estadísticas de asistencias de: {{datos.nombre}}</h3>
+                <div class="row">
+                    {% if datos.asistenciasTotales < 1 %}
+                        <div class="alert-box alert radius text-center">No existen registros de este departamento</div>
+                    {% else %}
+                    <div class="large-4 medium-8 columns">
+                        <div class="canvas-holder">
+                            <canvas id="chart-area" widht="100%" height="350" align="center"/>
+                        </div>
+                    </div>
+                    <div class="large-8 medium-4 columns">
+                        <table class="full-width">
+                            <thead>
+                                <th>Clave</th>
+                                <th>Materia</th>
+                                <th>Asistencias</th>
+                                <th>Inasistencias</th>
+                                <th>Totales</th>
+                            </thead>
+                            <tbody>
+                                {% for key, value in tablaMaterias.items %}
+                                    <tr>
+                                    <td>{{value.clave}}</td>
+                                    <td>{{value.nombre}}</td>
+                                    <td>{{value.asistencias}}</td>
+                                    <td>{{value.inasistencias}}</td>
+                                    <td>{{value.total}}</td>
+                                    </tr>
+                                {% endfor %}                               
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
