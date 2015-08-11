@@ -255,7 +255,8 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 							# 	})
 							aulaCreadaRegistro = Registro.creacion(
 									request.session['usuario']['nick'],
-									'Se creo el aula "' + _aula.nombre + '"',
+									'Se creo el aula "' + _aula.nombre + '" en el edificio "'+
+									_edificio+'"',
 									_aula.nombre, 'Aulas', dpto
 								)
 							aulaCreadaRegistro.save()
@@ -381,8 +382,8 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 						# 		'desc': 'Se creo una aula nueva.'
 						# 	})
 						aulaCreadaRegistro = Registro.creacion(request.session['usuario']['nick'], 
-														'Se creo el aula "'+_aula.nombre+'"',
-														_aula.nombre, 'Aulas', dpto)
+														'Se creo el aula "'+_aula.nombre+'" en el edificio'+
+														_edificio+'"',_aula.nombre, 'Aulas', dpto)
 						aulaCreadaRegistro.save()
 						pass
 				else:
@@ -475,7 +476,8 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 							request.session['usuario']['nick'],
 							'Se cambio el profesor "' 
 							+ profesor_actual.nombre + " " + profesor_actual.apellido+
-		                    '" por "'+_profesor.nombre+" "+_profesor.apellido+'"', 
+		                    '" por "'+_profesor.nombre+" "+_profesor.apellido+'" '+
+		                    'en el curso "'+curso.NRC+'"', 
 		                    profesor_actual.codigo_udg,
 		                    _profesor.codigo_udg, 'Cursos', dpto
                     	)
@@ -490,7 +492,8 @@ def modifica_curso(request, dpto, nrc, ajax=False):
 					registroS = Registro.modificacion(
 							request.session['usuario']['nick'],
 							'Se cambio la seccion "' +
-	                        secc_actual.id+" por "+_seccion.id+'"', 
+	                        secc_actual.id+" por "+_seccion.id+'" en el curso "'+
+	                        curso.NRC+'"', 
 	                        secc_actual.id,
 	                        _seccion.id, 
 	                        'Cursos', dpto
