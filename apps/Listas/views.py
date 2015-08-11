@@ -15,7 +15,7 @@ from apps.Listas.models import *
 import re, math
 
 # Override del día
-DAY_OVR = 2
+DAY_OVR = 4
 
 dias_abrev = ['L', 'M', 'I', 'J', 'V', 'S']
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
@@ -31,7 +31,7 @@ def crear_lista_diaria_TCompleto(request, dpto):
 	Override del día para pruebas.
 	(COMENTAR O ELIMINAR PARA PRODUCCION)
 	'''
-	#dia = DAY_OVR # DEBUG
+	dia = DAY_OVR # DEBUG
 
 	_profesor = None
 	filtro = {}
@@ -91,12 +91,11 @@ def crear_lista_diaria_TCompleto(request, dpto):
 				# print assist # DEBUG
 				pass # for 
 			pass # if
-
-			historico = Registro.creacion(request.session['usuario']['nick'],
-					  'Se guardaron las asistencias de Tiempo Completo del "'+ dpto.nombre +'"',
-					  'Guardadas', 'Asistencias', dpto)
-			historico.save()
 		pass # for
+	historico = Registro.creacion(request.session['usuario']['nick'],
+		  'Se guardaron las asistencias de Tiempo Completo del "'+ dpto.nombre +'"',
+		  'Guardadas', 'Asistencias', dpto)
+	historico.save()
 
 	return redirect("/")
 	pass # view
@@ -110,7 +109,7 @@ def crear_lista_diaria_TMedio(request, dpto):
 	Override del día para pruebas.
 	(COMENTAR O ELIMINAR PARA PRODUCCION)
 	'''
-	#dia = DAY_OVR # DEBUG
+	dia = DAY_OVR # DEBUG
 
 	'''
 		REV: Horario puede que no se ocupe aqui
@@ -119,7 +118,7 @@ def crear_lista_diaria_TMedio(request, dpto):
 	filtro = { dias_abrev[dia-1]: True }
 
 	for clave, valor in request.POST.items():
-		print clave, '\t\t', valor
+		#print clave, '\t\t', valor
 		if not clave.startswith('csrf'): # no tiene que ver con el key CSRF
 			_contrato = Contrato.objects.get(id=clave)
 			assist = Asistencia()
@@ -145,7 +144,7 @@ def crear_lista_diaria_TMedio(request, dpto):
 			assist.horas_clase = int(math.ceil(horas/60.0))
 
 			assist.save() # GUARDA LOS DATOS
-			print assist
+			#print assist
 
 			pass # if
 		pass # for
@@ -179,7 +178,7 @@ def listas_tCompleto(request, dpto):
 			Override del día para pruebas.
 			(COMENTAR O ELIMINAR PARA PRODUCCION)
 			'''
-			#dia = DAY_OVR # DEBUG
+			dia = DAY_OVR # DEBUG
 
 			profesores = Profesor.objects.filter(
 					curso__fk_area__fk_departamento=dpto
@@ -260,7 +259,7 @@ def listas_tMedio(request, dpto):
 			Override del día para pruebas.
 			(COMENTAR O ELIMINAR PARA PRODUCCION)
 			'''
-			#dia = DAY_OVR # DEBUG
+			dia = DAY_OVR # DEBUG
 
 			filtro = { dias_abrev[dia-1]: True }
 
@@ -305,14 +304,59 @@ def estadisticasDepartamento(request, dpto):
 		departamento = get_object_or_404(Departamento, nick=dpto)
 		try:
 			#Aquí se genera la información que se pasará a la gráfica
+			cicloActual = Ciclo.objects.earliest('fecha_ini')
+			asistenciasTotales = Asistencia.objects.filter(
+							fk_contrato__fk_curso__fk_ciclo=cicloActual,
+							fk_contrato__fk_curso__fk_materia__fk_departamento=departamento
+							)
+			materiasTC = asistenciasTotales.filter(fk_contrato__tipo='T')
+			materiasTM = asistenciasTotales.filter(fk_contrato__tipo='P')
+
+			#Lista de valores para filtrar repetidos
+			valores = materiasTC.values_list('fk_contrato__fk_curso__NRC',
+											'fk_contrato__fk_tipocont__id').distinct()
+
+			#Filtrando valores repetidos
+			for x in valores:
+				materiasTM = materiasTM.exclude(fk_contrato__fk_curso__NRC=x[0],
+												fk_contrato__fk_tipocont__id=str(x[1]))
+
+			tablaMaterias = {}
+			asistenciasTotales = materiasTC | materiasTM
+			for x in asistenciasTotales:
+				key = x.fk_contrato.fk_curso.fk_materia
+				if key not in tablaMaterias:
+					filtroAsist = {'asistio':True,'fk_contrato__fk_curso__fk_materia':key}
+					filtroInasist = {'asistio':False,'fk_contrato__fk_curso__fk_materia':key}
+					materiaAsistencias =  asistenciasTotales.filter(**filtroAsist).count()
+					materiaInasistencias =  asistenciasTotales.filter(**filtroInasist).count()
+					total = materiaAsistencias+materiaInasistencias
+					if total == 0.0 : continue #Evitar que de error al intentar dividir entre 0
+					asistenciasP = round(100 * float(materiaAsistencias)/float(total), 2)
+					inasistenciasP = round(100 * float(materiaInasistencias)/float(total), 2)
+
+					tablaMaterias.update(
+						{key:{
+							'nombre': key.nombre,
+							'clave' : key.clave,
+							'asistencias' : '%s(%s%%)'%(materiaAsistencias, asistenciasP),
+							'inasistencias' :'%s(%s%%)'%(materiaInasistencias,inasistenciasP),
+							'total' : total
+						}})
+
+			#Datos que se cargaran a la gráfica
 			datos = {
-				'nombre' : departamento.nombre
+				'nombre' : departamento.nombre,
+				'asistenciasTotales' : asistenciasTotales.count(),
+				'asisTCompleto' : materiasTC.filter(asistio=True).count(),
+				'asisTMedio' : materiasTM.filter(asistio=True).count(),
+				'inasisTCompleto' :  materiasTC.filter(asistio=False).count(),
+				'inasisTMedio' : materiasTM.filter(asistio=False).count()
 			}
-			form_size = 'small'
-			return render(request, 'Listas/estadisticas.html', locals())
+			return render(request, 'Listas/estadisticas-departamento.html', locals())
 			pass
 		except:
-			return redirect('inicio-secretaria.html')
+			return redirect('/inicio-secretaria/')
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -322,63 +366,93 @@ def estadisticasProfesor(request):
 	if request.session['rol'] >= 1:
 		if request.GET.get('profesor'):
 			profesor = get_object_or_404(Profesor, codigo_udg=request.GET.get('profesor'))
+			try:
+				#Aquí se genera la información que se pasará a la gráfica
+				cicloActual = Ciclo.objects.earliest('fecha_ini')
+				asistenciasTotales = Asistencia.objects.filter(
+									fk_contrato__fk_curso__fk_ciclo=cicloActual,
+									 fk_contrato__fk_curso__fk_profesor=profesor
+									)
+				faltasTotales = asistenciasTotales.filter(asistio=False)
 
-			#Aquí se genera la información que se pasará a la gráfica
-			asistenciasTotales = Asistencia.objects.filter(fk_contrato__fk_curso__fk_profesor=profesor)
-			faltasTotales = asistenciasTotales.filter(asistio=False)
-			asistenciasTCompleto = asistenciasTotales.filter(asistio=True, fk_contrato__tipo='T')
-			faltasTCompleto = asistenciasTotales.filter(asistio=False, fk_contrato__tipo='T')
-			asistenciasTMedio = asistenciasTotales.filter(asistio=True, fk_contrato__tipo='P')
-			faltasTMedio = asistenciasTotales.filter(asistio=False, fk_contrato__tipo='P')
-			datos = {
-				'nombre' : (profesor.nombre + " " + profesor.apellido +
-							 "(" + profesor.codigo_udg + ")"),
-				'asisTotales' : asistenciasTotales,
-				'inasisTotales' : faltasTotales,
-				'asisTCompleto' : asistenciasTCompleto,
-				'asisTMedio' : asistenciasTMedio,
-				'inasisTMedio' : faltasTMedio,
-				'inasisTCompleto' : faltasTCompleto,
-			}
-			tablaTCompleto = {}
-			tablaTMedio = {}
-			for x in asistenciasTotales:
-				asistencias = asistenciasTCompleto.filter(fk_contrato=x.fk_contrato).count()
-				inasistencias = faltasTCompleto.filter(fk_contrato=x.fk_contrato).count()
-				total = asistencias+inasistencias
-				if total == 0.0 : continue
-				asistP = 100 * float(asistencias)/float(total)
-				inasistP = 100 * float(inasistencias)/float(total)
-				tablaTCompleto.update({str(x.fk_contrato.id):
-					{'tipoContrato' : x.fk_contrato.fk_tipocont,
-					'nombre': x.fk_contrato.fk_curso.fk_materia.nombre,
-					'secc' : x.fk_contrato.fk_curso.fk_secc,
-					'asist' : "%s (%s%%)"%(asistencias, asistP),
-					'inasist' : "%s (%s%%)"%(inasistencias, inasistP),
-					'total' : total
-					}})
-			
-			for x in asistenciasTotales:
-				asistencias = asistenciasTMedio.filter(fk_contrato=x.fk_contrato).count()
-				inasistencias = faltasTMedio.filter(fk_contrato=x.fk_contrato).count()
-				total = asistencias+inasistencias
-				if total == 0.0 : continue
-				asistP = 100 * float(asistencias)/float(total)
-				inasistP = 100 * float(inasistencias)/float(total)
-				tablaTMedio.update({str(x.fk_contrato.id):
-					{'tipoContrato' : x.fk_contrato.fk_tipocont,
-					'nombre': x.fk_contrato.fk_curso.fk_materia.nombre,
-					'secc' : x.fk_contrato.fk_curso.fk_secc,
-					'asist' : "%s (%s%%)"%(asistencias, asistP),
-					'inasist' : "%s (%s%%)"%(inasistencias, inasistP),
-					'total' : total
-					}})
+				asistenciasTotalesTCompleto = asistenciasTotales.filter(fk_contrato__tipo='T')
+				asistenciasTCompleto = asistenciasTotalesTCompleto.filter(asistio=True)
+				faltasTCompleto = asistenciasTotalesTCompleto.filter(asistio=False)
+				valores = asistenciasTotalesTCompleto.values_list('fk_contrato__fk_curso__NRC',
+																 'fk_contrato__fk_tipocont__id').distinct()
 
-			form_size = 'small'
-			return render(request, 'Listas/estadisticasProfesor.html', locals())
-			pass
+				asistenciasTotalesTMedio = asistenciasTotales.filter(fk_contrato__tipo='P')
 
-			return redirect('/inicio-secretaria/')
+				for x in valores:
+					asistenciasTotalesTMedio = asistenciasTotalesTMedio.exclude(
+												fk_contrato__fk_curso__NRC=x[0],
+												fk_contrato__fk_tipocont__id=str(x[1]))
+
+				asistenciasTMedio = asistenciasTotalesTMedio.filter(asistio=True)
+				faltasTMedio = asistenciasTotalesTMedio.filter(asistio=False)
+
+				#Informacion detallada que se muestra en la tabla
+				tablaTCompleto = {}
+				tablaTMedio = {}
+
+				#Tabla de tiempo completo
+				for x in asistenciasTotales:
+					key = x.fk_contrato.id
+					if key not in tablaTCompleto:
+						asistencias = asistenciasTCompleto.filter(fk_contrato__id=key).count()
+						inasistencias = faltasTCompleto.filter(fk_contrato__id=key).count()
+						total = asistencias+inasistencias
+						if total == 0.0 : continue #Evitar que de error al intentar dividir entre 0
+						asistP = round(100 * float(asistencias)/float(total), 2)
+						inasistP = round(100 * float(inasistencias)/float(total), 2)
+
+						tablaTCompleto.update(
+							{str(x.fk_contrato.id):
+								{'tipoContrato' : x.fk_contrato.fk_tipocont,
+								'nombre': x.fk_contrato.fk_curso.fk_materia.nombre,
+								'secc' : x.fk_contrato.fk_curso.fk_secc,
+								'asist' : "%s (%s%%)"%(asistencias, asistP),
+								'inasist' : "%s (%s%%)"%(inasistencias, inasistP),
+								'total' : total
+								}})
+				
+				#Tabla de medio tiempo
+				for x in asistenciasTotales:
+					key = x.fk_contrato.id
+					if key not in tablaTMedio:
+						asistencias = asistenciasTMedio.filter(fk_contrato__id=key).count()
+						inasistencias = faltasTMedio.filter(fk_contrato__id=key).count()
+						total = asistencias+inasistencias
+						if total == 0.0 : continue #Evitar que de error al intentar dividir entre 0
+						asistP = round(100 * float(asistencias)/float(total), 2)
+						inasistP = round(100 * float(inasistencias)/float(total), 2)
+
+						tablaTMedio.update(
+							{str(x.fk_contrato.id):
+								{'tipoContrato' : x.fk_contrato.fk_tipocont,
+								'nombre': x.fk_contrato.fk_curso.fk_materia.nombre,
+								'secc' : x.fk_contrato.fk_curso.fk_secc,
+								'asist' : "%s (%s%%)"%(asistencias, asistP),
+								'inasist' : "%s (%s%%)"%(inasistencias, inasistP),
+								'total' : total
+								}})
+
+				#Datos que se cargaran a la gráfica
+				datos = {
+					'nombre' : (profesor.nombre + " " + profesor.apellido +
+								 "(" + profesor.codigo_udg + ")"),
+					'asisTotales' : asistenciasTotales,
+					'inasisTotales' : faltasTotales,
+					'asisTCompleto' : asistenciasTCompleto,
+					'asisTMedio' : asistenciasTMedio,
+					'inasisTMedio' : faltasTMedio,
+					'inasisTCompleto' : faltasTCompleto,
+				}
+
+				return render(request, 'Listas/estadisticas-profesor.html', locals())
+				pass
+			except:
+				return redirect('/inicio-secretaria/')
 		else:
 			lista_profesores = Profesor.objects.all()
 			objetos = "Profesores"
@@ -402,7 +476,7 @@ def estadisticasMateria(request):
 				return render(request, 'Listas/estadisticas.html', locals())
 				pass
 			except:
-				return redirect('inicio-secretaria')
+				return redirect('/inicio-secretaria/')
 		else:
 			form_size = 'small'
 			objetos = "Materias"
@@ -417,16 +491,54 @@ def estadisticasCiclo(request):
 	if request.session['rol'] >= 1:
 		if request.GET.get('ciclo'):
 			ciclo = get_object_or_404(Ciclo, id=request.GET.get('ciclo'))
+
+			asistenciasTotales = Asistencia.objects.filter(fk_contrato__fk_curso__fk_ciclo=ciclo)
+			departamentos = Departamento.objects.all()
+
+			departamentosTC = asistenciasTotales.filter(fk_contrato__tipo='T')
+			departamentosTM = asistenciasTotales.filter(fk_contrato__tipo='P')
+
+			#Lista de valores para filtrar repetidos
+			valores = departamentosTC.values_list('fk_contrato__fk_curso__NRC',
+											'fk_contrato__fk_tipocont__id').distinct()
+
+			#Filtrando valores repetidos
+			for x in valores:
+				departamentosTM = departamentosTM.exclude(fk_contrato__fk_curso__NRC=x[0],
+												fk_contrato__fk_tipocont__id=str(x[1]))
+
+			asistenciasTotales = departamentosTC | departamentosTM
+			tablaDepartamentos = {}
+			for x in departamentos:
+				key = x.nick
+				if key not in tablaDepartamentos:
+					asistencias = asistenciasTotales.filter(asistio=True,
+								fk_contrato__fk_curso__fk_materia__fk_departamento__nick=key).count()
+					inasistencias = asistenciasTotales.filter(asistio=False,
+								fk_contrato__fk_curso__fk_materia__fk_departamento__nick=key).count()
+					total = asistencias + inasistencias
+					tablaDepartamentos.update(
+						{key:
+							{
+							'nombre':x.nombre,
+							'asistencias':asistencias,
+							'inasistencias':inasistencias,
+							'total' : total
+						}})
+
 			try:
 				#Aquí se genera la información que se pasará a la gráfica
 				datos = {
-					'nombre' : "Ciclo " + ciclo.id
+					'nombre' : "Ciclo " + ciclo.id,
+					'asistenciasTotales' : asistenciasTotales.count(),
+					'asistencias' : asistenciasTotales.filter(asistio=True).count(),
+					'inasistencias' : asistenciasTotales.filter(asistio=False).count()
 				}
 				form_size = 'small'
-				return render(request, 'Listas/estadisticas.html', locals())
+				return render(request, 'Listas/estadisticas-ciclo.html', locals())
 				pass
 			except:
-				return redirect('inicio-secretaria.html')
+				return redirect('/inicio-secretaria/')
 		else:
 			objetos = "Ciclos"
 			lista_ciclos = Ciclo.objects.all()
