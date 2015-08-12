@@ -137,6 +137,11 @@ ul.lt-large li
 	background-repeat: repeat;
 }
 
+#comentario
+{
+	resize: none;
+}
+
 /*
  * FIX: 
  	* estilos para el acordeon se agregaron al archivo

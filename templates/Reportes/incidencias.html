@@ -62,9 +62,28 @@
                         <td class="row-secc">{{ x.fk_contrato.fk_curso.fk_secc }}</td>
 
                         <td class="row-horario">
-                        {% for i in x.fk_contrato.fk_curso.fk_horarios.all %}
-                        {{ i.hora_ini }}-{{ i.hora_fin }}
-                        {% endfor %}
+
+                        {% if x.getHorario.L and x.getHorario.I %}
+                        L-I<br>
+                        {% elif x.getHorario.L %}
+                        L<br>
+                        {% elif x.getHorario.M and x.getHorario.J %}
+                        M-J<br>
+                        {% elif x.getHorario.M %}
+                        M<br>
+                        {% elif x.getHorario.I and x.getHorario.V %}
+                        I-V<br>
+                        {% elif x.getHorario.I %}
+                        I<br>
+                        {% elif x.getHorario.J %}
+                        J<br>
+                        {% elif x.getHorario.V %}
+                        V<br>
+                        {% elif x.getHorario.S %}
+                        S<br>
+                        {% endif %}
+
+                        {{ x.getHorario.hora_ini }}-{{ x.getHorario.hora_fin }}
                         </td>
 
                         <td class="row-hrsFalta">{{ x.horasFalta }}</td>

@@ -3,13 +3,14 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from apps.Departamentos.models import *
 from apps.Reportes.models import *
 from apps.Historicos.models import *
 
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+dias_abrev = ['L', 'M', 'I', 'J', 'V', 'S']
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
 #Carga de la pagina de incio de las secretarias
@@ -42,6 +43,7 @@ def form_incidencias(request, dpto):
 		pass
 	else:
 		return redirect('error403', origen=request.path)
+
 
 #Formulario para la consulta de las incidencias (por fechas)
 @login_required(login_url='/')
@@ -87,6 +89,7 @@ def ver_incidencias(request, dpto):
 					'mes_fin': mes_fin, 
 					'extender_info': extender_info,
 					'listaIncidencias': listaIncidencias,
+					'listaDias': dias_abrev,
 				})
 			else:
 				return render(request, 'hecho.html', 
@@ -152,15 +155,11 @@ def reporte_incidencias(request, dpto):
 		_departamento = get_object_or_404(Departamento, nick=dpto)
 		listaProf = Profesor.objects.order_by('apellido')
 		listaMaterias = Curso.objects.all()
+		
+		hoy = date.today()
+		dia = hoy.isoweekday()
 
 		errores = []
-
-		try:
-			fechaReporte = str(request.POST.get('fecha'))
-			fechaReporte = fechaReporte.split('-')
-			fechaReporte = date(int(fechaReporte[0]), int(fechaReporte[1]), int(fechaReporte[2]))
-		except:
-			errores.append('Fecha')
 
 		try:
 			curso = str(request.POST.get('curso'))
@@ -168,17 +167,22 @@ def reporte_incidencias(request, dpto):
 		except:
 			errores.append('Curso')
 
-		try:
-			horasF = int(request.POST.get('horasFalta'))
-		except:
-			errores.append('Hora')
+		comentario = str(request.POST.get('comentario'))
+		filtro = { dias_abrev[dia-1]: True }
+
+		h = contrato.fk_curso.fk_horarios.get(**filtro)
+		hora_ini = datetime.combine(hoy, h.hora_ini)
+		hora_fin = datetime.combine(hoy, h.hora_fin)
+
+		horas_clase = (hora_fin - hora_ini) + timedelta(minutes = 5)
+		horas_clase = horas_clase.seconds/3600
 
 		if not errores:
 			nuevo_reporte = Reporte(
-				fecha = fechaReporte, 
 				fk_contrato = contrato, 
 				fk_depto = _departamento, 
-				horasFalta = horasF
+				horasFalta = horas_clase,
+				comentario = comentario
 			)
 
 			nuevo_reporte.save()
