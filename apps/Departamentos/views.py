@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -15,20 +16,6 @@ import copy
 from .fieldsets import *
 
 import re # libreria de expresiones regulares
-
-# from django import template
-
-# register = template.Library()
-
-# @register.assignment_tag
-# def query(qs, **kwargs):
-#     """ template tag which allows queryset filtering. Usage:
-#           {% query books author=author as mybooks %}
-#           {% for book in mybooks %}
-#             ...
-#           {% endfor %}
-#     """
-#     return qs.filter(**kwargs)
 
 TEMPLATE_FORM_CSV = 'Forms/form_subir_csv.html'
 
@@ -53,68 +40,131 @@ def inicio_jefedep(request):
 	   	return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
-def gestion_sistema(request, dpto, area, area_id, ajax=False):
-	_tabla = None
-	options = {}
-	filtros = {}
-	campos = []
+def POST_gestion_sistema(request, dpto, area, area_id, ajax):
+	if request.session['rol'] >= 2:
+		_tabla = None
+		options = {}
+		filtros = {}
+		campos = []
 
-	if area == 'suplentes':
-		_tabla = Suplente
-		filtros.update({'id': area_id})
-		campos = copy.deepcopy(FieldSet_Suplente)
+		if area == 'suplentes':
+			_tabla = Suplente
+			filtros.update({'id': area_id})
+			campos = copy.deepcopy(FieldSet_Suplente)
 
-		options.update({
-				'lista_profesores': Profesor.objects.all()
-			})
-
-		pass
-	elif area == 'profesores':
-		_tabla = Profesor
-		filtros.update({'codigo_udg': area_id})
-		campos = copy.deepcopy(FieldSet_Profesor)
-
-		pass
-	elif area == 'ciclos':
-		_tabla = Ciclo
-		filtros.update({'id': area_id})
-		campos = copy.deepcopy(FieldSet_Ciclo)
-
-		pass
-
-	try:
-		_objeto = _tabla.objects.get(**filtros)
-		print _objeto
-	except:
-		_objeto = None
-		pass
-
-	if _objeto:
-		for campo in campos:
-			if 'value' in campo:
-				campo['value'] = eval('_objeto.' + campo['value'])
-				#print eval('_objeto.' + campo['value'])
-				pass
 			pass
-		pass
+		elif area == 'profesores':
+			_tabla = Profesor
+			filtros.update({'codigo_udg': area_id})
+			campos = copy.deepcopy(FieldSet_Profesor)
 
-	options.update({'ajax': ajax})
-	options.update({'area': area})
-	options.update({'campos': campos})
-	#print campos
-	#return HttpResponse(_objeto)
-	return render(request, 'Forms/gestion_general.html', options)
+			pass
+		elif area == 'ciclos':
+			_tabla = Ciclo
+			filtros.update({'id': area_id})
+			campos = copy.deepcopy(FieldSet_Ciclo)
+
+			pass
+
+		try:
+			_objeto = _tabla.objects.get(**filtros)
+			print _objeto
+		except:
+			_objeto = None
+			pass
+
+		if _objeto:
+			for campo in campos:
+				if 'set' in campo and campo['id'] in request.POST:
+					if request.POST[campo['id']] != 'None':
+						dato = { campo['set'] : request.POST[campo['id']] }
+						#print dato
+
+						_tabla.objects.filter(**filtros).update(**dato)
+					pass # if
+				elif 'special' in campo and campo['id'] in request.POST:
+					dato = campo['special']
+					# print dato
+					# print 'se va a establecer en None\n'
+
+					_tabla.objects.filter(**filtros).update(**dato)
+					pass # elif
+				pass # for 
+			pass # if
+		return HttpResponse('enviado!')
+		pass
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def gestion_sistema(request, dpto, area, area_id, ajax=False):
+	if request.session['rol'] >= 2:
+		if request.method == 'POST':
+			return POST_gestion_sistema(request, dpto, area, area_id, ajax)
+			pass
+		else:
+			_tabla = None
+			options = {}
+			filtros = {}
+			campos = []
+
+			if area == 'suplentes':
+				_tabla = Suplente
+				filtros.update({'id': area_id})
+				campos = copy.deepcopy(FieldSet_Suplente)
+
+				options.update({
+						'lista_profesores': Profesor.objects.all()
+					})
+
+				pass
+			elif area == 'profesores':
+				_tabla = Profesor
+				filtros.update({'codigo_udg': area_id})
+				campos = copy.deepcopy(FieldSet_Profesor)
+
+				pass
+			elif area == 'ciclos':
+				_tabla = Ciclo
+				filtros.update({'id': area_id})
+				campos = copy.deepcopy(FieldSet_Ciclo)
+
+				pass
+
+			try:
+				_objeto = _tabla.objects.get(**filtros)
+				print _objeto
+			except:
+				_objeto = None
+				pass
+
+			if _objeto:
+				for campo in campos:
+					if 'value' in campo:
+						campo['value'] = eval('_objeto.' + campo['value'])
+						#print eval('_objeto.' + campo['value'])
+						pass
+					pass
+				pass
+
+			options.update({'ajax': ajax})
+			options.update({'area': area})
+			options.update({'campos': campos})
+			#print campos
+			#return HttpResponse(_objeto)
+			return render(request, 'Forms/gestion_general.html', options)
+		pass # if
+	else:
+		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
 @verifica_dpto
 def administrar_suplentes(request, dpto):
 	if request.session['rol'] >= 2:
-		options = {'area':'suplentes', 'titulo': 'Suplentes'}
-
-		suplentes = Suplente.objects.all()
 		_departamento = get_object_or_404(Departamento, nick=dpto)
+		suplentes = Suplente.objects.filter( fk_curso__fk_area__fk_departamento=_departamento )
 
-		options.update({'datos': suplentes})
+		options = {'area':'suplentes', 'titulo': 'Suplentes', 'datos': suplentes}
 		return render(request, 'Departamentos/gestion_suplentes.html', options)
 		pass
 	else:
@@ -894,6 +944,66 @@ def sistema_modifica_nrc(request, dpto, ciclo, nrc):
 
 		return render(request, 'Departamentos/modifica_curso_individual.html', options)
 		pass
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+#@verifica_dpto
+def nuevo_suplente(request, dpto):
+	_departamento = get_object_or_404(Departamento, nick=dpto)
+	options = { 'form_size': 'large', 'departamento': _departamento }
+	errores = []
+
+	cursos = Curso.objects.filter(
+			fk_area__fk_departamento=_departamento,
+			fk_ciclo=Ciclo.objects.last()
+		)
+	profesores = Profesor.objects.filter(
+			curso__fk_area__fk_departamento=_departamento
+		).distinct().order_by('apellido')
+
+	if request.session['rol'] >= 2:
+		if request.method == 'POST':
+			in_curso_nrc = request.POST.get('curso', '')
+			in_cod_supp = request.POST.get('in-supp', '')
+			in_fecha_ini = request.POST.get('in-fecha-ini', '')
+			in_fecha_fin = request.POST.get('in-fecha-fin', '')
+			in_full_ciclo = request.POST.get('in-cubrir-ciclo', '')
+
+			_curso = get_object_or_404(Curso, NRC=in_curso_nrc)
+			_suplente = get_object_or_404(Profesor, codigo_udg=in_cod_supp)
+
+			nuevo_supp = Suplente()
+			nuevo_supp.fk_curso = _curso
+			nuevo_supp.fk_profesor = _suplente
+
+			if not in_full_ciclo:
+				nuevo_supp.periodo_ini = in_fecha_ini
+				nuevo_supp.periodo_fin = in_fecha_fin
+				pass
+			else:
+				nuevo_supp.periodo_ini = None
+				nuevo_supp.periodo_fin = None
+				pass
+
+			try:
+				nuevo_supp.save()
+				options.update({ 'success': True })
+				pass
+			except IntegrityError:
+				errores.append({
+						'tipo': 'Curso Existente',
+						'desc': 'El curso %s ya existe'%_curso
+					})
+				options.update({ 'errores': errores })
+				pass
+
+			options.update({ 'lista_cursos': cursos, 'lista_profesores': profesores })
+			return render(request, 'Forms/nuevo-suplente.html', options)
+			pass
+		else: # una peticion GET comun y corriente
+			options.update({ 'lista_cursos': cursos, 'lista_profesores': profesores })
+			return render(request, 'Forms/nuevo-suplente.html', options)
 	else:
 		return redirect('error403', origen=request.path)
 

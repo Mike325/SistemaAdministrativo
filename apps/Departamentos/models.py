@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.validators import RegexValidator
 
+#import time
+from time import strftime
+
 from apps.Usuarios.models import Usuario
 
 numerico = RegexValidator(r'^[0-9]*$', 'Use solo caracteres numericos (0-9).')
@@ -93,7 +96,12 @@ class Horario(models.Model):
     fk_aula = models.ForeignKey(Aula, blank=True, null=True)
 
     def __unicode__(self):
-        return "%s - %s: %s"%(self.hora_ini, self.hora_fin, [x for x in ['L','M','I','J','V','S'] if eval('self.'+x)==True])
+        disp_hora_ini = self.hora_ini.strftime("%H:%M") if self.hora_ini else "no-asignado"
+        disp_hora_fin = self.hora_fin.strftime("%H:%M") if self.hora_fin else "no-asignado"
+        return "%s-%s : %s"%(
+                disp_hora_ini, disp_hora_fin, 
+                ''.join([x for x in 'LMIJVS' if eval('self.'+x)==True])
+            )
         pass
 
 class Curso(models.Model):
@@ -109,6 +117,42 @@ class Curso(models.Model):
     
     fk_profesor = models.ForeignKey(Profesor)
     # fk_suplente = models.ForeignKey(Suplente, blank=True, null=True)
+
+    def _str_horarios(self):
+        '''
+            ejemplo:
+            [13:00-14:55, LM]
+            [13:00-14:55, LM], [19:00-20:55, I]
+        '''
+        if self.fk_horarios.all:
+            #for index, item in enumerate(items
+            ret = ''
+            for index, horario in enumerate(self.fk_horarios.all()):
+                ret += '[%s-%s'%(
+                        horario.hora_ini.strftime("%H:%M"), 
+                        horario.hora_fin.strftime("%H:%M")
+                    )
+
+                dias = ''.join([
+                        x for x in 'LMIJVS' 
+                        if eval('horario.'+x)==True
+                    ])
+
+                if dias:
+                    ret += ' : %s'%dias
+                    pass
+
+                ret += ']'
+                if index != self.fk_horarios.all().count()-1:
+                    ret += ', '
+                    pass
+                pass
+
+            if not ret:
+                return '[(sin horarios)]'
+            else:
+                return ret
+        pass
 
     def __unicode__(self):
         return self.NRC

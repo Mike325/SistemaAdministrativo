@@ -7,17 +7,30 @@
 {% block poshead %}
     {% load staticfiles %}
     <link rel="stylesheet" href="{% static 'css/print/formatos.css' %}" type="text/css" media="print" />
+
     <script type="text/javascript">
+    $(document).ready(function()
+    { // Cuando el documento está listo...
+        $('td.assist-col input[type="checkbox"]').click(function()
+        {
+            contenedor = $(this).parent("td");
+
+            if ( this.checked==true ) { contenedor.removeClass("no-asistio"); }
+                else { contenedor.addClass("no-asistio"); }
+        });
+    });
+
     function ConfirmarEnvio(ref)
     {
-        mensaje = "Recuerde que las asistencias solo pueden enviarse una
-                    vez, y no pueden modificarse posteriormente.
-                    Revise bien la información antes de continuar.
-                    ¿Desea proceder con el envio?";
+        mensaje = "Recuerde que las asistencias solo pueden enviarse una "
+                + "vez, y no pueden modificarse posteriormente.\n"
+                + "Revise bien la información antes de continuar.\n\n"
+                + "¿Desea proceder con el envio?";
 
         return confirm(mensaje);
     }
     </script>
+
     {% if yaRegistradas %}
     <style type="text/css">.assist-col { display: none !important; }</style>
     {% endif %}
@@ -63,12 +76,24 @@
                             {% for x in listaAsistencia %}
                                 <tr>
                                     <td class="hide-for-print">{{ forloop.counter }}</td>
-                                    <td class="row-nombre">{{ x.profesor }}</td>
+                                    <td class="row-nombre">{% spaceless %}
+                                        {{ x.profesor }}
+                                        {% if x.suplente %}
+                                            <div class="no-padding" style="color: darkgray; margin-left: 18px;">
+                                                <b>Suplentes</b>:<br/>
+                                                {% for supp in x.suplente %}
+                                                        {# <br/>{{ supp.fk_curso__NRC }} -> {{ supp.fk_profesor__apellido }}, {{ supp.fk_profesor__nombre }} ({{ supp.fk_profesor__codigo_udg }}) #}
+                                                    {{ supp.fk_curso.NRC }} {{ supp.fk_curso.fk_materia.clave }}({{ supp.fk_curso.fk_secc.id }}) -> {{ supp.fk_profesor.apellido }}, {{ supp.fk_profesor.nombre }} ({{ supp.fk_profesor.codigo_udg }})
+                                                    {% if not forloop.last %}<br/>{% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endspaceless %}</td>
                                     <td class="row-hora-in">{{ x.hora_ini }}</td>
                                     <td class="row-sign">{# firma #}</td>
                                     <td class="row-hora-in">{{ x.hora_fin }}</td>
                                     <td class="row-sign">{# firma #}</td>
-                                    <td class="hide-for-print assist-col">
+                                    <td class="hide-for-print text-center assist-col">
                                         <input type="hidden" name="{{x.codigo_prof}}" value="off" />
                                         <input type="checkbox" id="asistencia" name="{{x.codigo_prof}}" checked/>
                                     </td>
@@ -88,19 +113,21 @@
             {% if tiempoM %} 
             <div class="row">
                 <div class="medium-12 columns">
+                    {% if yaRegistradas %}
+                    <div class="alert-box warning radius text-center hide-for-print">
+                        Las asistencias del día ya fueron registradas
+                    </div>
+                    {% endif %}
                     <button class="button tiny right hide-for-print" onclick="print()">Imprimir formato</button>
                     <table class="full-width-table">
-                        {% if yaRegistradas %}
-                        <div class="alert-box warning radius text-center hide-for-print">
-                            Las asistencias del día ya fueron registradas
-                        </div>
-                        {% endif %}
                         <thead>
                             <tr class="especialHead">
                                 {# <th class="hide-for-print"></th> #}
                                 <th colspan="2">
                                     {% load staticfiles %}
-                                    <img style="height: 180px;" src="{% static 'img/udglogo.jpg' %}">
+                                    <div style="width: 100px; height: 100%;">
+                                        <img src="{% static 'img/udglogo.jpg' %}">
+                                    </div>
                                 </th>
 
                                 <th style="text-align: center" colspan="3">
@@ -133,7 +160,14 @@
                                 <tr>
                                     <td class="hide-for-print">{{ forloop.counter }}</td>
                                     <td class="row-nrc">{{ x.fk_curso.NRC }}</td>
-                                    <td class="row-nombreprof">{{ x.fk_curso.fk_profesor.apellido }} {{x.fk_curso.fk_profesor.nombre}}</td>
+                                    <td class="row-nombreprof">{% spaceless %}
+                                        {{ x.fk_curso.fk_profesor.apellido }}, {{x.fk_curso.fk_profesor.nombre}} ({{ x.fk_curso.fk_profesor.codigo_udg }})
+                                        {% if x.fk_curso.suplente %}
+                                            <div class="no-padding" style="color: darkgray;">
+                                                <b>Suplente</b>:<br/>{{ x.fk_curso.suplente.fk_profesor.apellido }} {{ x.fk_curso.suplente.fk_profesor.nombre }} ({{ x.fk_curso.suplente.fk_profesor.codigo_udg }})
+                                            </div>
+                                        {% endif %}
+                                    {% endspaceless %}</td>
                                     <td class="row-materia">{{ x.fk_curso.fk_materia.nombre }}</td>
                                     <td class="row-secc">{{ x.fk_curso.fk_secc.id }}</td>
                                     <td class="row-edif">
@@ -158,7 +192,7 @@
                                     {% endfor %}
                                     </td>
                                     <td class="row-firma">{# firma #}</td>
-                                    <td class="hide-for-print assist-col">
+                                    <td class="hide-for-print text-center assist-col">
                                         <input type="hidden" name="{{x.id}}" value="off"/>
                                         <input type="checkbox" id="asistencia" name="{{x.id}}" checked/>
                                     </td>

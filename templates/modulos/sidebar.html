@@ -31,6 +31,7 @@
 				{% if request.session.rol > 2 %}
 					<li><a href="/inicio-administrador">Administrador</a></li>
 				{% endif %}
+				<li><a href="/creditos">Acerca de SIIAD</a></li>
 			</ul>
 		</div>
 
@@ -99,13 +100,11 @@
 					   				<a href="#panel2{{x.nick}}">{{x.nombre}}</a>
 					   				<div id="panel2{{x.nick}}" class="content">
 					   					<ul class="accordion no-margin">
-				   							<li><a href="/{{x.nick}}/sistema/csv/contratos/">Subir CSV contratos</a></li>
 				   							<li><a href="/{{x.nick}}/sistema/csv/cursos/">Subir CSV cursos</a></li>
+				   							<li><a href="/{{x.nick}}/sistema/csv/contratos/">Subir CSV contratos</a></li>
 				   							<li><a href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a></li>
-{% comment %}
-												<li><a href="/{{x.nick}}/form-incidencias">Reporte Asistencia</a></li>
-											<li><a href="/{{x.nick}}/listas/form-reporte-incidencias">Gestionar Encargados</a></li>
-{% endcomment %}
+				   							<li><a href="/{{ x.nick }}/suplentes/nuevo">Nuevo Suplente</a></li>
+				   							<li><a href="/{{ x.nick }}/suplentes/gestionar">Gestionar Suplentes</a></li>
 					   					</ul>
 					   				</div>
 				   				</li>
@@ -145,6 +144,9 @@
 				</li>
 			{% endif %}
 			</ul>
+		</div>
+		<div class="show-for-large-up no-margin no-padding text-center" id="creditos-div">
+			<a href="/creditos">Acerca de SIAAD</a>
 		</div>
 	</div>
 </div>

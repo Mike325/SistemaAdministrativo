@@ -5,6 +5,7 @@
 from functools import wraps
 from django.shortcuts import render, redirect
 from apps.Departamentos.models import Departamento
+from apps.Usuarios.models import Usuario
 
 def panelInicio(request):
     if request.user.is_authenticated():
@@ -22,20 +23,45 @@ def sidebar_context(request):
         'lista_departamentos' : Departamento.objects.all(),
     }
 
-def verifica_dpto(view):
-    @wraps(view)
+def verifica_dpto(origen):
+    '''
+        FIX:
+            + Limpieza de la funcion.
+            + Ahora se evalua correctamente si existe el dpto en
+              las variables de la solicitud.
+            + Ahora se redirige a la pagina de "no-autorizado" si
+              el usuario no tiene el permiso suficiente.
+    '''
+    @wraps(origen)
     def wrapper(request, *args, **kwargs):
-        try:
-            dptoObjeto = Departamento.objects.get(jefeDep__user__username=request.session['usuario']['nick'])
-            print dptoObjeto.nick
-            print kwargs
-            if dptoObjeto.nick == kwargs['dpto']:
-                return view(request, *args, **kwargs)
-            else:
-                return redirect('/')
-        except:
-            if request.session['usuario']['rol']>2:
-                return view(request, *args, **kwargs)
-            else:
-                return redirect('/')
+        error = False
+        if 'dpto' in kwargs and request.session['usuario']['rol'] <= 2:
+            _verif_usuario = request.user.username
+            _verif_usuario = Usuario.objects.get(user__username=_verif_usuario)
+
+            _verif_departamento = None
+            try:
+                _verif_departamento = Departamento.objects.get(nick=kwargs['dpto'])
+                pass
+            except:
+                # Muy probablemente se haya generado una consulta equivocada
+                # (el departamento no existe o algun error por lo parecido)
+                # pero dejemos el procesamiento de dicho error al sistema.
+                # aka: "dejemoslo pasar"
+                pass
+
+            if _verif_departamento and _verif_departamento.jefeDep != _verif_usuario:
+                error = True
+
+                pass
+
+            _verif_departamento = None
+            _verif_usuario = None
+            pass # if
+
+        if error:
+            return redirect('error403', origen=request.path)
+
+        return origen(request, *args, **kwargs)
+        pass #wrapper()
     return wrapper

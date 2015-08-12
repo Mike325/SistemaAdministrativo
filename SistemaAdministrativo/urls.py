@@ -17,6 +17,8 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from commons.views import Error403 as NoAutorizado
+from commons.views import Licencias
+from django.shortcuts import render
 
 from url_secretaria import *
 from url_jefedep import *
@@ -34,6 +36,7 @@ TODO:
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^creditos/$', Licencias),
 
     url(r'^sistema/403/origen=(?P<origen>.*)$', NoAutorizado, name='error403'),
 ]

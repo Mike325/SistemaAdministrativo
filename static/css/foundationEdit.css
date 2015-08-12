@@ -30,15 +30,7 @@ body
 .upper { text-transform: uppercase; }
 
 .especialHead { background: #fff !important; }
-.sign-field 
-{
-	/* 
-	 * FIX: 
-		 * Al momento de impresion el 
-		 * campo era muy pequeño.
-	 */
-	width: 145px !important;
-}
+.sign-field { width: 145px !important; }
 
 .division-banner 
 {
@@ -137,10 +129,35 @@ ul.lt-large li
 	background-repeat: repeat;
 }
 
-#comentario
+#comentario{ resize: none; }
+
+#creditos-div
 {
-	resize: none;
+	position: relative; 
+	display: block;
+		width: 100%; 
+		height: 29px; 
+
+	background-color: #F7F7F7; 
+	border-top: 1px solid #CFCFCF;
 }
+
+#creditos-div > a,
+#creditos-div > p
+{
+	display: block; 
+	width: 90%; 
+	margin: 0 auto; 
+	margin-top: 4px;
+	padding: 0; 
+
+	color: #676767; 
+	font-size: 13px; 
+
+	transition: 0.65s;
+}
+
+.assist-col.no-asistio { background-color: #FF7171; }
 
 /*
  * FIX: 

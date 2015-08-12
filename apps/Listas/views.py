@@ -207,9 +207,15 @@ def listas_tCompleto(request, dpto):
 
 				cuenta = horarios.count()
 
+				suplencias = Suplente.objects.filter(
+						fk_curso__in=cursos
+					)
+
 				if contratos and cuenta > 0:
 					listaAsistencia.append({
 							'profesor': x.apellido + ', ' + x.nombre + '(' + x.codigo_udg + ')',
+							# 'suplente': x.suplente_set.values('fk_curso__NRC', 'fk_profesor__nombre', 'fk_profesor__apellido', 'fk_profesor__codigo_udg'),
+							'suplente': suplencias,
 							'hora_ini': horarios[0].hora_ini,
 							'hora_fin': horarios[cuenta-1].hora_fin,
 							'codigo_prof': x.codigo_udg
@@ -218,7 +224,7 @@ def listas_tCompleto(request, dpto):
 				pass
 
 				'''DESCOMENTAR SI QUIERE ORDENARSE POR HORA DE INICIO'''
-				listaAsistencia = sorted(listaAsistencia, key=lambda d: (d['hora_ini'], d['profesor']))
+				#listaAsistencia = sorted(listaAsistencia, key=lambda d: (d['hora_ini'], d['profesor']))
 
 			# return HttpResponse('') # DEBUG
 

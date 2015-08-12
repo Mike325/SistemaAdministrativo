@@ -54,9 +54,10 @@ FieldSet_Suplente.append({
 		'id': 'in-codigo',
 		'type': 'hidden',
 		'value': 'fk_profesor.codigo_udg',
-		'set': 'fk_suplente',
+		'set': 'fk_profesor',
 		'model': 'Profesor',
-		'filter': 'codigo_udg'
+		'filter': 'codigo_udg',
+		'size': 0
 	})
 FieldSet_Suplente.append({
 		'rootclass': 'rango-fecha',
@@ -66,6 +67,7 @@ FieldSet_Suplente.append({
 		'class': 'date start',
 		'value': 'periodo_ini',
 		'set': 'periodo_ini',
+		'prop': 'date',
 		'size': 3
 	})
 FieldSet_Suplente.append({
@@ -76,6 +78,7 @@ FieldSet_Suplente.append({
 		'class': 'date end',
 		'value': 'periodo_fin',
 		'set': 'periodo_fin',
+		'prop': 'date',
 		'size': 3
 	})
 FieldSet_Suplente.append({
@@ -85,6 +88,7 @@ FieldSet_Suplente.append({
 		'checklabel': 'Vigente todo el ciclo.',
 		'id': 'in-full-periodo',
 		'type': 'checkbox',
+		'special': { 'periodo_ini': None, 'periodo_fin': None },
 		'value': 'periodo_fin==None',
 		'rel': 'in-periodo-ini, in-periodo-fin',
 		'size': 3
@@ -96,26 +100,23 @@ FieldSet_Ciclo.append({
 		'label': 'Nombre ciclo',
 		'id': 'in-id-ciclo',
 		'value': 'id',
-		# 'send': False,
-		# 'disable': True,
-		'max_length': 5,
+		'set': 'id',
+		'max_length': 6,
 		'size': 4
 	})
 FieldSet_Ciclo.append({
-		'rootclass': 'rango-fecha',
-		
 		'label': 'Fecha inicio',
 		'id': 'in-ciclo-ini',
 		'value': 'fecha_ini',
+		'set': 'fecha_ini',
 		'class': 'date start',
 		'size': 5
 	})
 FieldSet_Ciclo.append({
-		'rootclass': 'rango-fecha',
-		
 		'label': 'Fecha fin',
 		'id': 'in-ciclo-fin',
 		'value': 'fecha_fin',
+		'set': 'fecha_fin',
 		'class': 'date end',
 		'size': 5
 	})
@@ -133,11 +134,13 @@ FieldSet_Profesor.append({
 		'id': 'in-apellido',
 		'value': 'apellido',
 		'max_length': 50,
+		'set': 'apellido',
 		'size': 4
 	})
 FieldSet_Profesor.append({
 		'id': 'in-nombre',
 		'value': 'nombre',
 		'max_length': 50,
+		'set': 'nombre',
 		'size': 5
 	})

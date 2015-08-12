@@ -31,22 +31,29 @@
     				</div>
     				<div class="large-12 colums panel">
     					<h3 class="text-center">{{ dep.nombre }}<h3>
+                        <hr/>
     					<div class="row">
+                            <h4 class="text-center">Tareas iniciales</h4>
+                            <hr/>
                             <div class="large-12 columns">
                                 <button class="button expand" onclick="location.href='/{{ dep.nick }}/sistema/csv/cursos/'">Subir CSV Cursos</button>
                             </div>
-                            
-                            <div class="large-12 columns">
-                                <button class="button expand" onclick="location.href='/{{ dep.nick }}/ver_cursos'">Consulta/Modificacion de Cursos</button>
-                            </div>
-
-                            <div class="large-12 columns">
-                                <button class="button expand" onclick="location.href='/{{ dep.nick }}/suplentes'">Gestión de Suplentes</button>
-                            </div>
-
                             <div class="large-12 columns">
                                 <button class="button expand" onclick="location.href='/{{ dep.nick }}/sistema/csv/contratos/'">Subir CSV Contratos</button>
                             </div>
+                            
+                            <h4 class="text-center">Tareas administrativas</h4>
+                            <hr/>
+                            <div class="large-12 columns">
+                                <button class="button expand" onclick="location.href='/{{ dep.nick }}/ver_cursos'">Consulta/Modificacion de Cursos</button>
+                            </div>
+                            <div class="large-12 columns">
+                                <button class="button expand" onclick="location.href='/{{ dep.nick }}/suplentes/nuevo'">Nuevo Suplente</button>
+                            </div>
+                            <div class="large-12 columns">
+                                <button class="button expand" onclick="location.href='/{{ dep.nick }}/suplentes/gestionar'">Gestión de Suplentes</button>
+                            </div>
+
     					</div>
     				</div>
 			 </div>

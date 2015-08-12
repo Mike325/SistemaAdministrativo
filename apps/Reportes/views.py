@@ -44,7 +44,6 @@ def form_incidencias(request, dpto):
 	else:
 		return redirect('error403', origen=request.path)
 
-
 #Formulario para la consulta de las incidencias (por fechas)
 @login_required(login_url='/')
 def ver_incidencias(request, dpto):
@@ -113,21 +112,9 @@ def form_reporte_incidencias(request, dpto):
 		_departamento = get_object_or_404(Departamento, nick=dpto)
 		
 		try:
-			print 'op'
-			# listaProf = Profesor.objects.order_by('apellido')
-			# listaMaterias = Curso.objects.filter(fk_area__fk_departamento_id=2)
-
 			listaProf = Profesor.objects.filter(
 					curso__fk_area__fk_departamento=_departamento
 				).distinct().order_by('apellido')
-
-			# listaMaterias = {}
-
-			# listaMaterias = Curso.objects.filter(
-			# 		fk_area__fk_departamento=_departamento
-			# 	)
-
-			# print listaMaterias # DEBUG
 
 			return render(request, 'Forms/form-reporte-incidencias.html', 
 				{
