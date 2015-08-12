@@ -41,7 +41,7 @@
     <div class="large-7 large-offset-5 columns">
         <div class="row collapse">
             <div class="small-10 columns">
-                <form method="POST" action="/historicos/filtro/">{% csrf_token %}
+                <form method="POST" action="/{{dpto.nick}}/historicos/filtro/">{% csrf_token %}
                     <p class="dateOnly" id="dateOnly">
                         <input type="text" id="fecha" class="date error" name="fecha" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
                     </p>
