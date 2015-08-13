@@ -38,7 +38,6 @@
 			});
 
 			$('table').filterTable({
-				minRows: 2,
 				ignoreClass: 'no-filter',
 				inputSelector: '#filtro-tabla > input'
 			});
@@ -62,28 +61,20 @@
 			<table class="full-width-table" id="cursos">
 				<thead>
 					<th>#</th>
-					<th>NRC</th>
-					<th>CLAVE</th>
-					<th>SECC</th>
-					<th>PROFESOR</th>
-					<th>SUPLENTE</th>
-					<th>INICIO</th>
-					<th>FIN</th>
+					<th>CODIGO</th>
+					<th>APELLIDO</th>
+					<th>NOMBRE</th>
 					<th>ACCIONES</th>
 				</thead>
 
 				<tbody>
 					{% for dato in datos %}
 						<tr>
-							<td class="row-id indentifier">{{ dato.id }}</td>
-							<td class="row-nrc">{{ dato.fk_curso.NRC }}</td>
-							<td class="row-clave">{{ dato.fk_curso.fk_materia.clave }}</td>
-							<td class="row-secc">{{ dato.fk_curso.fk_secc }}</td>
-							<td class="row-profesor">{{ dato.fk_curso.fk_profesor }}</td>
-							<td class="row-suplente">{{ dato.fk_profesor }}</td>
-							<td class="row-inicio">{{ dato.periodo_ini|default:"(inicio ciclo)" }}</td>
-							<td class="row-fin">{{ dato.periodo_fin|default:"(fin ciclo)" }}</td>
-							<td class="no-padding"><button class="button expand no-margin button-editar" type="button">Editar</button></td>
+							<td class="row-contador no-filter">{{ forloop.counter }}</td>
+							<td class="row-codigo indentifier">{{ dato.codigo_udg }}</td>
+							<td class="row-apellido">{{ dato.apellido }}</td>
+							<td class="row-nombre">{{ dato.nombre }}</td>
+							<td class="no-padding no-filter"><button class="button expand no-margin button-editar" type="button">Editar</button></td>
 						</tr>
 					{% endfor %}
 				</tbody>

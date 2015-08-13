@@ -24,7 +24,7 @@ FieldSet_Suplente.append({
 		'send': False,
 		'disable': True,
 		'size': 8
-	})
+	}) # break
 FieldSet_Suplente.append({
 		'label': 'SECC',
 		'id': 'in-secc',
@@ -41,7 +41,7 @@ FieldSet_Suplente.append({
 		'send': False,
 		'disable': True,
 		'size': 5
-	})
+	}) # break
 FieldSet_Suplente.append({
 		'label': 'Suplente',
 		'id': 'in-supp',
@@ -49,7 +49,7 @@ FieldSet_Suplente.append({
 		'value': 'fk_profesor',
 		'rel': 'in-codigo',
 		'size': 5
-	})
+	}) # break
 FieldSet_Suplente.append({
 		'id': 'in-codigo',
 		'type': 'hidden',
@@ -110,7 +110,8 @@ FieldSet_Ciclo.append({
 		'value': 'fecha_ini',
 		'set': 'fecha_ini',
 		'class': 'date start',
-		'size': 5
+		'prop': 'date',
+		'size': 4
 	})
 FieldSet_Ciclo.append({
 		'label': 'Fecha fin',
@@ -118,12 +119,14 @@ FieldSet_Ciclo.append({
 		'value': 'fecha_fin',
 		'set': 'fecha_fin',
 		'class': 'date end',
-		'size': 5
+		'prop': 'date',
+		'size': 4
 	})
 
 '''CAMPOS PARA PROFESORES'''
 FieldSet_Profesor = []
 FieldSet_Profesor.append({
+		'label': 'Codigo UDG',
 		'id': 'in-codigo',
 		'value': 'codigo_udg',
 		'send': False,
@@ -131,16 +134,20 @@ FieldSet_Profesor.append({
 		'size': 3
 	})
 FieldSet_Profesor.append({
+		'label': 'Apellidos',
 		'id': 'in-apellido',
 		'value': 'apellido',
 		'max_length': 50,
 		'set': 'apellido',
+		'rtrim': True,
 		'size': 4
 	})
 FieldSet_Profesor.append({
+		'label': 'Nombre(s)',
 		'id': 'in-nombre',
 		'value': 'nombre',
 		'max_length': 50,
 		'set': 'nombre',
+		'rtrim': True,
 		'size': 5
 	})

@@ -25,19 +25,16 @@
                 'language': 'es'
             });
 
-            /*
-                FIX:
-                    + datepair se usa solo para rangos de fechas y/o horas.
-                      No es aplicable a este caso.
-             */
-            // var dateOnlyEl = document.getElementById('dateOnly');
-            // var dateOnlyDatepair = new Datepair(dateOnlyEl);
+            /* FIX:
+                + Ahora se redimensiona el textarea segun la entrada.
+            */
+            var heightLimit = 200;
+            $('#comentario').on('input', function() 
+            {
+                this.style.height = "";
+                this.style.height = Math.min(this.scrollHeight, heightLimit) + 4 + "px";
+            });
         });
-
-{% comment %}
-        {# ANTIGUO CODIGO #}
-        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %} {'id_curso':{{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endfor %} ]{% if not forloop.last %},{% endif %} {% endfor %} };
-{% endcomment %}
 
         var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %}{% if curso.fk_area.fk_departamento = departamento %} {'id_curso': {{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'nombre_materia': '{{ curso.fk_materia.nombre}}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endif %}{% endfor %} ]{% if not forloop.last %},{% endif %} {% endfor %} };
 
@@ -101,26 +98,15 @@
                 </div>
             </div>
             <div class="row">
-                <div class="medium-6 columns">
+                <div class="medium-12 columns">
                     <label>
                         Comentario
-                        <textarea id="comentario" name="comentario" maxlength="100" rows="2" placeholder="Motivo de la incidencia">
-                        </textarea>
+                        <textarea id="comentario" name="comentario" maxlength="100" rows="2" placeholder="Motivo de la incidencia"></textarea>
                     </label>
                 </div>
             </div>
-                <input type="submit" value="Enviar Reporte" class="button tiny round">
+                <input type="submit" value="Enviar Reporte" class="button small radius">
             </div>
         </fieldset>
     </form>    
 {% endblock %}
-
-{% comment %}
-    {% block content %}
-    <div class="row">
-        <div class="medium-11 medium-centered columns panel">
-
-        </div>
-    </div>
-{% endblock %}
-{% endcomment %}

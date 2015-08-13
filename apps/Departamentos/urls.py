@@ -16,5 +16,11 @@ app_dep_urls = [
 	url(r'^(?P<dpto>.+)/suplentes/nuevo$', nuevo_suplente),
 	url(r'^(?P<dpto>.+)/suplentes/gestionar$', administrar_suplentes),
 
+	url(r'^sistema/profesores/nuevo$', nuevo_profesor),
+	url(r'^sistema/profesores/gestionar$', administrar_profesores),
+
+	#url(r'^(?P<dpto>.+)/ciclos/nuevo$', nuevo_ciclo),
+	url(r'^(?P<dpto>.+)/ciclos/gestionar$', administrar_ciclos),
+
 	url(r'^(?P<dpto>.+)/sistema/gestionar/(?P<area>.+)/(?P<area_id>.+)/(?P<ajax>.*)$', gestion_sistema),
 ]

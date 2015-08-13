@@ -6,7 +6,6 @@
 
 {% block poshead %}
 	{% load staticfiles %}
-	<script type="text/javascript" src="{% static 'js/jquery.filtertable.min.js' %}"></script>
 	<script type="text/javascript">
 		$(document).ready(function() 
 		{
@@ -22,7 +21,6 @@
 				})
 				.done(function( data ) 
 				{
-					//console.log(this, data);
 					$('#dialogo-modif').html(data).foundation('reveal', 'open');
 					$('html, body').delay(400).animate(
 					{
@@ -36,12 +34,6 @@
 					$('#dialogo-modif').html(error_default).foundation('reveal', 'open');
 				});
 			});
-
-			$('table').filterTable({
-				minRows: 2,
-				ignoreClass: 'no-filter',
-				inputSelector: '#filtro-tabla > input'
-			});
 		});
 	</script>
 {% endblock %}
@@ -51,9 +43,6 @@
 		<div class="medium-12 columns">	
 			<h3 class="text-center">{{ titulo }}</h3>
 			<div class="row">
-				<div class="medium-5 columns">
-					<p id="filtro-tabla">Filtro: <input type="search" placeholder="Buscar en los datos de la tabla"> </p>
-				</div>
 				<div class="medium-3 columns right">
 					<button onclick="location.href='./nuevo'" class="button success small hide-for-print right" style="margin-top: 18px;">Nuevo <b>(+)</b></button>
 				</div>
@@ -62,27 +51,19 @@
 			<table class="full-width-table" id="cursos">
 				<thead>
 					<th>#</th>
-					<th>NRC</th>
-					<th>CLAVE</th>
-					<th>SECC</th>
-					<th>PROFESOR</th>
-					<th>SUPLENTE</th>
-					<th>INICIO</th>
-					<th>FIN</th>
+					<th>ID</th>
+					<th>FECHA INICIO</th>
+					<th>FECHA FIN</th>
 					<th>ACCIONES</th>
 				</thead>
 
 				<tbody>
 					{% for dato in datos %}
 						<tr>
+							<td class="row-contador">{{ forloop.counter }}</td>
 							<td class="row-id indentifier">{{ dato.id }}</td>
-							<td class="row-nrc">{{ dato.fk_curso.NRC }}</td>
-							<td class="row-clave">{{ dato.fk_curso.fk_materia.clave }}</td>
-							<td class="row-secc">{{ dato.fk_curso.fk_secc }}</td>
-							<td class="row-profesor">{{ dato.fk_curso.fk_profesor }}</td>
-							<td class="row-suplente">{{ dato.fk_profesor }}</td>
-							<td class="row-inicio">{{ dato.periodo_ini|default:"(inicio ciclo)" }}</td>
-							<td class="row-fin">{{ dato.periodo_fin|default:"(fin ciclo)" }}</td>
+							<td class="row-fecha-ini">{{ dato.fecha_ini }}</td>
+							<td class="row-fecha-fin">{{ dato.fecha_fin }}</td>
 							<td class="no-padding"><button class="button expand no-margin button-editar" type="button">Editar</button></td>
 						</tr>
 					{% endfor %}

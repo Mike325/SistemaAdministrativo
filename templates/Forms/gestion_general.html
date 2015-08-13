@@ -41,9 +41,8 @@
 			    ],
 			    onSelect: function (suggestion) 
 			    {
-			        // alert('Seleccionado: ' + suggestion.value + "|" + suggestion.data);
 			        $('#in-codigo').val(suggestion.data);
-			        alert($('#in-codigo').val());
+			        //alert($('#in-codigo').val());
 			    },
 			    minChars: 3,
 			    lookupLimit: 10,
@@ -65,19 +64,24 @@
             });
 
             $('form').datepair();
+        {% elif area == 'ciclos' %}
+			$('.date').datepicker(
+            {
+				'format': 'yyyy-mm-dd',
+				'autoclose': true,
+				'language': 'es'
+            });
+
+            $('form').datepair();
 		{% endif %}
 		});
 
 		function EnviarFormulario(ref)
 		{
-			console.log($(ref).serialize());
+			button = document.getElementById('button-send-form');
+			button.disabled = true;
 
-			ref.disabled=true;
-
-			// div_error = document.getElementById('errores-div');
-			// div_info = document.getElementById('info-div');
-			// $(div_error).slideUp(165);
-
+			div_info = document.getElementById('status-div');
 			$.ajax({
 				url: ref.action,
 				method: 'POST',
@@ -85,20 +89,26 @@
 			})
 			.done(function(data)
 			{
-				alert(data);
+				$(div_info).addClass('success').text(data).slideDown(function()
+				{
+					setTimeout(function()
+					{
+						$('a.close-reveal-modal').trigger('click');
+					}, 1700);
+				});
 			})
 			.error(function(data)
 			{
-				alert('error:\n' + JSON.stringify(data));
+				$(div_info).addClass('error').text(data).slideDown();
+				button.disabled = false;
 			});
 
-			alert('"enviado"... o eso dirá luego');
 			return false;
 		}
 	</script>
 	<div class="row">
 			<div class="small-12 columns">
-				<h2 class="text-center">Modificar {{ area|title }}</h2>
+				<h2 class="text-center" style="margin-bottom: 20px;">Modificar {{ area|title }}</h2>
 				<form action="{{ request.path }}" onsubmit="return EnviarFormulario(this)">{% csrf_token %}
 					<div class="row">
 						{% for campo in campos %}
@@ -119,12 +129,17 @@
 						</div>
 						{% endfor %}
 					</div>
+					<div class="row">
+						<div class="medium-12 columns">
+							<div class="alert-box radius text-center" id="status-div" style="display: none; padding: 15px 10px;"></div>
+						</div>
+					</div>
 					<hr/>
 					<div class="row">
 						<div class="medium-5 columns right">
 							<div class="row collapse">
 								<div class="medium-6 columns">
-									<button type="submit" class="button success expand">Guardar cambios</button>
+									<button type="submit" id="button-send-form" class="button success expand">Guardar cambios</button>
 								</div>
 
 								<div class="medium-6 columns">

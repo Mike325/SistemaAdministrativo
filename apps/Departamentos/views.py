@@ -18,6 +18,8 @@ from .fieldsets import *
 import re # libreria de expresiones regulares
 
 TEMPLATE_FORM_CSV = 'Forms/form_subir_csv.html'
+TEMPLATE_NUEVO_PROF = 'Forms/nuevo-profesor.html'
+TEMPLATE_NUEVO_SUPP = 'Forms/nuevo-suplente.html'
 
 @login_required(login_url='/')
 def inicio_jefedep(request):
@@ -46,6 +48,7 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 		options = {}
 		filtros = {}
 		campos = []
+		errores = []
 
 		if area == 'suplentes':
 			_tabla = Suplente
@@ -77,10 +80,23 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 			for campo in campos:
 				if 'set' in campo and campo['id'] in request.POST:
 					if request.POST[campo['id']] != 'None':
-						dato = { campo['set'] : request.POST[campo['id']] }
-						#print dato
+						valor = request.POST[campo['id']]
 
-						_tabla.objects.filter(**filtros).update(**dato)
+						if 'rtrim' in campo and campo['rtrim']==True:
+							valor = request.POST[campo['id']].rstrip()
+							pass
+
+						dato = { campo['set'] : valor }
+
+						try:
+							_tabla.objects.filter(**filtros).update(**dato)
+							pass
+						except Exception, e:
+							errores.append({
+									'tipo': 'Entrada invalida',
+									'desc': '"%s" no es una entrada valida'%valor
+								})
+
 					pass # if
 				elif 'special' in campo and campo['id'] in request.POST:
 					dato = campo['special']
@@ -88,10 +104,17 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 					# print 'se va a establecer en None\n'
 
 					_tabla.objects.filter(**filtros).update(**dato)
+
 					pass # elif
+
 				pass # for 
+
 			pass # if
-		return HttpResponse('enviado!')
+
+		if errores:
+			return JsonResponse(errores, safe=false)
+
+		return HttpResponse('Se han guardado los cambios exitosamente.')
 		pass
 	else:
 		return redirect('error403', origen=request.path)
@@ -166,6 +189,83 @@ def administrar_suplentes(request, dpto):
 
 		options = {'area':'suplentes', 'titulo': 'Suplentes', 'datos': suplentes}
 		return render(request, 'Departamentos/gestion_suplentes.html', options)
+		pass
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def administrar_profesores(request):
+	''' FIX:
+			+ Por razones practicas, no se pueden administar profesores
+			  especificamente de un departamento (porque eso implicaría
+			  automaticamente el tener que eliminar aquellos profesores
+			  que aun no pertenecen a ninguno y/o que pertenecen a 
+			  multiples departamentos).
+		REV:
+			+ En modificar curso y suplentes, verificar que los nuevos
+			  profesores se muestren en la lista.
+	'''
+	if request.session['rol'] >= 2:
+		#_departamento = get_object_or_404(Departamento, nick=dpto)
+		profesores = Profesor.objects.all().order_by('apellido')
+
+		options = {'area':'profesores', 'titulo': 'Profesores', 'datos': profesores}
+		return render(request, 'Departamentos/gestion_profesores.html', options)
+		pass
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def nuevo_profesor(request):
+	if request.session['rol'] >= 2:
+		errores = []
+		options = { 'form_size': 'mini' } # opciones por defecto
+
+		if request.method == 'POST':
+			in_codigo_udg = request.POST.get('in-codigo-udg', '')
+			in_apellido = request.POST.get('in-apellido', '')
+			in_nombre = request.POST.get('in-nombre', '')
+
+			if Profesor.objects.filter(codigo_udg=in_codigo_udg).exists():
+				errores.append({
+						'tipo': 'Registro',
+						'desc': 'El codigo "%s" ya existe en este sistema.'%in_codigo_udg
+					})
+				pass
+
+			if errores:
+				options.update({ 'errores': errores })
+				return render(request, TEMPLATE_NUEVO_PROF, options)
+
+			_profesor = Profesor()
+			_profesor.codigo_udg = in_codigo_udg
+			_profesor.apellido = in_apellido.rstrip()
+			_profesor.nombre = in_nombre.rstrip()
+			_profesor.save()
+
+			options.update({ 'success': True, 'nuevo_prof': _profesor })
+
+			return render(request, TEMPLATE_NUEVO_PROF, options)
+			pass # if
+		else: # peticion GET
+			return render(request, TEMPLATE_NUEVO_PROF, options)
+
+		pass # if
+	else:
+		return redirect('error403', origen=request.path)
+		pass # else
+
+	pass # nuevo_profesor()
+
+@login_required(login_url='/')
+@verifica_dpto
+def administrar_ciclos(request, dpto):
+	if request.session['rol'] >= 2:
+		_departamento = get_object_or_404(Departamento, nick=dpto)
+		ciclos = Ciclo.objects.all()
+
+		options = {'area':'ciclos', 'titulo': 'Ciclos', 'datos': ciclos}
+		return render(request, 'Departamentos/gestion_ciclos.html', options)
 		pass
 	else:
 		return redirect('error403', origen=request.path)
@@ -838,7 +938,7 @@ def procesar_csv_cursos(request, dpto):
 
 				# Preparaciones para Profesor
 				profesor = x['profesor'].split(', ')
-				profesor = {'nombre': profesor[1], 'apellidos': profesor[0]}
+				profesor = {'nombre': profesor[1].rstrip(), 'apellidos': profesor[0].rstrip()}
 
 				if re.search('\(\d+\)', profesor['nombre']) is not None:
 					codigo_prof = profesor['nombre'].split('(')
