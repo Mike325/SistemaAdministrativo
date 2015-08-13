@@ -72,6 +72,7 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 		try:
 			_objeto = _tabla.objects.get(**filtros)
 			print _objeto
+
 		except:
 			_objeto = None
 			pass
@@ -90,6 +91,7 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 
 						try:
 							_tabla.objects.filter(**filtros).update(**dato)
+
 							pass
 						except Exception, e:
 							errores.append({
@@ -98,6 +100,7 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 								})
 
 					pass # if
+
 				elif 'special' in campo and campo['id'] in request.POST:
 					dato = campo['special']
 					# print dato
@@ -113,6 +116,20 @@ def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 
 		if errores:
 			return JsonResponse(errores, safe=false)
+
+		if area == 'suplentes':
+			departamento = Departamento.objects.get(nick=dpto.split('/',2)[0])
+			descripcion = 'Se modifico el suplente del curso %s'%(_objeto.fk_curso.NRC)
+			_objetoNuevo = _tabla.objects.get(**filtros)
+			cambioDe = '%s%s [%s -> %s]'%(_objeto.fk_profesor.nombre,_objeto.fk_profesor.apellido,
+									_objeto.periodo_ini,_objeto.periodo_fin)
+			cambioA = '%s%s [%s -> %s]'%(_objetoNuevo.fk_profesor.nombre,_objetoNuevo.fk_profesor.apellido,
+									_objetoNuevo.periodo_ini,_objetoNuevo.periodo_fin)
+			
+			if cambioDe != cambioA:
+				registro = Registro.modificacion(request.session['usuario']['nick'],
+						descripcion,cambioDe,cambioA,'Suplentes', departamento)
+				registro.save()
 
 		return HttpResponse('Se han guardado los cambios exitosamente.')
 		pass
@@ -1089,6 +1106,13 @@ def nuevo_suplente(request, dpto):
 			try:
 				nuevo_supp.save()
 				options.update({ 'success': True })
+
+				registro = Registro.creacion(request.session['usuario']['nick'],
+							'Se agrego el suplente "'+ _suplente.nombre +' '+
+							_suplente.apellido +'" al curso "'+ _curso.NRC +
+							'"', in_cod_supp, 'Suplentes', _departamento)
+				registro.save()
+
 				pass
 			except IntegrityError:
 				errores.append({
