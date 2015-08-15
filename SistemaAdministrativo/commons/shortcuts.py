@@ -4,8 +4,10 @@
 
 from functools import wraps
 from django.shortcuts import render, redirect
-from apps.Departamentos.models import Departamento
+from apps.Departamentos.models import Departamento, Ciclo
 from apps.Usuarios.models import Usuario
+
+import datetime
 
 def panelInicio(request):
     if request.user.is_authenticated():
@@ -22,6 +24,14 @@ def sidebar_context(request):
     return{
         'lista_departamentos' : Departamento.objects.all(),
     }
+
+# def ciclo_context(request):
+#     hoy = datetime.date.today()
+#     context_ciclo_vig = Ciclo.objects.filter(
+#         fecha_ini__lte=hoy,
+#         fecha_fin__gte=hoy
+#     )
+#     return { 'context_cicloVigente': context_ciclo_vig }
 
 def verifica_dpto(origen):
     '''
@@ -65,3 +75,10 @@ def verifica_dpto(origen):
         return origen(request, *args, **kwargs)
         pass #wrapper()
     return wrapper
+
+def get_ciclo_vigente():
+    hoy = datetime.date.today()
+    return Ciclo.objects.filter(
+            fecha_ini__lte=hoy,
+            fecha_fin__gte=hoy
+        )

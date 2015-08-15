@@ -18,6 +18,18 @@
 	<script type="text/javascript">
 	$(document).ready(function()
 	{
+		$('#in-cubrir-ciclo').change(function()
+		{
+			if ( this.checked == true )
+			{
+				$('.rango-fecha input[type="text"]').attr("disabled", true);
+			}
+			else
+			{
+				$('.rango-fecha input[type="text"]').removeAttr("disabled");
+			}
+		});
+
 		$('.date').datepicker(
         {
             'format': 'yyyy-mm-dd',
@@ -68,6 +80,7 @@
 	{% endif %}
 
 	<form action="{{ request.path }}" method="POST">{% csrf_token %}
+		<h3>Nuevo Suplente</h3>
 		<div class="row">
 			<div class="medium-6 columns">
 				<label>Profesor</label>
@@ -92,9 +105,10 @@
 			<div class="medium-12 columns">
 				<label>Suplente</label>
 					<select name="in-supp">
-						{% for profe in lista_profesores %}
+						<option value="0" disabled="true" selected="true">(seleccione)</option>
+						{% for profe in lista_suplentes %}
 							<option value="{{ profe.codigo_udg }}">
-								{{ profe.apellido }} {{ profe.nombre }} ({{ profe.codigo_udg }})
+								{{ profe.apellido }}, {{ profe.nombre }} ({{ profe.codigo_udg }})
 							</option>
 						{% endfor %}
 					</select>

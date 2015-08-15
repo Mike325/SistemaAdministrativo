@@ -82,7 +82,6 @@
                                             <div class="no-padding" style="color: darkgray; margin-left: 18px;">
                                                 <b>Suplentes</b>:<br/>
                                                 {% for supp in x.suplente %}
-                                                        {# <br/>{{ supp.fk_curso__NRC }} -> {{ supp.fk_profesor__apellido }}, {{ supp.fk_profesor__nombre }} ({{ supp.fk_profesor__codigo_udg }}) #}
                                                     {{ supp.fk_curso.NRC }} {{ supp.fk_curso.fk_materia.clave }}({{ supp.fk_curso.fk_secc.id }}) -> {{ supp.fk_profesor.apellido }}, {{ supp.fk_profesor.nombre }} ({{ supp.fk_profesor.codigo_udg }})
                                                     {% if not forloop.last %}<br/>{% endif %}
                                                 {% endfor %}
@@ -157,46 +156,53 @@
                         <tbody>
                             <form method="POST">{% csrf_token %}
                             {% for x in listaContratos %}
-                                <tr>
-                                    <td class="hide-for-print">{{ forloop.counter }}</td>
-                                    <td class="row-nrc">{{ x.fk_curso.NRC }}</td>
-                                    <td class="row-nombreprof">{% spaceless %}
-                                        {{ x.fk_curso.fk_profesor.apellido }}, {{x.fk_curso.fk_profesor.nombre}} ({{ x.fk_curso.fk_profesor.codigo_udg }})
-                                        {% if x.fk_curso.suplente %}
-                                            <div class="no-padding" style="color: darkgray;">
-                                                <b>Suplente</b>:<br/>{{ x.fk_curso.suplente.fk_profesor.apellido }} {{ x.fk_curso.suplente.fk_profesor.nombre }} ({{ x.fk_curso.suplente.fk_profesor.codigo_udg }})
-                                            </div>
-                                        {% endif %}
-                                    {% endspaceless %}</td>
-                                    <td class="row-materia">{{ x.fk_curso.fk_materia.nombre }}</td>
-                                    <td class="row-secc">{{ x.fk_curso.fk_secc.id }}</td>
-                                    <td class="row-edif">
-                                    {% for horario in x.fk_curso.fk_horarios.all %}
-                                        {% if horario in horarios %}
-                                            {{ horario.fk_edif.id }}{% if not forloop.last %}<br>{% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    </td>
-                                    <td class="row-aula">
-                                    {% for horario in x.fk_curso.fk_horarios.all %}
-                                        {% if horario in horarios %}
-                                            {{ horario.fk_aula.nombre }}<br>   
-                                        {% endif %}
-                                    {% endfor %}
-                                    </td>
-                                    <td class="row-horario">
-                                    {% for horario in x.fk_curso.fk_horarios.all %}
-                                        {% if horario in horarios %}
-                                            {{ horario.hora_ini }}-{{horario.hora_fin}}<br>  
-                                        {% endif %}
-                                    {% endfor %}
-                                    </td>
-                                    <td class="row-firma">{# firma #}</td>
-                                    <td class="hide-for-print text-center assist-col">
-                                        <input type="hidden" name="{{x.id}}" value="off"/>
-                                        <input type="checkbox" id="asistencia" name="{{x.id}}" checked/>
-                                    </td>
-                                </tr>
+                                {% with x.fk_curso as curso %}
+                                {# FIX: "with" reduce las llamadas directas a la base de datos #}
+                                    <tr>
+                                        <td class="hide-for-print">{{ forloop.counter }}</td>
+                                        <td class="row-nrc">{{ curso.NRC }}</td>
+                                        <td class="row-nombreprof">{% spaceless %}
+                                            {{ curso.fk_profesor.apellido }}, {{curso.fk_profesor.nombre}} ({{ curso.fk_profesor.codigo_udg }})
+                                            {# change #}
+                                            {% if curso.suplente and curso.suplente in lista_suplentes %}
+                                                <div class="no-padding" style="color: darkgray;">
+                                                    <b>Suplente</b>:<br/>{{ curso.suplente.fk_profesor.apellido }} {{ curso.suplente.fk_profesor.nombre }} ({{ curso.suplente.fk_profesor.codigo_udg }})
+                                                </div>
+                                            {% endif %}
+                                        {% endspaceless %}</td>
+                                        <td class="row-materia">{{ curso.fk_materia.nombre }}</td>
+                                        <td class="row-secc">{{ curso.fk_secc.id }}</td>
+                                        {% with curso.fk_horarios.all as horarios_curso %}
+                                        {# FIX: "with" reduce las llamadas directas a la base de datos #}
+                                            <td class="row-edif">
+                                            {% for horario in horarios_curso %}
+                                                {% if horario in horarios %}
+                                                    {{ horario.fk_edif.id }}{% if not forloop.last %}<br/>{% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            </td>
+                                            <td class="row-aula">
+                                            {% for horario in horarios_curso %}
+                                                {% if horario in horarios %}
+                                                    {{ horario.fk_aula.nombre }}<br>   
+                                                {% endif %}
+                                            {% endfor %}
+                                            </td>
+                                            <td class="row-horario">
+                                            {% for horario in horarios_curso %}
+                                                {% if horario in horarios %}
+                                                    {{ horario.hora_ini }}-{{horario.hora_fin}}<br>  
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endwith %}
+                                        </td>
+                                        <td class="row-firma">{# firma #}</td>
+                                        <td class="hide-for-print text-center assist-col">
+                                            <input type="hidden" name="{{x.id}}" value="off"/>
+                                            <input type="checkbox" id="asistencia" name="{{x.id}}" checked/>
+                                        </td>
+                                    </tr>
+                                {% endwith %}
                             {% endfor %}
                             <tr class="hide-for-print">
                                 <td colspan="10"><input type="submit" class="button expand" onclick="return ConfirmarEnvio(this);" {% if yaRegistradas == True or not listaContratos %}disabled{% endif %}/></td>

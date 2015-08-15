@@ -15,11 +15,12 @@ from SistemaAdministrativo.commons.shortcuts import *
 import copy
 from .fieldsets import *
 
-import re # libreria de expresiones regulares
+import re, time, datetime
 
 TEMPLATE_FORM_CSV = 'Forms/form_subir_csv.html'
 TEMPLATE_NUEVO_PROF = 'Forms/nuevo-profesor.html'
 TEMPLATE_NUEVO_SUPP = 'Forms/nuevo-suplente.html'
+TEMPLATE_NUEVO_CICLO = 'Forms/nuevo-ciclo.html'
 
 @login_required(login_url='/')
 def inicio_jefedep(request):
@@ -153,9 +154,7 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 				filtros.update({'id': area_id})
 				campos = copy.deepcopy(FieldSet_Suplente)
 
-				options.update({
-						'lista_profesores': Profesor.objects.all()
-					})
+				options.update({ 'lista_profesores': Profesor.objects.all() })
 
 				pass
 			elif area == 'profesores':
@@ -187,9 +186,7 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 					pass
 				pass
 
-			options.update({'ajax': ajax})
-			options.update({'area': area})
-			options.update({'campos': campos})
+			options.update({'ajax': ajax, 'area': area, 'campos': campos})
 			#print campos
 			#return HttpResponse(_objeto)
 			return render(request, 'Forms/gestion_general.html', options)
@@ -202,11 +199,84 @@ def gestion_sistema(request, dpto, area, area_id, ajax=False):
 def administrar_suplentes(request, dpto):
 	if request.session['rol'] >= 2:
 		_departamento = get_object_or_404(Departamento, nick=dpto)
-		suplentes = Suplente.objects.filter( fk_curso__fk_area__fk_departamento=_departamento )
+		suplentes = Suplente.objects.filter( 
+				fk_curso__fk_area__fk_departamento=_departamento,
+				fk_curso__fk_ciclo=get_ciclo_vigente()
+			).distinct().order_by('id')
 
 		options = {'area':'suplentes', 'titulo': 'Suplentes', 'datos': suplentes}
 		return render(request, 'Departamentos/gestion_suplentes.html', options)
 		pass
+	else:
+		return redirect('error403', origen=request.path)
+
+@login_required(login_url='/')
+def nuevo_suplente(request, dpto):
+	hoy = datetime.date.today()
+
+	_departamento = get_object_or_404(Departamento, nick=dpto)
+	options = { 'form_size': 'large', 'departamento': _departamento }
+	errores = []
+
+	cursos = Curso.objects.filter(
+			fk_area__fk_departamento=_departamento,
+			fk_ciclo__in=get_ciclo_vigente()
+		)
+	profesores = Profesor.objects.filter(
+			curso__fk_area__fk_departamento=_departamento
+		).distinct().order_by('apellido')
+
+	suplentes = Profesor.objects.all().order_by('apellido')
+
+	if request.session['rol'] >= 2:
+		if request.method == 'POST':
+			in_curso_nrc = request.POST.get('curso', '')
+			in_cod_supp = request.POST.get('in-supp', '')
+			in_fecha_ini = request.POST.get('in-fecha-ini', '')
+			in_fecha_fin = request.POST.get('in-fecha-fin', '')
+			in_full_ciclo = request.POST.get('in-cubrir-ciclo', '')
+
+			_curso = get_object_or_404(Curso, NRC=in_curso_nrc)
+			_suplente = get_object_or_404(Profesor, codigo_udg=in_cod_supp)
+
+			nuevo_supp = Suplente()
+			nuevo_supp.fk_curso = _curso
+			nuevo_supp.fk_profesor = _suplente
+
+			if not in_full_ciclo:
+				nuevo_supp.periodo_ini = in_fecha_ini
+				nuevo_supp.periodo_fin = in_fecha_fin
+				pass
+			else:
+				nuevo_supp.periodo_ini = None
+				nuevo_supp.periodo_fin = None
+				pass
+
+			try:
+				nuevo_supp.save()
+				options.update({ 'success': True })
+
+				registro = Registro.creacion(request.session['usuario']['nick'],
+							'Se agrego el suplente "'+ _suplente.nombre +' '+
+							_suplente.apellido +'" al curso "'+ _curso.NRC +
+							'"', in_cod_supp, 'Suplentes', _departamento)
+				registro.save()
+
+				pass
+			except IntegrityError:
+				errores.append({
+						'tipo': 'Curso Existente',
+						'desc': 'El curso %s ya existe'%_curso
+					})
+				options.update({ 'errores': errores })
+				pass
+
+			options.update({ 'lista_cursos': cursos, 'lista_profesores': profesores, 'lista_suplentes': suplentes })
+			return render(request, 'Forms/nuevo-suplente.html', options)
+			pass
+		else: # una peticion GET comun y corriente
+			options.update({ 'lista_cursos': cursos, 'lista_profesores': profesores, 'lista_suplentes': suplentes })
+			return render(request, 'Forms/nuevo-suplente.html', options)
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -275,10 +345,8 @@ def nuevo_profesor(request):
 	pass # nuevo_profesor()
 
 @login_required(login_url='/')
-@verifica_dpto
-def administrar_ciclos(request, dpto):
+def administrar_ciclos(request):
 	if request.session['rol'] >= 2:
-		_departamento = get_object_or_404(Departamento, nick=dpto)
 		ciclos = Ciclo.objects.all()
 
 		options = {'area':'ciclos', 'titulo': 'Ciclos', 'datos': ciclos}
@@ -288,10 +356,79 @@ def administrar_ciclos(request, dpto):
 		return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
+def nuevo_ciclo(request):
+	if request.session['rol'] >= 2:
+		errores = []
+		options = { 'form_size': 'medium' } # opciones por defecto
+
+		if request.method == 'POST': # Peticion POST
+			in_id = request.POST.get('in-id', '')
+			in_fecha_ini = request.POST.get('in-fecha-ini', '')
+			in_fecha_fin = request.POST.get('in-fecha-fin', '')
+
+			if Ciclo.objects.filter(id=in_id).exists():
+				errores.append({
+						'tipo': 'Registro',
+						'desc': 'El ciclo con el nombre "%s" ya existe.'%in_id
+					})
+				pass
+
+			if Ciclo.objects.filter(fecha_fin__gte=in_fecha_ini).exists():
+				errores.append({
+						'tipo': 'Registro',
+						'desc': 'No puede registrar %s como fecha de inicio.<br/>Ya existe un ciclo cubriendo la fecha mencionada.'%in_fecha_ini
+					})
+				pass
+
+			if in_fecha_ini >= in_fecha_fin:
+				errores.append({
+						'tipo': 'Registro',
+						'desc': 'No puede registrar %s como fecha de fin.<br/>La fecha de inicio es mayor o igual.'%in_fecha_fin
+					})
+				pass
+
+			if errores:
+				options.update({ 'errores': errores })
+				return render(request, TEMPLATE_NUEVO_CICLO, options)
+
+			_ciclo = Ciclo()
+			_ciclo.id = in_id
+			_ciclo.fecha_ini = in_fecha_ini
+			_ciclo.fecha_fin = in_fecha_fin
+
+			try:
+				_ciclo.save()
+				options.update({ 'success': True, 'nuevo_ciclo': _ciclo })
+				pass
+			except:
+				errores.append({
+						'tipo': 'Entrada invalida',
+						'desc': 'Alguno de los campos no poseía un tipo adecuado'
+					})
+				options.update({ 'errores': errores })
+				pass
+
+			return render(request, TEMPLATE_NUEVO_CICLO, options)
+			pass # if
+		else: # peticion GET
+			return render(request, TEMPLATE_NUEVO_CICLO, options)
+			pass # else
+
+		pass # if
+	else:
+		return redirect('error403', origen=request.path)
+		pass # else
+
+	pass # nuevo_profesor()
+
+@login_required(login_url='/')
 @verifica_dpto
 def ver_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
-		lista_cursos = Curso.objects.filter(fk_area__fk_departamento__nick=dpto).order_by('fk_materia__nombre')
+		lista_cursos = Curso.objects.filter(
+				fk_area__fk_departamento__nick=dpto,
+				fk_ciclo=get_ciclo_vigente()
+			).order_by('fk_materia__nombre')
 		paginator = Paginator(lista_cursos, 100)
 
 		pagina = request.GET.get('pagina')
@@ -1064,72 +1201,7 @@ def sistema_modifica_nrc(request, dpto, ciclo, nrc):
 	else:
 		return redirect('error403', origen=request.path)
 
-@login_required(login_url='/')
-#@verifica_dpto
-def nuevo_suplente(request, dpto):
-	_departamento = get_object_or_404(Departamento, nick=dpto)
-	options = { 'form_size': 'large', 'departamento': _departamento }
-	errores = []
 
-	cursos = Curso.objects.filter(
-			fk_area__fk_departamento=_departamento,
-			fk_ciclo=Ciclo.objects.last()
-		)
-	profesores = Profesor.objects.filter(
-			curso__fk_area__fk_departamento=_departamento
-		).distinct().order_by('apellido')
-
-	if request.session['rol'] >= 2:
-		if request.method == 'POST':
-			in_curso_nrc = request.POST.get('curso', '')
-			in_cod_supp = request.POST.get('in-supp', '')
-			in_fecha_ini = request.POST.get('in-fecha-ini', '')
-			in_fecha_fin = request.POST.get('in-fecha-fin', '')
-			in_full_ciclo = request.POST.get('in-cubrir-ciclo', '')
-
-			_curso = get_object_or_404(Curso, NRC=in_curso_nrc)
-			_suplente = get_object_or_404(Profesor, codigo_udg=in_cod_supp)
-
-			nuevo_supp = Suplente()
-			nuevo_supp.fk_curso = _curso
-			nuevo_supp.fk_profesor = _suplente
-
-			if not in_full_ciclo:
-				nuevo_supp.periodo_ini = in_fecha_ini
-				nuevo_supp.periodo_fin = in_fecha_fin
-				pass
-			else:
-				nuevo_supp.periodo_ini = None
-				nuevo_supp.periodo_fin = None
-				pass
-
-			try:
-				nuevo_supp.save()
-				options.update({ 'success': True })
-
-				registro = Registro.creacion(request.session['usuario']['nick'],
-							'Se agrego el suplente "'+ _suplente.nombre +' '+
-							_suplente.apellido +'" al curso "'+ _curso.NRC +
-							'"', in_cod_supp, 'Suplentes', _departamento)
-				registro.save()
-
-				pass
-			except IntegrityError:
-				errores.append({
-						'tipo': 'Curso Existente',
-						'desc': 'El curso %s ya existe'%_curso
-					})
-				options.update({ 'errores': errores })
-				pass
-
-			options.update({ 'lista_cursos': cursos, 'lista_profesores': profesores })
-			return render(request, 'Forms/nuevo-suplente.html', options)
-			pass
-		else: # una peticion GET comun y corriente
-			options.update({ 'lista_cursos': cursos, 'lista_profesores': profesores })
-			return render(request, 'Forms/nuevo-suplente.html', options)
-	else:
-		return redirect('error403', origen=request.path)
 
 # @login_required(login_url='/')
 # def computacion_form_asistencias(request):

@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 
@@ -14,8 +14,10 @@ from apps.Listas.models import *
 
 import re, math
 
+from SistemaAdministrativo.commons.shortcuts import get_ciclo_vigente
+
 # Override del día
-DAY_OVR = 4
+DAY_OVR = 2
 
 dias_abrev = ['L', 'M', 'I', 'J', 'V', 'S']
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
@@ -180,9 +182,15 @@ def listas_tCompleto(request, dpto):
 			'''
 			dia = DAY_OVR # DEBUG
 
+			if dia >= 7: 
+			# si es domingo o por alguna extraña 
+			# razon salió un día mas alto
+				raise Http404 # pues nada
+
 			profesores = Profesor.objects.filter(
-					curso__fk_area__fk_departamento=dpto
-				).distinct().order_by('apellido')
+					curso__fk_area__fk_departamento=dpto,
+					curso__fk_ciclo__in=get_ciclo_vigente()
+				).distinct().order_by('apellido').select_related()
 
 			filtro = {'fk_horarios__'+dias_abrev[dia-1]: True}
 
@@ -208,7 +216,9 @@ def listas_tCompleto(request, dpto):
 				cuenta = horarios.count()
 
 				suplencias = Suplente.objects.filter(
-						fk_curso__in=cursos
+						Q(fk_curso__in=cursos),
+						Q(periodo_ini__lte=hoy) | Q(periodo_ini__isnull=True),
+						Q(periodo_fin__gte=hoy) | Q(periodo_fin__isnull=True)
 					)
 
 				if contratos and cuenta > 0:
@@ -267,6 +277,11 @@ def listas_tMedio(request, dpto):
 			'''
 			dia = DAY_OVR # DEBUG
 
+			if dia >= 7: 
+			# si es domingo o por alguna extraña 
+			# razon salió un día mas alto
+				raise Http404 # pues nada
+
 			filtro = { dias_abrev[dia-1]: True }
 
 			horarios = Horario.objects.filter(**filtro)
@@ -280,9 +295,18 @@ def listas_tMedio(request, dpto):
 
 			cursosTMedio = Contrato.objects.filter(
 					tipo = 'P',
+					fk_curso__fk_ciclo=get_ciclo_vigente(),
 					fk_curso__fk_horarios__in = horarios,
 					fk_curso__fk_area__fk_departamento = dpto
-				).order_by('fk_curso__fk_horarios__hora_ini','fk_curso__fk_profesor__apellido')
+				).order_by(
+					'fk_curso__fk_horarios__hora_ini',
+					'fk_curso__fk_profesor__apellido'
+				).select_related()
+
+			suplentes = Suplente.objects.filter(
+					Q(periodo_ini__lte=hoy) | Q(periodo_ini__isnull=True),
+					Q(periodo_fin__gte=hoy) | Q(periodo_fin__isnull=True)
+				)
 
 			return render(request, 'Listas/listas.html', 
 				{
@@ -295,7 +319,8 @@ def listas_tMedio(request, dpto):
 
 					'horarios' : horarios,
 					'listaContratos' : cursosTMedio,
-					'yaRegistradas' : yaRegistradas
+					'yaRegistradas' : yaRegistradas,
+					'lista_suplentes': suplentes
 				})
 	else:
 		return redirect('error403', origen=request.path)

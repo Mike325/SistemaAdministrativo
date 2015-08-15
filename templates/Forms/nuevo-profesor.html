@@ -4,8 +4,18 @@
 	Nuevo Profesor
 {% endblock %}
 
+{% block poshead %}
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			$('form :input:enabled:visible:first').focus();
+		});
+	</script>
+{% endblock %}
+
 {% block formulario %}
 	<form action="{{ request.path }}" method="POST">{% csrf_token %}
+		<h3 class="text-center">Nuevo Profesor</h3>
 		<div class="row">
 			<div class="columns">
 			{% if errores %}

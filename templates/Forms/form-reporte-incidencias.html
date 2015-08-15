@@ -104,8 +104,12 @@
                         <textarea id="comentario" name="comentario" maxlength="100" rows="2" placeholder="Motivo de la incidencia"></textarea>
                     </label>
                 </div>
-            </div>
-                <input type="submit" value="Enviar Reporte" class="button small radius">
+                <div class="medium-4 columns left">
+                    <input type="submit" value="Enviar Reporte" class="button small radius">
+                </div>
+                {% comment %}
+                    FIX: Etiqueta de cerrado extra y falta de un row en el botón de submit.
+                {% endcomment %}
             </div>
         </fieldset>
     </form>    

@@ -22,10 +22,14 @@
 
 {% block content %}
 <div class="row">
+    {% load staticfiles %}
+    {% load verificaciones_iniciales %}
+
+    {% advertencias_sist %}
 
     <div class="large-4 medium-6 small-12 columns">
         <div class="division-banner">
-            <img src="/static/img/logos_carreras/robotica.png">
+            <img src="{% static 'img/logos_carreras/robotica.png' %}">
         </div>
         <div class="large-12 colums panel">
             <h3 class="text-center">Usuarios del sistema<h3>
@@ -45,7 +49,7 @@
     
     <div class="large-4 medium-6 small-12 columns">
         <div class="division-banner">
-            <img src="/static/img/logos_carreras/robotica.png">
+            <img src="{% static 'img/logos_carreras/robotica.png' %}">
         </div>
         <div class="large-12 colums panel">
             <h3 class="text-center">Cambiar Jefe de Departamento<h3>
@@ -61,7 +65,7 @@
 
     <div class="large-4 medium-6 small-12 columns">
         <div class="division-banner">
-            <img src="/static/img/logos_carreras/robotica.png">
+            <img src="{% static 'img/logos_carreras/robotica.png' %}">
         </div>
         <div class="large-12 colums panel">
             <h3 class="text-center">Históricos<h3>
@@ -80,7 +84,7 @@
 
     <div class="large-4 medium-6 small-12 columns">
         <div class="division-banner">
-            <img src="/static/img/logos_carreras/robotica.png">
+            <img src="{% static 'img/logos_carreras/robotica.png' %}">
         </div>
         <div class="large-12 colums panel">
             <h3 class="text-center">Añadir Departamento<h3>
