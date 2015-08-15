@@ -86,12 +86,36 @@
 				    <a href="#panel2">Jefe de Departamento</a>
 				    <div id="panel2" class="content no-margin no-padding">
 				    	<a href="/inicio-jefedep/">Panel de inicio</a>
-			    		<a href="/nueva_secretaria" class="accordion-top-sublink">Crear Nueva Secretaria</a>
-			    		{% for x in lista_departamentos %}
+				    	<a href="/nueva_secretaria">Crear Nueva Secretaria</a>
+						<ul class="accordion inner-accordion" data-accordion>
+							<li class="accordion-navigation">
+				   				<a href="#panel-prof">Profesores</a>
+				   				<div id="panel-prof" class="content">
+				   					<ul class="accordion no-margin">
+										<li><a href="/sistema/profesores/nuevo">Nuevo Profesor</a></li>
+										<li><a href="/sistema/profesores/gestionar">Gestionar Profesores</a></li>
+		   							</ul>
+		   					 	</div>
+		   					</li>
+		   				</ul>
+		   				<ul class="accordion inner-accordion" data-accordion>
+							<li class="accordion-navigation">
+				   				<a href="#panel-ciclo">Ciclos</a>
+				   				<div id="panel-ciclo" class="content">
+				   					<ul class="accordion no-margin">
+										<li><a href="/sistema/ciclos/nuevo">Nuevo Ciclo</a></li>
+										<li><a href="/sistema/ciclos/gestionar">Gestionar Ciclos</a></li>
+		   							</ul>
+		   					 	</div>
+		   					</li>
+		   				</ul>
+{% comment %}
+				    	{% for x in lista_departamentos %}
 			    			{% if x.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
-			    				<a href="/{{x.nick}}/historicos" class="accordion-top-sublink">Históricos {{x}}</a>
+			    				
 			    			{% endif %}
 			    		{% endfor %}
+{% endcomment %}
 
 						{% for x in lista_departamentos %}
 							{% if x.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
@@ -103,8 +127,9 @@
 				   							<li><a href="/{{x.nick}}/sistema/csv/cursos/">Subir CSV cursos</a></li>
 				   							<li><a href="/{{x.nick}}/sistema/csv/contratos/">Subir CSV contratos</a></li>
 				   							<li><a href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a></li>
-				   							<li><a href="/{{ x.nick }}/suplentes/nuevo">Nuevo Suplente</a></li>
-				   							<li><a href="/{{ x.nick }}/suplentes/gestionar">Gestionar Suplentes</a></li>
+				   							<li><a href="/{{x.nick}}/historicos">Histórico de cambios</a></li>
+				   							<li><a href="/{{x.nick}}/suplentes/nuevo">Nuevo Suplente</a></li>
+											<li><a href="/{{x.nick}}/suplentes/gestionar">Gestionar Suplentes</a></li>
 					   					</ul>
 					   				</div>
 				   				</li>
