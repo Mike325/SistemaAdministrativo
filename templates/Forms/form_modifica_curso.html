@@ -138,7 +138,7 @@
 				}
 				else
 				{
-					div_info.innerHTML='<p style="font-size: 14px; margin: 0;" class="text-center">' + data + '</p>';
+					div_info.innerHTML='<p class="text-center font-small no-margin">' + data + '</p>';
 					$(div_info).slideDown(250, function()
 					{
 						setTimeout(function()
@@ -202,11 +202,11 @@
 										<div class="row">
 											<div class="small-6 columns">
 												<label>Edificio</label>
-													<input type="text" name="in-horario-{{ horario.id }}-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}" maxlength="5">
+													<input type="text" name="in-horario-{{ horario.id }}-edif" class="in-horario-edif upper" value="{{ horario.fk_edif }}" maxlength="5" required>
 											</div>
 											<div class="small-6 columns">
 												<label>Aula</label>
-													<input type="text" name="in-horario-{{ horario.id }}-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}" maxlength="5">
+													<input type="text" name="in-horario-{{ horario.id }}-aula" class="in-horario-aula upper" value="{{ horario.fk_aula }}" maxlength="5" required>
 											</div>
 										</div>
 									</div>
@@ -215,11 +215,11 @@
 										<div class="row select-horario">
 											<div class="small-6 columns">
 												<label>Hora inicio</label>
-													<input type="text" name="in-horario-{{ horario.id }}-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}" maxlength="5">
+													<input type="text" name="in-horario-{{ horario.id }}-hora-ini" class="in-hora-ini time start" value="{{ horario.hora_ini }}" maxlength="5" required>
 											</div>
 											<div class="small-6 columns">
 												<label>Hora fin</label>
-													<input type="text" name="in-horario-{{ horario.id }}-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}" maxlength="5">
+													<input type="text" name="in-horario-{{ horario.id }}-hora-fin" class="in-hora-fin time end" value="{{ horario.hora_fin }}" maxlength="5" required>
 											</div>
 										</div>
 									</div>
@@ -265,10 +265,10 @@
 
 							<div class="row" id="add-horario-button-div">
 									<div class="small-4 columns right">
-										<button type="button" class="button tiny radius success no-margin" style="width: 100%;" onclick="CrearHorario(this)">Añadir otro horario</button>
+										<button type="button" class="button tiny expand radius success no-margin" onclick="CrearHorario(this)">Añadir otro horario</button>
 									</div>
-									<div data-alertbox class="alert-box alert radius small-8 columns left" id="errores-div" style="display: none; padding: 12px 6px;"></div>
-									<div data-alertbox class="alert-box success radius small-8 columns left" id="info-div" style="display: none; padding: 12px 6px;"></div>
+									<div data-alertbox class="alert-box alert radius small-8 columns left alert-box-edit" id="errores-div" style="display: none;"></div>
+									<div data-alertbox class="alert-box success radius small-8 columns left alert-box-edit" id="info-div" style="display: none;"></div>
 							</div>
 						</fieldset>
 					</div>

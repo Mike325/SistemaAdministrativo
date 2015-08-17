@@ -95,6 +95,9 @@ class Horario(models.Model):
     fk_edif = models.ForeignKey(Edificio, blank=True, null=True)
     fk_aula = models.ForeignKey(Aula, blank=True, null=True)
 
+    def get_dias(self):
+        return '-'.join([x for x in 'LMIJVS' if eval('self.'+x)==True])
+
     def __unicode__(self):
         disp_hora_ini = self.hora_ini.strftime("%H:%M") if self.hora_ini else "no-asignado"
         disp_hora_fin = self.hora_fin.strftime("%H:%M") if self.hora_fin else "no-asignado"

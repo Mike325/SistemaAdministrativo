@@ -31,9 +31,7 @@
 		{% for dep in lista_departamentos %}
             {% if dep.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
     			<div class="large-4 medium-6 small-12 columns">
-    				<div class="division-banner">
-    					<img src="{% static 'img/logos_carreras/' %}{{ dep.nick }}.png">
-    				</div>
+    				<div class="division-banner" style="background-image: url('{% static 'img/logos_carreras/' %}{{ dep.nick }}.png');"></div>
     				<div class="large-12 colums panel">
     					<h3 class="text-center">{{ dep.nombre }}<h3>
                         <hr/>
@@ -66,9 +64,7 @@
 		{% endfor %}
 
         <div class="large-4 medium-6 small-12 columns">
-            <div class="division-banner">
-                <img src="/static/img/logos_carreras/robotica.png">
-            </div>
+            <div class="division-banner" style="background-image: url('{% static 'img/logos_carreras/robotica.png' %}');"></div>
             <div class="large-12 colums panel">
                 <h3 class="text-center">Tareas comunes<h3>
                 <div class="row">
@@ -95,9 +91,7 @@
         </div>
 
         <div class="large-4 medium-6 small-12 columns">
-            <div class="division-banner">
-                <img src="/static/img/logos_carreras/robotica.png">
-            </div>
+            <div class="division-banner" style="background-image: url('{% static 'img/logos_carreras/robotica.png' %}');"></div>
             <div class="large-12 colums panel">
                 <h3 class="text-center">Usuarios del sistema<h3>
                 <div class="row">
@@ -109,9 +103,7 @@
         </div>
         
         <div class="large-4 medium-6 small-12 columns end">
-            <div class="division-banner">
-                <img src="/static/img/logos_carreras/robotica.png">
-            </div>
+            <div class="division-banner" style="background-image: url('{% static 'img/logos_carreras/robotica.png' %}');"></div>
             <div class="large-12 colums panel">
                 <h3 class="text-center">Históricos<h3>
                 <div class="row">

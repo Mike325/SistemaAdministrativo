@@ -43,6 +43,10 @@ def inicio_jefedep(request):
 	   	return redirect('error403', origen=request.path)
 
 @login_required(login_url='/')
+def tutorial_csv(request):
+	return render(request, 'Departamentos/tutorial_csv.html')
+
+@login_required(login_url='/')
 def POST_gestion_sistema(request, dpto, area, area_id, ajax):
 	if request.session['rol'] >= 2:
 		_tabla = None
@@ -288,9 +292,6 @@ def administrar_profesores(request):
 			  automaticamente el tener que eliminar aquellos profesores
 			  que aun no pertenecen a ninguno y/o que pertenecen a 
 			  multiples departamentos).
-		REV:
-			+ En modificar curso y suplentes, verificar que los nuevos
-			  profesores se muestren en la lista.
 	'''
 	if request.session['rol'] >= 2:
 		#_departamento = get_object_or_404(Departamento, nick=dpto)
@@ -329,6 +330,11 @@ def nuevo_profesor(request):
 			_profesor.apellido = in_apellido.rstrip()
 			_profesor.nombre = in_nombre.rstrip()
 			_profesor.save()
+
+			registro = Registro.creacion(request.session['usuario']['nick'],
+							'Se agrego el profesor "'+ str(_profesor) + '"', 
+							_profesor.codigo_udg, 'Profesores', None)
+			registro.save()
 
 			options.update({ 'success': True, 'nuevo_prof': _profesor })
 
@@ -399,6 +405,12 @@ def nuevo_ciclo(request):
 			try:
 				_ciclo.save()
 				options.update({ 'success': True, 'nuevo_ciclo': _ciclo })
+
+
+				registro = Registro.creacion(request.session['usuario']['nick'],
+							'Se agrego el ciclo "'+ str(_ciclo) + '"', 
+							_ciclo.id, 'Ciclos', None)
+				registro.save()
 				pass
 			except:
 				errores.append({
@@ -961,6 +973,7 @@ def procesar_csv_contratos(request, dpto):
 def procesar_csv_cursos(request, dpto):
 	if request.session['rol'] >= 2: # es jefedep o mayor
 		default_options = {'titulo_tipo':'Cursos', 'form_size': 'medium'}
+		errores = [] # inicializa errores
 		options = {}
 
 		if request.method == 'POST': # se envio a traves del formulario
@@ -978,7 +991,6 @@ def procesar_csv_cursos(request, dpto):
 					})
 				pass
 
-			errores = [] # inicializa errores
 			cursos = [] # inicializa el objeto para los cursos
 
 			try:

@@ -36,7 +36,8 @@
             });
         });
 
-        var materias = { {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% for curso in profe.curso_set.all %}{% if curso.fk_area.fk_departamento = departamento %} {'id_curso': {{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'nombre_materia': '{{ curso.fk_materia.nombre}}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endif %}{% endfor %} ]{% if not forloop.last %},{% endif %} {% endfor %} };
+        var materias = { 
+            {% for profe in profesores %} '{{ profe.codigo_udg }}': [{% with profe.curso_set.all as cursos_profesor %} {% for curso in cursos_profesor %} {% if curso in lista_cursos %} {'id_curso': {{ curso.NRC }}, 'id_materia': '{{ curso.fk_materia.clave }}', 'nombre_materia': '{{ curso.fk_materia.nombre}}', 'seccion': '{{ curso.fk_secc }}', 'horario': '{{ curso.fk_horarios.all }}'}{% if not forloop.last %},{% endif %} {% endif %} {% endfor %} {% endwith %} ]{% if not forloop.last %},{% endif %} {% endfor %} };
 
 
         function filtra_materias(ref)

@@ -95,10 +95,10 @@
                 <div class="login-logo" style="background-image: url('{% static 'img/SIIAD-logo.png' %}'); "></div> 
 
                 {% if errors %}
-                    <div class="alert-box alert radius" style="font-size: 14px;">{{errors}}</div>
+                    <div class="alert-box alert radius font-small">{{errors}}</div>
                 {% endif %}
                 {% if info %}
-                    <div class="alert-box info radius" style="font-size: 14px;">{{info}}</div>
+                    <div class="alert-box info radius font-small">{{info}}</div>
                 {% endif %}
 
                 <form method="POST" action="/">{% csrf_token %}

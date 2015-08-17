@@ -24,16 +24,6 @@ from url_secretaria import *
 from url_jefedep import *
 from url_admin import *
 
-"""
-TODO:
-    + Convertir los enlaces a dinamicos
-        (que con poner 'computacion' como una variable, el sistema haga 
-         la gestion necesaria automaticamente para llegar a la vista indicada
-         y asi para los demas departamentos)
-    + Mandar las urls a archivos separados (?)
-        (estilo lo que se hacia con las apps para importar sus propias urls)
-"""
-
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^creditos/$', Licencias),

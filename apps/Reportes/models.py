@@ -18,4 +18,15 @@ class Reporte(models.Model):
 
 	def getHorario(self):
 		filtro = {dias_abrev[self.fecha.weekday()]: True}
-		return self.fk_contrato.fk_curso.fk_horarios.get(**filtro)
+		horarios = self.fk_contrato.fk_curso.fk_horarios.filter(**filtro)
+
+		dias = []
+		ret = { 'horarios': horarios }
+
+		for horario in horarios:
+			dias.append( horario.get_dias() )
+			pass
+
+		ret.update({ 'dias': dias })
+
+		return ret

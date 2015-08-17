@@ -44,15 +44,15 @@
             {% if tiempoC %}
             <div class="row">
                 <div class="medium-12 columns">
-                    <h4 style="text-align: center">Centro Universitario de Ciencias Exactas e Ingenierías</h4>
+                    <h4 class="text-center">Centro Universitario de Ciencias Exactas e Ingenierías</h4>
                     {% if yaRegistradas %}
                         <div class="alert-box warning radius text-center hide-for-print">
                             Las asistencias del día ya fueron registradas
                         </div>
                     {% endif %}
-                    <hr>
+                    <hr/>
 
-                    <button class="button tiny hide-for-print right" onclick="print()">Imprimir formato</button>
+                    <button type="button" class="button tiny hide-for-print right" onclick="print()">Imprimir formato</button>
                     <table class="full-width-table">
                         <thead>
                             <tr>
@@ -79,13 +79,15 @@
                                     <td class="row-nombre">{% spaceless %}
                                         {{ x.profesor }}
                                         {% if x.suplente %}
-                                            <div class="no-padding" style="color: darkgray; margin-left: 18px;">
-                                                <b>Suplentes</b>:<br/>
-                                                {% for supp in x.suplente %}
-                                                    {{ supp.fk_curso.NRC }} {{ supp.fk_curso.fk_materia.clave }}({{ supp.fk_curso.fk_secc.id }}) -> {{ supp.fk_profesor.apellido }}, {{ supp.fk_profesor.nombre }} ({{ supp.fk_profesor.codigo_udg }})
-                                                    {% if not forloop.last %}<br/>{% endif %}
-                                                {% endfor %}
-                                            </div>
+                                            {% with x.suplente as suplentes_profesor %}
+                                                <div class="no-padding suplentes margin">
+                                                    <b>Suplentes</b>:<br/>
+                                                    {% for supp in suplentes_profesor %}
+                                                        {{ supp.fk_curso.NRC }} {{ supp.fk_curso.fk_materia.clave }}({{ supp.fk_curso.fk_secc.id }}) -> {{ supp.fk_profesor.apellido }}, {{ supp.fk_profesor.nombre }} ({{ supp.fk_profesor.codigo_udg }})
+                                                        {% if not forloop.last %}<br/>{% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endwith %}
                                         {% endif %}
                                     {% endspaceless %}</td>
                                     <td class="row-hora-in">{{ x.hora_ini }}</td>
@@ -117,7 +119,7 @@
                         Las asistencias del día ya fueron registradas
                     </div>
                     {% endif %}
-                    <button class="button tiny right hide-for-print" onclick="print()">Imprimir formato</button>
+                    <button type="button" class="button tiny right hide-for-print" onclick="print()">Imprimir formato</button>
                     <table class="full-width-table">
                         <thead>
                             <tr class="especialHead">
@@ -129,7 +131,7 @@
                                     </div>
                                 </th>
 
-                                <th style="text-align: center" colspan="3">
+                                <th class="text-center" colspan="3">
                                     UNIVERSIDAD DE GUADALAJARA<br>
                                     {{ departamento|upper }}<br>
                                     LISTADO DE FIRMAS {{ dayWeek }}
@@ -165,7 +167,7 @@
                                             {{ curso.fk_profesor.apellido }}, {{curso.fk_profesor.nombre}} ({{ curso.fk_profesor.codigo_udg }})
                                             {# change #}
                                             {% if curso.suplente and curso.suplente in lista_suplentes %}
-                                                <div class="no-padding" style="color: darkgray;">
+                                                <div class="no-padding suplentes">
                                                     <b>Suplente</b>:<br/>{{ curso.suplente.fk_profesor.apellido }} {{ curso.suplente.fk_profesor.nombre }} ({{ curso.suplente.fk_profesor.codigo_udg }})
                                                 </div>
                                             {% endif %}

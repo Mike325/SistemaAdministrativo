@@ -38,21 +38,21 @@
 {% block content %}
 <div class="row">
 
-    <div class="large-7 large-offset-5 columns">
+    <div class="large-7 columns right">
         <div class="row collapse">
-            <div class="small-10 columns">
-                <form method="POST" action="/{{dpto.nick}}/historicos/filtro/">{% csrf_token %}
-                    <p class="dateOnly" id="dateOnly">
-                        <input type="text" id="fecha" class="date error" name="fecha" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
-                    </p>
-                    {% if errors %}
-                        <small class="error">{{errors}}</small>
-                    {% endif %}
-            </div>
-            <div class="small-2 columns">
-                <input type="submit" value="Buscar" class="button postfix">
-                </form>
-            </div>
+            <form method="POST" action="/{{dpto.nick}}/historicos/filtro/">{% csrf_token %}
+                <div class="small-9 columns">
+                        <p class="dateOnly" id="dateOnly">
+                            <input type="text" id="fecha" class="date error" name="fecha" placeholder="Buscar por fecha (YYYY-MM-DD)" required/>
+                        </p>
+                        {% if errors %}
+                            <small class="error">{{errors}}</small>
+                        {% endif %}
+                </div>
+                <div class="small-3 columns">
+                    <input type="submit" value="Buscar" class="button expand" style="padding: 10px 12px;">
+                </div>
+            </form>
         </div>
     </div>
 
@@ -73,7 +73,7 @@
             </li>
             {% endif %}
 
-            <li><p class="no-margin no-padding" style="position: absolute; right: 0; right: 32px;">Mostrando {{ registros.start_index }}-{{ registros.end_index }} de {{ registros.paginator.count }}.</p></li>
+            <li><p class="no-margin no-padding paginator-count">Mostrando {{ registros.start_index }}-{{ registros.end_index }} de {{ registros.paginator.count }}.</p></li>
         </ul>
 
         
@@ -119,7 +119,7 @@
             </li>
             {% endif %}
 
-            <li><p class="no-margin no-padding" style="position: absolute; right: 0; right: 32px;">Mostrando {{ registros.start_index }}-{{ registros.end_index }} de {{ registros.paginator.count }}.</p></li>
+            <li><p class="no-margin no-padding paginator-count">Mostrando {{ registros.start_index }}-{{ registros.end_index }} de {{ registros.paginator.count }}.</p></li>
         </ul>
 
     </div>

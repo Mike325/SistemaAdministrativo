@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
@@ -12,6 +12,10 @@ from apps.Historicos.models import *
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 dias_abrev = ['L', 'M', 'I', 'J', 'V', 'S']
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+
+TEMPLATE_SUCCESS = 'hecho.html'
+TEMPLATE_FORM_INCIDENCIAS = 'Forms/form-incidencias.html'
+TEMPLATE_FORM_REPORTE_INC = 'Forms/form-reporte-incidencias.html'
 
 #Carga de la pagina de incio de las secretarias
 @login_required(login_url='/')
@@ -39,7 +43,7 @@ def inicio_secretaria(request):
 def form_incidencias(request, dpto):
 	if request.session['rol'] >= 1:
 		form_size = 'medium'
-		return render(request, 'Forms/form-incidencias.html', locals())
+		return render(request, TEMPLATE_FORM_INCIDENCIAS, locals())
 		pass
 	else:
 		return redirect('error403', origen=request.path)
@@ -77,7 +81,10 @@ def ver_incidencias(request, dpto):
 			if mes_ini != mes_fin:
 				extender_info = True
 
-			listaIncidencias = Reporte.objects.filter(fecha__gte = fechaInicio, fecha__lte = fechaFin)
+			listaIncidencias = Reporte.objects.filter(
+					fecha__gte = fechaInicio, 
+					fecha__lte = fechaFin
+				).select_related('fk_contrato')
 
 			if listaIncidencias:
 				return render(request, 'Reportes/incidencias.html',
@@ -91,13 +98,13 @@ def ver_incidencias(request, dpto):
 					'listaDias': dias_abrev,
 				})
 			else:
-				return render(request, 'hecho.html', 
+				return render(request, TEMPLATE_SUCCESS, 
 				{
 					'accion': 'Vaya. No existe ningun reporte en esas fechas.',
 				})
 
 		else:
-			return render(request, 'form-incidencias.html',
+			return render(request, TEMPLATE_FORM_INCIDENCIAS,
 				{
 					'errores': errores
 				})
@@ -112,19 +119,26 @@ def form_reporte_incidencias(request, dpto):
 		_departamento = get_object_or_404(Departamento, nick=dpto)
 		
 		try:
+			# curso = Curso.objects.filter(
+			# 		curso__fk_area__fk_departamento=_departamento
+			# 	)
+			cursos = Curso.objects.filter(
+					fk_area__fk_departamento=_departamento
+				)
 			listaProf = Profesor.objects.filter(
-					curso__fk_area__fk_departamento=_departamento
-				).distinct().order_by('apellido')
+					curso__in=cursos
+				).distinct().order_by('apellido').select_related()
 
-			return render(request, 'Forms/form-reporte-incidencias.html', 
+			return render(request, TEMPLATE_FORM_REPORTE_INC, 
 				{
-					'departamento': _departamento,
+					'form_size': 'large',
 					'profesores': listaProf,
-					'form_size': 'large'
+					'lista_cursos': cursos,
+					'departamento': _departamento
 				})
 		except Exception, e:
-			print e
-			return render(request, 'Forms/form-reporte-incidencias.html', 
+			#print e
+			return render(request, TEMPLATE_FORM_REPORTE_INC, 
 				{
 					'error': True,
 					'departamento': _departamento,
@@ -145,6 +159,11 @@ def reporte_incidencias(request, dpto):
 		
 		hoy = date.today()
 		dia = hoy.isoweekday()
+
+		if dia >= 7: 
+		# si es domingo o por alguna extraña 
+		# razon salió un día mas alto
+			raise Http404 # pues nada
 
 		errores = []
 
@@ -180,13 +199,13 @@ def reporte_incidencias(request, dpto):
 										nuevo_reporte.__unicode__(), 'Reportes', _departamento)
 			registroReporte.save()
 
-			return render(request, 'hecho.html', 
+			return render(request, TEMPLATE_SUCCESS, 
 			{
 				'accion': 'Hecho. Se ha realizado el reporte.',
 			})
 
 		else:
-			return render(request, 'Forms/form-reporte-incidencias.html', 
+			return render(request, TEMPLATE_FORM_REPORTE_INC, 
 				{
 					'errores': errores, 
 					'departamento': _departamento,

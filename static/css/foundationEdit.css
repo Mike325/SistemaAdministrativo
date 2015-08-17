@@ -1,8 +1,27 @@
 /* Modificaciones al codigo por defecto de foundation */
-body
+body { background-color: #e9eaed; }
+/* Estilos para la barra superior >> INICIO */
+.top-bar 
 {
-	background-color: #e9eaed;
+	background-color: #4285F4 !important;
+
+	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow:    0px 1px 4px rgba(0, 0, 0, 0.3);
 }
+.top-bar .separator
+{
+	border-left: 0.15rem solid #4285E4;
+}
+.top-bar .bg-color
+{
+	background-color: #4285F4 !important;
+}
+.top-bar ul.dropdown li a:hover
+{
+	background-color: #3672D2 !important;
+}
+/* Estilos para la barra superior >> FIN */
 .row
 {
 	margin: 0 auto;
@@ -14,26 +33,56 @@ body
 	background: #e9eaed;
 	max-width: 100% !important;
 }
-.top-bar 
+.alert-box.alert-box-edit
 {
-	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-	-webkit-box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-	-moz-box-shadow:    0px 1px 4px rgba(0, 0, 0, 0.3);
+	padding: 12px 6px !important;
+}
+.alert-box.error-edit
+{
+	background-color: #FFC4C2 !important;
+}
+
+fieldset legend
+{
+	background-color: transparent !important;
+	border-left: 1px solid #DDD;
+	border-right: 1px solid #DDD;
+
+	box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
+	-webkit-box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
+	-moz-box-shadow:    0 0 12px rgba(0, 0, 0, 0.06);
 }
 
 /* Estilos globales adicionales */
-
-.full-width-table { width: 100% !important; }
+/* Margenes y Espaciado */
 .no-padding { padding: 0 !important; }
 .no-margin { margin: 0 !important; }
-.white-bg { background-color: #FFF; }
-.upper { text-transform: uppercase; }
+.no-margin-bot { margin-bottom: 0 !important; }
 
+/* Colores accesibles */
+.white-bg { background-color: #FFF; }
+.white-font { color: #FFFFFF; }
+
+/* Tablas */
+.full-width-table { width: 100% !important; }
 .especialHead { background: #fff !important; }
 .sign-field { width: 145px !important; }
 
+/* Modificadores de fuente */
+.font-small { font-size: 13px; }
+.upper { text-transform: uppercase; }
+
+
 .division-banner 
 {
+	display: block;
+	height: 75px;
+
+	background-repeat: repeat-x;
+	background-position: center;
+
+	overflow: hidden;
+
 	margin: 1rem 0 0 0 !important;
 	padding: 0 !important;
 }
@@ -101,7 +150,6 @@ ul.sidebar-nav li a
 
 ul.lt-large
 {
-	/*height: 27px;*/
 	margin-top: 0 !important;
 	overflow: hidden;
 }
@@ -111,6 +159,16 @@ ul.lt-large li
 	float: left !important;
 }
 
+/* Contenedor del banner */
+.main-banner
+{
+	display: block; 
+	height: 100px; 
+	position: relative; 
+	background-repeat: repeat;
+}
+
+/* Degradado del banner */
 .transparent-black-bg
 {
 	background: -moz-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
@@ -119,14 +177,6 @@ ul.lt-large li
 	background: -o-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%);
 	background: -ms-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%);
 	background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%);
-}
-
-.main-banner
-{
-	display: block; 
-	height: 100px; 
-	position: relative; 
-	background-repeat: repeat;
 }
 
 #comentario{ resize: none; }
@@ -165,21 +215,12 @@ ul.lt-large li
 	margin-bottom: 12px;
 }
 
-/*
- * FIX: 
- 	* estilos para el acordeon se agregaron al archivo
- 	* fix-sidebar.css y todavía NO son definitivos.
- * 
-
-.inner-accordion{
-	margin:0 !important;
-	padding:0 !important;
+.paginator-count
+{
+	position: absolute; 
+		right: 0; 
+		right: 32px;
 }
-.accordion-link{
-	text-align: center !important;
-	color: #222 !important;
-	background-color: #E3E3E3;
-	display: block;
-	border: solid 1px #9f9f9f;
-	}
-*/
+
+.suplentes { color: darkgray; }
+.suplentes.margin { margin-left: 18px; }

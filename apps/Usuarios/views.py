@@ -241,10 +241,9 @@ def nueva_secretaria(request):
                                                     apellido, correo, codigo)
                 nuevo_usuario.save()
 
-                dpto = Departamento.objects.get(jefeDep__user__username=request.session['usuario']['nick'])
                 registro = Registro.creacion(request.session['usuario']['nick'],
                         'Se creo la secretaria "'+nuevo_usuario.user.get_full_name()+'"'
-                        , usuario, 'Usuarios', dpto)
+                        , usuario, 'Usuarios', None)
                 registro.save()
 
                 return redirect('/')

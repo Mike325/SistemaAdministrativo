@@ -16,12 +16,28 @@ import re, math
 
 from SistemaAdministrativo.commons.shortcuts import get_ciclo_vigente
 
+'''
+FIX:
+	+ Agregadas constantes de template.
+
+	+ Formulario para Estadisticas de Profesor ahora muestra los profesores
+	  en orden alfabetico por apellido.
+
+	+ 'cicloActual' se estaba basando en el ciclo cuya fecha de inicio 
+	  fuera la más antigua.
+		^ Adicionalmente, se actualizó la condicion en todos filtros 
+		  para coincidir con el valor que retorna 'get_ciclo_vigente'
+'''
+
 # Override del día
 DAY_OVR = 2
 
 dias_abrev = ['L', 'M', 'I', 'J', 'V', 'S']
 dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+
+TEMPLATE_ESTADISTICAS_LISTAS = 'Listas/estadisticas-listas.html'
+TEMPLATE_LISTAS = 'Listas/listas.html'
 
 #Creacion de la lista de asistencias para profesores de tiempo completo
 def crear_lista_diaria_TCompleto(request, dpto):
@@ -56,17 +72,6 @@ def crear_lista_diaria_TCompleto(request, dpto):
 			_asistencia = None
 			tipoActual = contratos[0].fk_tipocont
 			for contrato in contratos:
-				'''
-				REV:
-					+ La validación del contrato no sería necesaria aqui
-					  dado que se almacena la asistencia para cada contrato.
-					+ Estadisticas tendría que analizar los distintos tipos 
-					  de contrato.
-				'''
-				# if contrato.fk_tipocont != tipoActual:
-				#   print tipoActual, '-', contrato.fk_tipocont
-				#   pass
-
 				assist = Asistencia()
 				assist.asistio = True if valor=='on' else False
 				assist.fk_contrato = contrato
@@ -224,7 +229,6 @@ def listas_tCompleto(request, dpto):
 				if contratos and cuenta > 0:
 					listaAsistencia.append({
 							'profesor': x.apellido + ', ' + x.nombre + '(' + x.codigo_udg + ')',
-							# 'suplente': x.suplente_set.values('fk_curso__NRC', 'fk_profesor__nombre', 'fk_profesor__apellido', 'fk_profesor__codigo_udg'),
 							'suplente': suplencias,
 							'hora_ini': horarios[0].hora_ini,
 							'hora_fin': horarios[cuenta-1].hora_fin,
@@ -245,7 +249,7 @@ def listas_tCompleto(request, dpto):
 				).count()
 			yaRegistradas = yaRegistradas!=0
 			print yaRegistradas
-			return render(request, 'Listas/listas.html',
+			return render(request, TEMPLATE_LISTAS,
 				{
 					'today': fechaDia, 
 					'tiempoC': True,
@@ -308,7 +312,7 @@ def listas_tMedio(request, dpto):
 					Q(periodo_fin__gte=hoy) | Q(periodo_fin__isnull=True)
 				)
 
-			return render(request, 'Listas/listas.html', 
+			return render(request, TEMPLATE_LISTAS, 
 				{
 					'tiempoM': True,
 					'departamento': dpto,
@@ -334,18 +338,18 @@ def estadisticasDepartamento(request, dpto):
 	if request.session['rol'] >= 1:
 		departamento = get_object_or_404(Departamento, nick=dpto)
 		try:
-			
 			datos = {}
 			tablaMaterias = {}
 
 			#Aquí se genera la información que se pasará a la gráfica
-			cicloActual = Ciclo.objects.earliest('fecha_ini')
+			cicloActual = get_ciclo_vigente()
 
+			# Si la peticion incluye fecha de inicio y fecha fin
 			if request.GET.get('fechaI','') and request.GET.get('fechaF',''):
 				fechaI = request.GET.get('fechaI')
 				fechaF = request.GET.get('fechaF')
 				asistenciasTotales = Asistencia.objects.filter(
-							fk_contrato__fk_curso__fk_ciclo=cicloActual,
+							fk_contrato__fk_curso__fk_ciclo__in=cicloActual,
 							fk_contrato__fk_curso__fk_materia__fk_departamento=departamento,
 							fecha__range=[fechaI , fechaF]
 							)
@@ -353,9 +357,9 @@ def estadisticasDepartamento(request, dpto):
 					'fechaI':fechaI,
 					'fechaF':fechaF,
 					})
-			else:
+			else: # Obtiene los datos normalmente
 				asistenciasTotales = Asistencia.objects.filter(
-							fk_contrato__fk_curso__fk_ciclo=cicloActual,
+							fk_contrato__fk_curso__fk_ciclo__in=cicloActual,
 							fk_contrato__fk_curso__fk_materia__fk_departamento=departamento
 							)
 
@@ -405,7 +409,7 @@ def estadisticasDepartamento(request, dpto):
 				'asistenciasTotales' : asistenciasTotales.count(),
 				'asisTCompleto' : materiasTC.filter(asistio=True).count(),
 				'asisTMedio' : materiasTM.filter(asistio=True).count(),
-				'inasisTCompleto' :  materiasTC.filter(asistio=False).count(),
+				'inasisTCompleto' : materiasTC.filter(asistio=False).count(),
 				'inasisTMedio' : materiasTM.filter(asistio=False).count()
 			})
 			return render(request, 'Listas/estadisticas-departamento.html', locals())
@@ -428,13 +432,13 @@ def estadisticasProfesor(request):
 				tablaTCompleto = {}
 				tablaTMedio = {}
 
-				cicloActual = Ciclo.objects.earliest('fecha_ini')
+				cicloActual = get_ciclo_vigente()
 
 				if request.POST.get('fechaI','') and request.POST.get('fechaF',''):
 					fechaI = request.POST.get('fechaI')
 					fechaF = request.POST.get('fechaF')
 					asistenciasTotales = Asistencia.objects.filter(
-									fk_contrato__fk_curso__fk_ciclo=cicloActual,
+									fk_contrato__fk_curso__fk_ciclo__in=cicloActual,
 									fk_contrato__fk_curso__fk_profesor=profesor,
 									fecha__range=[fechaI , fechaF]
 									)
@@ -444,7 +448,7 @@ def estadisticasProfesor(request):
 					})
 				else:
 					asistenciasTotales = Asistencia.objects.filter(
-									fk_contrato__fk_curso__fk_ciclo=cicloActual,
+									fk_contrato__fk_curso__fk_ciclo__in=cicloActual,
 									fk_contrato__fk_curso__fk_profesor=profesor
 									)
 
@@ -530,10 +534,10 @@ def estadisticasProfesor(request):
 			except:
 				return redirect('/inicio-secretaria/')
 		else:
-			lista_profesores = Profesor.objects.all()
+			lista_profesores = Profesor.objects.all().order_by('apellido')
 			objetos = "Profesores"
 			form_size = 'small'
-			return render(request, 'Listas/estadisticas-listas.html', locals())
+			return render(request, TEMPLATE_ESTADISTICAS_LISTAS, locals())
 	else:
 		return redirect('error403', origen=request.path)
 
@@ -547,13 +551,13 @@ def estadisticasMateria(request):
 				datos = {}
 				tablamaterias = {}
 
-				cicloActual = Ciclo.objects.earliest('fecha_ini')
+				cicloActual = get_ciclo_vigente()
 
 				if request.POST.get('fechaI','') and request.POST.get('fechaF',''):
 					fechaI = request.POST.get('fechaI')
 					fechaF = request.POST.get('fechaF')
 					asistenciasTotales = Asistencia.objects.filter(
-								fk_contrato__fk_curso__fk_ciclo=cicloActual,
+								fk_contrato__fk_curso__fk_ciclo__in=cicloActual,
 								fk_contrato__fk_curso__fk_materia=materia,
 								fecha__range=[fechaI , fechaF]
 								)
@@ -563,7 +567,7 @@ def estadisticasMateria(request):
 					})
 				else:
 					asistenciasTotales = Asistencia.objects.filter(
-								fk_contrato__fk_curso__fk_ciclo=cicloActual,
+								fk_contrato__fk_curso__fk_ciclo__in=cicloActual,
 								fk_contrato__fk_curso__fk_materia=materia
 								)
 				faltasTotales = asistenciasTotales.filter(asistio=False)
@@ -615,7 +619,7 @@ def estadisticasMateria(request):
 			form_size = 'small'
 			objetos = "Materias"
 			lista_materias = Materia.objects.all()
-			return render(request, 'Listas/estadisticas-listas.html', locals())     
+			return render(request, TEMPLATE_ESTADISTICAS_LISTAS, locals())     
 	else:
 		return redirect('error403', origen=request.path)
 #Estadisticas de asistencia por ciclo escolar
@@ -689,6 +693,6 @@ def estadisticasCiclo(request):
 			objetos = "Ciclos"
 			lista_ciclos = Ciclo.objects.all()
 			form_size = 'small'
-			return render(request, 'Listas/estadisticas-listas.html', locals())
+			return render(request, TEMPLATE_ESTADISTICAS_LISTAS, locals())
 	else:
 		return redirect('error403', origen=request.path)

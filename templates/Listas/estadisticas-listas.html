@@ -10,7 +10,7 @@
         <form action="/estadisticas-materia">
             <select name="materia" onchange="redirigeUrl(this)">
             {% for materia in lista_materias %}
-                    <option value='{{materia.clave}}'>{{materia.nombre}}({{materia.clave}})</option>
+                    <option value='{{materia.clave}}'>{{materia.nombre}} ({{materia.clave}})</option>
             {% endfor %}
             </select>
             <input type="submit" class="button expand">
@@ -28,7 +28,7 @@
         <form action="/estadisticas-ciclo">
             <select name="ciclo" onchange="redirigeUrl(this)">
             {% for ciclo in lista_ciclos %}
-                    <option value='{{ciclo.id}}'>{{ciclo.id}}({{ciclo.fecha_ini}})-({{ciclo.fecha_fin}})</option>
+                    <option value='{{ciclo.id}}'>{{ciclo.id}} ({{ciclo.fecha_ini}} al {{ciclo.fecha_fin}})</option>
             {% endfor %}
             </select>
             <input type="submit" class="button expand">

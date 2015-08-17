@@ -17,9 +17,11 @@
                 <thead class="especialHead">
                     <th colspan="2">
                         {% load staticfiles %}
-                        <img src="{% static 'img/udglogo.jpg' %}">
+                        <div style="width: 100px; height: 100px;">
+                            <img src="{% static 'img/udglogo.jpg' %}">
+                        </div>
                     </th>
-                    <th style="text-align: center" colspan="7">
+                    <th class="text-center" colspan="7">
                         REPORTE DE INCIDENCIAS DEL PERSONAL ACADEMINCO<br>
                         CENTRO UNIVERSITARIO DE CIENCIAS EXACTAS E INGENIERIAS<br>
 
@@ -45,50 +47,51 @@
                 </thead>
 
                 <tbody>
-                    {% for x in listaIncidencias %}
-                    <tr>
-                        <td class="row-fecha">{{ x.fecha.day }}/{{ x.fecha.month }}/{{ x.fecha.year }}</td>
-                        <td class="row-nombre">{{ x.fk_contrato.fk_curso.fk_profesor }}</td>
-                        <td class="row-codigo">{{ x.fk_contrato.fk_curso.fk_profesor.codigo_udg }}</td>
-                        {% if x.fk_contrato.tipo == 'T' %}
-                        <td class="row-categoria">Tiempo Completo({{ x.fk_contrato.tipo }})</td>
-                        {% elif x.fk_contrato.tipo == 'P' %}
-                        <td class="row-categoria">Medio Tiempo({{ x.fk_contrato.tipo }})</td>
-                        {% elif x.fk_contrato.tipo == '' %}
-                        <td class="row-categoria">Sin especificar({{ x.fk_contrato.tipo }})</td>
-                        {% endif %}
-                        <td class="row-dpto">{{ x.fk_depto.nick.upper }}</td>
-                        <td class="row-materia">{{ x.fk_contrato.fk_curso.fk_materia.nombre }}</td>
-                        <td class="row-secc">{{ x.fk_contrato.fk_curso.fk_secc }}</td>
+                    {% with listaIncidencias as incidencias %}
+                        {% for x in incidencias %}
+                        <tr>
+                            {% with x.fk_contrato as contrato %}
+                                <td class="row-fecha">{{ x.fecha.day }}/{{ x.fecha.month }}/{{ x.fecha.year }}</td>
+                                <td class="row-nombre">{{ contrato.fk_curso.fk_profesor }}</td>
+                                <td class="row-codigo">{{ contrato.fk_curso.fk_profesor.codigo_udg }}</td>
+                                {% if contrato.tipo == 'T' %}
+                                <td class="row-categoria">Tiempo Completo({{ contrato.tipo }})</td>
+                                {% elif contrato.tipo == 'P' %}
+                                <td class="row-categoria">Medio Tiempo({{ contrato.tipo }})</td>
+                                {% elif contrato.tipo == '' %}
+                                <td class="row-categoria">Sin especificar({{ contrato.tipo }})</td>
+                                {% endif %}
+                                <td class="row-dpto">{{ x.fk_depto.nick.upper }}</td>
+                                <td class="row-materia">{{ contrato.fk_curso.fk_materia.nombre }}</td>
+                                <td class="row-secc">{{ contrato.fk_curso.fk_secc }}</td>
 
-                        <td class="row-horario">
+                                <td class="row-horario">
+                                    {% comment %}
+                                        FIX:
+                                            + Optimizado para mayor cantidad de registros en un futuro.
+                                            + Nunca sabremos los horarios con los que udg puede salir...
+                                              Así que aceptamos todos los casos:
+                                                - Multiples horarios en un solo día.
+                                                - Diferentes combinaciones de días.
+                                                - Cursos cuyo horario no ha sido definido o ha sido
+                                                  eliminado a la hora de editar el curso
+                                                  (cosa que no debería de pasar).
+                                    {% endcomment %}
+                                    {% if x.getHorario %}{% with x.getHorario as horario_materia %}
+                                        {% for dia in horario_materia.dias %} {{ dia }}<br/> {% endfor %}
+                                        {% for horario in horario_materia.horarios %}
+                                            {{ horario.hora_ini }}-{{ horario.hora_fin }}
+                                        {% endfor %}{% endwith %}
+                                    {% else %}
+                                        (horario no definido)
+                                    {% endif %}
+                                </td>
 
-                        {% if x.getHorario.L and x.getHorario.I %}
-                        L-I<br>
-                        {% elif x.getHorario.L %}
-                        L<br>
-                        {% elif x.getHorario.M and x.getHorario.J %}
-                        M-J<br>
-                        {% elif x.getHorario.M %}
-                        M<br>
-                        {% elif x.getHorario.I and x.getHorario.V %}
-                        I-V<br>
-                        {% elif x.getHorario.I %}
-                        I<br>
-                        {% elif x.getHorario.J %}
-                        J<br>
-                        {% elif x.getHorario.V %}
-                        V<br>
-                        {% elif x.getHorario.S %}
-                        S<br>
-                        {% endif %}
-
-                        {{ x.getHorario.hora_ini }}-{{ x.getHorario.hora_fin }}
-                        </td>
-
-                        <td class="row-hrsFalta">{{ x.horasFalta }}</td>
-                    </tr>
-                    {% endfor %}
+                                <td class="row-hrsFalta">{{ x.horasFalta }}</td>
+                            {% endwith %}
+                        </tr>
+                        {% endfor %}
+                    {% endwith %}
                 </tbody>
             </table>
         </div>

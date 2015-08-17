@@ -1,14 +1,5 @@
 {% comment %}
 	FIX:
-		- Sin redundancia de codigo:
-			tener diferentes bloques de navegacion por cada pagina puede sujetarse 
-			a errores de dedo y/o desactualizacion de los datos. Tenerlos en un 
-			solo lugar es rapido y facil de actualizar en todos las paginas.
-
-		- Vistas uniformes:
-			El administrador debe de ser capaz de acceder al menu de administrador
-			aun cuando se encuentre en una vista perteneciente a la secretaria.
-
 		- Nuevo estilo:
 			Ajustado a la nueva vista de árbol/acordeón.
 			Todavía faltan algunos ajustes, pero debería estar bien por ahora.
@@ -20,7 +11,7 @@
 		<a href="/"><div class="sidebar-image" style="background-image: url('{% static 'img/SIIAD-logo.png' %}');"></div></a>
 
 		{# barra mas pequeña (sin acordeon). pantalllas inferiores a 1024px #}
-		<div class="no-margin no-padding hidden-for-large-up">
+		<div class="no-margin no-padding hide-for-large-up">
 			<ul class="no-bullet no-margin sidebar-nav lt-large">
 				{% if request.session.rol > 0 %}
 					<li><a href="/inicio-secretaria">Secretaria</a></li>
@@ -118,23 +109,25 @@
 {% endcomment %}
 
 						{% for x in lista_departamentos %}
-							{% if x.jefeDep|lower = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
-							<ul class="accordion inner-accordion" data-accordion>
-								<li class="accordion-navigation">
-					   				<a href="#panel2{{x.nick}}">{{x.nombre}}</a>
-					   				<div id="panel2{{x.nick}}" class="content">
-					   					<ul class="accordion no-margin">
-				   							<li><a href="/{{x.nick}}/sistema/csv/cursos/">Subir CSV cursos</a></li>
-				   							<li><a href="/{{x.nick}}/sistema/csv/contratos/">Subir CSV contratos</a></li>
-				   							<li><a href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a></li>
-				   							<li><a href="/{{x.nick}}/historicos">Histórico de cambios</a></li>
-				   							<li><a href="/{{x.nick}}/suplentes/nuevo">Nuevo Suplente</a></li>
-											<li><a href="/{{x.nick}}/suplentes/gestionar">Gestionar Suplentes</a></li>
-					   					</ul>
-					   				</div>
-				   				</li>
-							</ul>
-							{% endif %}
+							{% with x.JefeDep|lower as dep_jefeActual %}
+								{% if dep_jefeActual = request.session.usuario.nick|lower or request.session.usuario.rol > 2 %}
+								<ul class="accordion inner-accordion" data-accordion>
+									<li class="accordion-navigation">
+						   				<a href="#panel2{{x.nick}}">{{x.nombre}}</a>
+						   				<div id="panel2{{x.nick}}" class="content">
+						   					<ul class="accordion no-margin">
+					   							<li><a href="/{{x.nick}}/sistema/csv/cursos/">Subir CSV cursos</a></li>
+					   							<li><a href="/{{x.nick}}/sistema/csv/contratos/">Subir CSV contratos</a></li>
+					   							<li><a href="/{{x.nick}}/ver_cursos">Consulta/Modificar Cursos</a></li>
+					   							<li><a href="/{{x.nick}}/historicos">Histórico de cambios</a></li>
+					   							<li><a href="/{{x.nick}}/suplentes/nuevo">Nuevo Suplente</a></li>
+												<li><a href="/{{x.nick}}/suplentes/gestionar">Gestionar Suplentes</a></li>
+						   					</ul>
+						   				</div>
+					   				</li>
+								</ul>
+								{% endif %}
+							{% endwith %}
 						{% endfor %}
 				    </div>
 

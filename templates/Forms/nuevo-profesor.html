@@ -19,9 +19,9 @@
 		<div class="row">
 			<div class="columns">
 			{% if errores %}
-				<div class="alert-box alert radius"><ul style="color: #FFF; margin-bottom: 0;">
+				<div class="alert-box alert radius"><ul class="white-font no-margin-bot">
 					{% for error in errores %}
-						<li style="color: #FFF; font-size: 13px;"><b>{{ error.tipo }}</b>: {{ error.desc }}</li>
+						<li class="white-font font-small"><b>{{ error.tipo }}</b>: {{ error.desc }}</li>
 					{% endfor %}
 				</ul></div>
 			{% elif success %}

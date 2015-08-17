@@ -37,10 +37,10 @@
         {% endif %}
 
         {% if errores %}
-            <div data-alert class="alert-box warning radius" style="background-color: #FFC4C2">
-                <ul style="font-size: 14px; margin-bottom: 0;">
+            <div data-alert class="alert-box warning error-edit radius">
+                <ul class="font-small no-margin-bot">
                     {% for error in errores %}
-                        <li><b>{{ error.propiedad }}:</b> {{ error.descripcion|safe }}</li>
+                        <li class="font-small"><b>{{ error.propiedad }}:</b> {{ error.descripcion|safe }}</li>
                     {% endfor %}
                 </ul>
                 <a href="#" class="close">x</a>
@@ -53,7 +53,8 @@
                 Ubique el archivo usando el boton "Seleccionar Archivo" y finalmente
                 haga clic en "Subir archivo".<br/><br/>
                 <b>El sistema solo admite archivos .csv. Si desea exportar los datos de una tabla de excel 
-                use el cuadro de dialogo "Guardar Como" y seleccione "Archivo CSV" en la parte de abajo.</b>
+                use el cuadro de dialogo "Guardar Como" y seleccione "Archivo CSV" en la parte de abajo.</b><br/><br/>
+                Para más instrucciones sobre como usar, convertir y subir archivos CSV al sistema, <a href="/consideraciones-csv">haga clic aqui</a>.
             </div>
 
             <label>Departamento:</label>

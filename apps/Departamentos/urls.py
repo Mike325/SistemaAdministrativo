@@ -3,6 +3,7 @@ from django.conf.urls import include, url
 from .views import * # Vistas de la app
 
 app_dep_urls = [
+	url(r'^consideraciones-csv/$', tutorial_csv),
 	url(r'^(?P<dpto>.+)/sistema/csv/cursos/$', procesar_csv_cursos),
 	url(r'^(?P<dpto>.+)/sistema/csv/cursos/subir$', procesar_csv_cursos),
 	url(r'^(?P<dpto>.+)/sistema/csv/contratos/$', procesar_csv_contratos),
